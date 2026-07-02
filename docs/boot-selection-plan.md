@@ -171,22 +171,28 @@ run scan_dev_for_scripts
 
 ## Selector-Logo Candidate
 
-Prepared but not installed on 2026-07-02:
+Installed for the next recovery-SD boot test on 2026-07-02:
 
 ```text
+device=/dev/mmcblk1
 package=/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-bootmenu-scriptfirst-selector-logo.fex
 package_sha256=bad9dc0a68dd1c047982c85f13192a8759c16298f592785f18db1d8f74971007
 u_boot_item_sha256=dfc59bbf7e4fe66f0ab2014fbe83e19ea7074a09e5c9c3740ee77fd77c51f89f
 selector_bmp_sha256=bc3dcbd5a046168fe3b463b66da96cddafd84c0779c804f308b5d788c46bcb03
 selector_bmp=320x240 24-bit Windows BMP, 230454 bytes
+backup=/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260702T234205Z.bin
+backup_sha256=9fabc67f143b3aa5e15ad17368684e5597196555891c886e92fc17a60ca2a4ec
 ```
 
-This is the next recovery-SD test candidate. It keeps `boot.scr` on the
-script-first `bootmenu` path but removes the unsafe `sunxi_show_bmp boot.bmp`
-call. The expected visual result is at least a static selector/logo screen
-during the U-Boot window. If the text menu still is not visible, test keyboard
-selection by pressing Down then Enter during the timeout and checking
-`/proc/cmdline` after boot for `bootchooser=uboot-bootmenu-sd`.
+The installed bytes were read back from `/dev/mmcblk1` at `bs=8192 skip=2050`
+and matched the candidate for the exact 1388544-byte package length.
+
+This keeps `boot.scr` on the script-first `bootmenu` path but removes the
+unsafe `sunxi_show_bmp boot.bmp` call. The expected visual result is at least a
+static selector/logo screen during the U-Boot window. If the text menu still is
+not visible, test keyboard selection by pressing Down then Enter during the
+timeout and checking `/proc/cmdline` after boot for
+`bootchooser=uboot-bootmenu-sd`.
 
 ## Validation
 
