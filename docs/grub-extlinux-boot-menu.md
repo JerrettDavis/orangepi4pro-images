@@ -17,10 +17,11 @@ Boot order in `/boot/boot.cmd`:
 
 1. Try GRUB EFI when `grub_first=true`.
 2. Try U-Boot extlinux menu when `extlinux_first=true`.
-3. Fall back to the previous legacy `bootm` flow.
+3. Try direct U-Boot `booti` when `direct_booti_first=true`.
+4. Fall back to the previous legacy `bootm` flow.
 
 This keeps the known-good `uImage`/`uInitrd` path available if GRUB EFI or
-extlinux returns.
+extlinux/direct `booti` returns.
 
 ## GRUB EFI Status
 
@@ -56,12 +57,26 @@ boot_extlinux=sysboot ${devtype} ${devnum}:${distro_bootpart} any ${scriptaddr} 
 That makes extlinux the most likely functional boot selector on the current
 vendor bootloader.
 
-After the first reboot test, the system still booted with the legacy `bootm`
-kernel command line. The likely cause was that U-Boot loaded `boot.scr` from
-the FAT `OPI_EFI` partition, where `uImage`/`uInitrd` existed but the raw
-`Image-*`, stock `vmlinux-*`, versioned initrds, and versioned DTB directories
-referenced by extlinux did not. Those files were mirrored onto `OPI_EFI`, and
-the `sysboot` calls were changed to try `fat`, then `ext2`, then `any`.
+Reboot test results:
+
+- GRUB EFI did not boot.
+- Extlinux did not boot, even after mirroring raw kernel/initrd/DTB assets onto
+  `OPI_EFI` and trying `sysboot` with `fat`, `ext2`, and `any`.
+- Direct `booti` with the raw cyberdeck kernel, initrd, and DTB did not boot.
+- Every test fell through to the existing legacy `bootm` path.
+
+The probes remain in `/boot/boot.cmd`, but they are disabled in
+`/boot/orangepiEnv.txt`:
+
+```text
+grub_first=false
+extlinux_first=false
+direct_booti_first=false
+```
+
+Treat this vendor U-Boot as legacy-`bootm` only until a serial-console command
+audit proves otherwise or a newer U-Boot is installed on a recoverable boot
+medium.
 
 ## Entries
 
@@ -86,6 +101,9 @@ The extlinux entries include `bootchooser=extlinux-nvme` or
 `bootchooser=extlinux-sd` in `APPEND`. If the menu is not visible on HDMI, check
 `/proc/cmdline` after boot to distinguish a hidden extlinux boot from fallback
 legacy `bootm`.
+
+The direct `booti` probe used `bootchooser=direct-booti-nvme`. That marker was
+not present after reboot, confirming fallback to legacy `bootm`.
 
 ## Validation
 
@@ -112,6 +130,7 @@ Quick disable without restoring files:
 ```bash
 sudo sed -i 's/^grub_first=.*/grub_first=false/' /boot/orangepiEnv.txt
 sudo sed -i 's/^extlinux_first=.*/extlinux_first=false/' /boot/orangepiEnv.txt
+sudo sed -i 's/^direct_booti_first=.*/direct_booti_first=false/' /boot/orangepiEnv.txt
 sudo mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr
 sudo cp /boot/boot.scr /boot/efi/boot.scr
 sudo cp /boot/orangepiEnv.txt /boot/efi/orangepiEnv.txt

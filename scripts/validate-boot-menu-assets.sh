@@ -43,10 +43,12 @@ done
 
 grub-script-check /boot/grub/grub.cfg
 
-grep -q '^grub_first=true$' /boot/orangepiEnv.txt || fail 'grub_first is not enabled'
-grep -q '^extlinux_first=true$' /boot/orangepiEnv.txt || fail 'extlinux_first is not enabled'
+grep -q '^grub_first=false$' /boot/orangepiEnv.txt || fail 'grub_first should be disabled after failed reboot tests'
+grep -q '^extlinux_first=false$' /boot/orangepiEnv.txt || fail 'extlinux_first should be disabled after failed reboot tests'
+grep -q '^direct_booti_first=false$' /boot/orangepiEnv.txt || fail 'direct_booti_first should be disabled after failed reboot tests'
 grep -q 'bootefi' /boot/boot.cmd || fail 'boot.cmd does not contain GRUB EFI handoff'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
+grep -q 'booti' /boot/boot.cmd || fail 'boot.cmd does not contain direct booti probe'
 grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallback'
 
 grep -q 'Ubuntu NVMe - cyberdeck kernel' /boot/grub/grub.cfg || fail 'GRUB NVMe menu entry missing'

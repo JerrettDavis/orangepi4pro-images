@@ -19,3 +19,5 @@
   advertises `sysboot/extlinux` but not clear `bootefi` support.
 - Updated `/boot/boot.cmd` order to try GRUB EFI, then extlinux, then legacy
   `bootm` fallback.
+- Reboot-tested GRUB EFI, extlinux, and direct `booti`; all fell through to
+  legacy `bootm`, so the probes are disabled by default in `orangepiEnv.txt`.
