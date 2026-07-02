@@ -9,6 +9,8 @@ Current status on 2026-07-02:
   `v2018.05-sun60iw2` plus `CONFIG_CMD_BOOTMENU`, `CONFIG_USB_KEYBOARD`, and
   `CONFIG_DM_KEYBOARD`, then patched so `/boot/boot.scr` is scanned before
   extlinux. That package is not currently installed after recovery.
+- A second file-only package candidate now embeds a static selector logo in
+  vendor U-Boot's early-logo path instead of drawing a BMP from `boot.scr`.
 - The first reboot with the menu-capable package reached the NVMe desktop but
   showed a black screen before userspace, because the live boot files were
   still staged for the older extlinux visibility experiment.
@@ -166,6 +168,25 @@ Current recovered SD bootloader readback contains the stock order:
 run scan_dev_for_extlinux
 run scan_dev_for_scripts
 ```
+
+## Selector-Logo Candidate
+
+Prepared but not installed on 2026-07-02:
+
+```text
+package=/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-bootmenu-scriptfirst-selector-logo.fex
+package_sha256=bad9dc0a68dd1c047982c85f13192a8759c16298f592785f18db1d8f74971007
+u_boot_item_sha256=dfc59bbf7e4fe66f0ab2014fbe83e19ea7074a09e5c9c3740ee77fd77c51f89f
+selector_bmp_sha256=bc3dcbd5a046168fe3b463b66da96cddafd84c0779c804f308b5d788c46bcb03
+selector_bmp=320x240 24-bit Windows BMP, 230454 bytes
+```
+
+This is the next recovery-SD test candidate. It keeps `boot.scr` on the
+script-first `bootmenu` path but removes the unsafe `sunxi_show_bmp boot.bmp`
+call. The expected visual result is at least a static selector/logo screen
+during the U-Boot window. If the text menu still is not visible, test keyboard
+selection by pressing Down then Enter during the timeout and checking
+`/proc/cmdline` after boot for `bootchooser=uboot-bootmenu-sd`.
 
 ## Validation
 
