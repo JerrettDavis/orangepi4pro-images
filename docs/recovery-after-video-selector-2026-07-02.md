@@ -45,3 +45,6 @@ Vendor source shows that command is not a simple current-prefix BMP draw: it
 rewrites the requested path to `/boot/boot.bmp`, scans hardcoded storage
 devices, may use an embedded fallback image, and reinitializes DRM display
 state.
+
+After this recovery, repo boot scripts were updated so `selector_bitmap=true`
+prints a warning and does not call `sunxi_show_bmp`.

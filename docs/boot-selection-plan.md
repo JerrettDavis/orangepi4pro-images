@@ -3,18 +3,19 @@
 Current status on 2026-07-02:
 
 - The machine boots NVMe Ubuntu through extlinux.
-- The SD-card bootloader package has been replaced with a validated
-  menu-capable vendor U-Boot package built from `v2018.05-sun60iw2` plus
-  `CONFIG_CMD_BOOTMENU`, `CONFIG_USB_KEYBOARD`, and `CONFIG_DM_KEYBOARD`.
-- The installed SD-card bootloader package was updated again with a
-  script-first distro scan patch so `/boot/boot.scr` is scanned before
-  `/boot/extlinux/extlinux.conf`.
+- The SD-card bootloader package is currently the recovered extlinux-first
+  package. It scans `/boot/extlinux/extlinux.conf` before `/boot/boot.scr`.
+- A validated menu-capable vendor U-Boot package was built from
+  `v2018.05-sun60iw2` plus `CONFIG_CMD_BOOTMENU`, `CONFIG_USB_KEYBOARD`, and
+  `CONFIG_DM_KEYBOARD`, then patched so `/boot/boot.scr` is scanned before
+  extlinux. That package is not currently installed after recovery.
 - The first reboot with the menu-capable package reached the NVMe desktop but
   showed a black screen before userspace, because the live boot files were
   still staged for the older extlinux visibility experiment.
-- The current live boot files now call U-Boot `bootmenu` first, with a
+- The repo selector templates can call U-Boot `bootmenu` first, with a
   10-second default to NVMe, then continue through the known-good legacy
-  `bootm` image path selected by menu variables.
+  `bootm` image path selected by menu variables. The live recovered SD
+  `boot.scr` is the conservative direct `bootm` script.
 - While the SD card is inserted, U-Boot reads `/boot/boot.scr` and
   `/boot/orangepiEnv.txt` from the SD root filesystem, even though Linux mounts
   NVMe `OPI_BOOT` at `/boot`. Always install selector assets to the SD `/boot`
@@ -85,16 +86,12 @@ bootlogo=false
 logo=disabled
 selector_console=true
 selector_prompt=true
-selector_bitmap=true
+selector_bitmap=false
 ```
 
 The expected behavior is a visible prompt/menu attempt followed by automatic
-NVMe boot after about 10 seconds. The staged script also replaces `boot.bmp`
-with a generated selector bitmap and has `boot.cmd` call `sunxi_show_bmp
-boot.bmp`, because the vendor DRM logo path is visible even when the text
-console is not. USB-keyboard selection may still fail on the installed U-Boot
-because it lacks keyboard support; this test is meant to prove whether the
-visible logo path can be controlled without flashing a new loader.
+NVMe boot after about 10 seconds. Do not call `sunxi_show_bmp` from
+`boot.scr`; that path hung the board during the video-first selector test.
 
 ## Required For On-Screen Selection
 
@@ -141,9 +138,9 @@ If that marker appears, U-Boot entered the menu branch but returned without a
 selection. If `extlinux-legacy-*` still appears, U-Boot did not enter the menu
 branch even though the synced boot files contain it.
 
-## Installed SD Boot Package
+## Script-First SD Boot Package
 
-Installed 2026-07-02:
+Installed and then later replaced during recovery on 2026-07-02:
 
 ```text
 device=/dev/mmcblk1
@@ -161,6 +158,13 @@ distro scan order:
 ```text
 run scan_dev_for_scripts
 run scan_dev_for_extlinux
+```
+
+Current recovered SD bootloader readback contains the stock order:
+
+```text
+run scan_dev_for_extlinux
+run scan_dev_for_scripts
 ```
 
 ## Validation

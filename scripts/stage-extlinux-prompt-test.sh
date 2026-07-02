@@ -19,7 +19,7 @@ Defaults:
   TIMEOUT_VALUE=100
   DEFAULT_LABEL=ubuntu-nvme
   The staged env also sets bootlogo=false, logo=disabled,
-  selector_console=true, selector_prompt=true, and selector_bitmap=true.
+  selector_console=true, selector_prompt=true, and selector_bitmap=false.
   BOOT_DIR=/boot
   EFI_DIR=/boot/efi
   SD_BOOT_DIR=/mnt/opisd-ro/boot
@@ -31,6 +31,7 @@ under each target boot directory, then installs the repo boot templates with:
   TIMEOUT 100
   DEFAULT ubuntu-nvme
   selector_console=true
+  selector_bitmap=false
 
 No boot sectors, SPI flash, partition tables, or root filesystems are written.
 USAGE
@@ -74,8 +75,6 @@ prepare_tree() {
   for file in boot.cmd boot.scr orangepiEnv.txt extlinux/extlinux.conf; do
     [ -e "$target/$file" ] && cp -a "$target/$file" "$target/backups/extlinux-prompt-test-$stamp/${file//\//-}"
   done
-  [ -e "$target/boot.bmp" ] && cp -a "$target/boot.bmp" "$target/backups/extlinux-prompt-test-$stamp/boot.bmp"
-
   install -m 0644 "$repo_root/configs/boot.cmd" "$target/boot.cmd"
   install -m 0644 "$repo_root/configs/orangepiEnv.txt" "$target/orangepiEnv.txt"
   install -m 0644 "$repo_root/configs/extlinux.conf" "$target/extlinux/extlinux.conf"
@@ -89,37 +88,9 @@ prepare_tree() {
     -e 's/^bootlogo=.*/bootlogo=false/' \
     -e 's/^selector_console=.*/selector_console=true/' \
     -e 's/^selector_prompt=.*/selector_prompt=true/' \
-    -e 's/^selector_bitmap=.*/selector_bitmap=true/' \
+    -e 's/^selector_bitmap=.*/selector_bitmap=false/' \
     -e 's/^logo=.*/logo=disabled/' \
     "$target/orangepiEnv.txt"
-
-  python3 - "$target/boot.bmp" <<'PY'
-import sys
-from PIL import Image, ImageDraw, ImageFont
-
-out = sys.argv[1]
-img = Image.new("RGB", (320, 240), (6, 8, 11))
-draw = ImageDraw.Draw(img)
-
-try:
-    title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 20)
-    body_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 15)
-    small_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12)
-except OSError:
-    title_font = body_font = small_font = None
-
-draw.rectangle((0, 0, 319, 239), fill=(6, 8, 11))
-draw.rectangle((0, 0, 319, 5), fill=(238, 137, 28))
-draw.text((18, 22), "Orange Pi 4 Pro", fill=(255, 180, 64), font=title_font)
-draw.text((18, 50), "Cyberdeck Boot Selector", fill=(238, 244, 248), font=body_font)
-draw.line((18, 76, 302, 76), fill=(70, 78, 88), width=1)
-draw.text((24, 96), "1  Ubuntu NVMe", fill=(240, 244, 248), font=body_font)
-draw.text((24, 122), "2  Ubuntu SD", fill=(240, 244, 248), font=body_font)
-draw.text((24, 148), "3  NVMe verbose", fill=(240, 244, 248), font=body_font)
-draw.text((18, 188), "Default: NVMe after 10 seconds", fill=(168, 178, 190), font=small_font)
-draw.text((18, 207), "Current U-Boot input may be serial-only", fill=(168, 178, 190), font=small_font)
-img.save(out, "BMP")
-PY
 
   mkimage -C none -A arm -T script -d "$target/boot.cmd" "$target/boot.scr" >/dev/null
 }
@@ -137,7 +108,6 @@ if [ -d "$efi_dir" ]; then
   cp -a "$boot_dir/boot.scr" "$efi_dir/boot.scr"
   cp -a "$boot_dir/orangepiEnv.txt" "$efi_dir/orangepiEnv.txt"
   cp -a "$boot_dir/extlinux/extlinux.conf" "$efi_dir/extlinux/extlinux.conf"
-  cp -a "$boot_dir/boot.bmp" "$efi_dir/boot.bmp"
 fi
 
 if [ -d "$sd_boot_dir" ]; then

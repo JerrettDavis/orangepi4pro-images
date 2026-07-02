@@ -25,6 +25,12 @@ grep -q 'No boot assets were generated' /tmp/orangepi4pro-build-boot-assets.out
 rm -f /tmp/orangepi4pro-bootstrap-ubuntu.out /tmp/orangepi4pro-bootstrap-kali.out \
   /tmp/orangepi4pro-build-kernel.out /tmp/orangepi4pro-build-boot-assets.out
 
+printf 'Checking boot-script safety guards...\n'
+if grep -RInE '^[[:space:]]*sunxi_show_bmp[[:space:]]+boot[.]bmp' configs scripts docs; then
+  printf 'ERROR: sunxi_show_bmp boot.bmp must not be called from boot scripts\n' >&2
+  exit 1
+fi
+
 printf 'Scanning for obvious secret patterns...\n'
 if grep -RInE '(BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY|ghp_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|AKIA[0-9A-Z]{16}|password[[:space:]]*=|token[[:space:]]*=|secret[[:space:]]*=)' \
   --exclude-dir=.git .; then
@@ -39,4 +45,3 @@ if find . -type f -not -path './.git/*' -exec file {} + | grep -E 'ELF|PE32 exec
 fi
 
 printf 'CI checks passed.\n'
-

@@ -76,8 +76,8 @@ grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallbac
 grep -q 'Forcing selector output to serial and video console' /boot/boot.cmd \
   || fail 'boot.cmd does not contain selector console override'
 grep -q 'sysboot -p' /boot/boot.cmd || fail 'boot.cmd does not contain prompted sysboot path'
-grep -q 'sunxi_show_bmp boot.bmp' /boot/boot.cmd \
-  || fail 'boot.cmd does not contain selector bitmap display path'
+! grep -q '^[[:space:]]*sunxi_show_bmp boot.bmp' /boot/boot.cmd \
+  || fail 'boot.cmd must not call unsafe sunxi_show_bmp from boot.scr'
 
 grep -q 'Ubuntu NVMe - cyberdeck kernel' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe menu entry missing'
 grep -q 'Ubuntu SD - stock kernel' /boot/extlinux/extlinux.conf || fail 'extlinux SD menu entry missing'

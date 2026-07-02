@@ -31,8 +31,7 @@ if test "${selector_console}" = "true"; then
 fi
 
 if test "${selector_bitmap}" = "true"; then
-	echo "Showing selector bitmap through sunxi DRM logo path"
-	sunxi_show_bmp boot.bmp
+	echo "selector_bitmap=true ignored: sunxi_show_bmp is unsafe from boot.scr on this BSP"
 fi
 
 if test "${bootmenu_first}" = "true"; then
