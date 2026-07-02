@@ -53,6 +53,66 @@ rootfstype=ext4
 `OPI_BOOT` keeps Unix symlinks. `OPI_EFI` is FAT32, so its mirror was created
 with symlinks dereferenced into real files/directories.
 
+## Cyberdeck Kernel Added
+
+On 2026-07-02 a patched vendor BSP kernel was built and staged on the NVMe
+target:
+
+```text
+5.15.147-sun60iw2-cyberdeck
+```
+
+Source:
+
+- Repository: `https://github.com/orangepi-xunlong/linux-orangepi.git`
+- Branch: `orange-pi-5.15-sun60iw2`
+- Commit: `3de7a14a69f9e1fcbfec914c972a5398f0abd6d9`
+
+The target boot partition now has versioned assets:
+
+```text
+Image-5.15.147-sun60iw2-cyberdeck
+uImage-5.15.147-sun60iw2-cyberdeck
+initrd.img-5.15.147-sun60iw2-cyberdeck
+uInitrd-5.15.147-sun60iw2-cyberdeck
+config-5.15.147-sun60iw2-cyberdeck
+System.map-5.15.147-sun60iw2-cyberdeck
+dtb-5.15.147-sun60iw2-cyberdeck/
+```
+
+Current NVMe `uImage`, `uInitrd`, and `dtb` symlinks point at that release.
+`boot.scr` still uses the vendor legacy `bootm` flow.
+
+Native HID touch support is enabled through:
+
+```text
+CONFIG_HID_MULTITOUCH=m
+CONFIG_HIDRAW=y
+CONFIG_UHID=m
+CONFIG_INPUT_UINPUT=m
+```
+
+The NVMe target loads these modules at boot from:
+
+```text
+/etc/modules-load.d/orangepi4pro-touch.conf
+```
+
+The old QDtech X11 libusb bridge is kept as a fallback but disabled in the
+NVMe clone:
+
+```text
+/home/orangepi/.config/autostart/qdtech-touch-x11.desktop
+```
+
+The Xorg `evdev` touchscreen override was moved under:
+
+```text
+/etc/X11/xorg.conf.d/disabled/
+```
+
+This leaves libinput as the default handler for the native HID event device.
+
 ## Bootloader Caveat
 
 No bootloader sectors, SPI flash, MTD device, or SD boot area were modified.
@@ -70,4 +130,3 @@ boot locations.
 
 If SD-less boot fails, reinsert the SD card and inspect the serial console or
 U-Boot environment before writing any firmware.
-
