@@ -3,11 +3,15 @@
 Current status on 2026-07-02:
 
 - The machine boots NVMe Ubuntu through extlinux.
-- The installed Orange Pi U-Boot can parse extlinux and boot the configured
-  default entry.
-- The installed Orange Pi U-Boot does not enable `CONFIG_USB_KEYBOARD` or
-  `CONFIG_DM_KEYBOARD`, so it is not a reliable HDMI plus USB-keyboard boot
-  selector.
+- The SD-card bootloader package has been replaced with a validated
+  menu-capable vendor U-Boot package built from `v2018.05-sun60iw2` plus
+  `CONFIG_CMD_BOOTMENU`, `CONFIG_USB_KEYBOARD`, and `CONFIG_DM_KEYBOARD`.
+- The first reboot with the menu-capable package reached the NVMe desktop but
+  showed a black screen before userspace, because the live boot files were
+  still staged for the older extlinux visibility experiment.
+- The current live boot files now call U-Boot `bootmenu` first, with a
+  10-second default to NVMe, then continue through the known-good legacy
+  `bootm` image path selected by menu variables.
 - `TIMEOUT 0` is unsafe on this BSP. It has already wedged at the Orange Pi
   bootloader loading graphic.
 
@@ -87,7 +91,7 @@ visible logo path can be controlled without flashing a new loader.
 
 ## Required For On-Screen Selection
 
-The next boot-time selector attempt must start from a U-Boot build that has:
+The boot-time selector attempt now starts from a U-Boot build that has:
 
 - `CONFIG_MENU=y`
 - `CONFIG_CMD_PXE=y`
@@ -102,9 +106,23 @@ cd ../orangepi4pro-board-support
 scripts/build-vendor-uboot.sh --bootmenu --clean
 ```
 
-Do not flash this to NVMe, SPI, or the recovery SD until the Allwinner boot
-package generation path is understood. The safe test target should be separate
-recoverable media or a verified package image with documented rollback.
+The Allwinner TOC1 package path is now understood in the board-support repo.
+The SD-card bootloader slot was backed up before installing the menu-capable
+package, and the installed bytes were read back and verified.
+
+The current selector flow is:
+
+```text
+bootmenu_first=true
+bootmenu_timeout=10
+Ubuntu NVMe - cyberdeck kernel -> bootchooser=uboot-bootmenu-nvme
+Ubuntu SD - stock kernel       -> bootchooser=uboot-bootmenu-sd
+Ubuntu NVMe - verbose boot     -> bootchooser=uboot-bootmenu-nvme-verbose
+```
+
+After a test boot, inspect `/proc/cmdline`. A successful menu/default path
+should contain one of the `uboot-bootmenu-*` markers instead of the older
+`extlinux-legacy-*` marker.
 
 ## Validation
 

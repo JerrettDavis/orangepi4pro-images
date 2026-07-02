@@ -26,6 +26,8 @@ expected_selector_prompt=${EXPECTED_SELECTOR_PROMPT:-false}
 expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-false}
 expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
 expected_logo=${EXPECTED_LOGO:-enabled}
+expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-true}
+expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-10}
 
 for file in \
   /boot/boot.cmd \
@@ -49,6 +51,10 @@ fi
 grep -q '^grub_first=false$' /boot/orangepiEnv.txt || fail 'grub_first should be disabled after failed reboot tests'
 grep -q '^extlinux_first=true$' /boot/orangepiEnv.txt || fail 'extlinux_first should be enabled for legacy-image menu test'
 grep -q '^direct_booti_first=false$' /boot/orangepiEnv.txt || fail 'direct_booti_first should be disabled after failed reboot tests'
+grep -q "^bootmenu_first=${expected_bootmenu_first}$" /boot/orangepiEnv.txt \
+  || fail "bootmenu_first should be ${expected_bootmenu_first}"
+grep -q "^bootmenu_timeout=${expected_bootmenu_timeout}$" /boot/orangepiEnv.txt \
+  || fail "bootmenu_timeout should be ${expected_bootmenu_timeout}"
 grep -q "^selector_console=${expected_selector_console}$" /boot/orangepiEnv.txt \
   || fail "selector_console should be ${expected_selector_console}"
 grep -q "^selector_prompt=${expected_selector_prompt}$" /boot/orangepiEnv.txt \
@@ -60,6 +66,9 @@ grep -q "^bootlogo=${expected_bootlogo}$" /boot/orangepiEnv.txt \
 grep -q "^logo=${expected_logo}$" /boot/orangepiEnv.txt \
   || fail "logo should be ${expected_logo}"
 grep -q 'bootefi' /boot/boot.cmd || fail 'boot.cmd does not contain GRUB EFI handoff'
+grep -q 'bootmenu' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot bootmenu handoff'
+grep -q 'uboot-bootmenu-nvme' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot NVMe selector marker'
+grep -q 'uboot-bootmenu-sd' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot SD selector marker'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
 grep -q 'booti' /boot/boot.cmd || fail 'boot.cmd does not contain direct booti probe'
 grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallback'
@@ -105,6 +114,8 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_bitmap=.*/selector_bitmap=${expected_selector_bitmap}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
+  | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
+  | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
   > "$repo_env_cmp"
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   /boot/orangepiEnv.txt \
@@ -112,6 +123,8 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_bitmap=.*/selector_bitmap=${expected_selector_bitmap}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
+  | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
+  | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
   > "$boot_env_cmp"
 cmp -s "$repo_env_cmp" "$boot_env_cmp" \
   || fail '/boot/orangepiEnv.txt differs from configs/orangepiEnv.txt beyond allowed prompt-test overrides'

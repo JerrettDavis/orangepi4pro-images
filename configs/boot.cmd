@@ -8,10 +8,12 @@ setenv overlay_error "false"
 # default values
 setenv verbosity "1"
 setenv console "both"
-setenv bootlogo "false"
+setenv bootlogo "true"
 setenv rootfstype "ext4"
 setenv docker_optimizations "on"
 setenv earlycon "on"
+setenv bootmenu_first "false"
+setenv bootmenu_timeout "10"
 
 echo "Boot script loaded from ${devtype} ${devnum}"
 
@@ -31,6 +33,21 @@ fi
 if test "${selector_bitmap}" = "true"; then
 	echo "Showing selector bitmap through sunxi DRM logo path"
 	sunxi_show_bmp boot.bmp
+fi
+
+if test "${bootmenu_first}" = "true"; then
+	echo "Starting U-Boot bootmenu selector"
+	setenv stdin "serial,usbkbd"
+	setenv stdout "serial,vidconsole"
+	setenv stderr "serial,vidconsole"
+	setenv bootmenu_delay "${bootmenu_timeout}"
+	setenv bootmenu_boot_nvme "setenv selected_boot true; setenv extlinux_first false; setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck; setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck; setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b; setenv extraargs bootchooser=uboot-bootmenu-nvme"
+	setenv bootmenu_boot_sd "setenv selected_boot true; setenv extlinux_first false; setenv boot_kernel uImage-5.15.147-sun60iw2; setenv boot_initrd uInitrd-5.15.147-sun60iw2; setenv boot_dtb dtb-5.15.147-sun60iw2/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=dc683cb4-0847-4d2f-83f1-184d35749d4c; setenv extraargs bootchooser=uboot-bootmenu-sd"
+	setenv bootmenu_boot_verbose "setenv selected_boot true; setenv extlinux_first false; setenv verbosity 7; setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck; setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck; setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b; setenv extraargs bootchooser=uboot-bootmenu-nvme-verbose"
+	setenv bootmenu_0 "Ubuntu NVMe - cyberdeck kernel=run bootmenu_boot_nvme"
+	setenv bootmenu_1 "Ubuntu SD - stock kernel=run bootmenu_boot_sd"
+	setenv bootmenu_2 "Ubuntu NVMe - verbose boot=run bootmenu_boot_verbose"
+	bootmenu ${bootmenu_timeout}
 fi
 
 if test "${grub_first}" = "true"; then
@@ -78,7 +95,7 @@ if test -z "${rootdev}"; then rootdev=PARTUUID="${partuuid}"; fi
 setenv bootargs "root=${rootdev} rootwait rootfstype=${rootfstype} ${consoleargs} consoleblank=0 loglevel=${verbosity} clk_ignore_unused swiotlb=65536 usb-storage.quirks=${usbstoragequirks} ${extraargs} ${extraboardargs}"
 
 if test "${docker_optimizations}" = "on"; then setenv bootargs "${bootargs} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1"; fi
-setenv bootargs "${bootargs} bootchooser=legacy-bootm-fallback"
+if test "${selected_boot}" != "true"; then setenv bootargs "${bootargs} bootchooser=legacy-bootm-fallback"; fi
 
 if test "${direct_booti_first}" = "true"; then
 	echo "Trying direct booti with Image/initrd/DTB from ${devtype} ${devnum} ${prefix}"
@@ -97,10 +114,14 @@ if test "${direct_booti_first}" = "true"; then
 	echo "direct booti path returned or failed; falling back to legacy bootm"
 fi
 
-load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd
-load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}uImage
+if test -z "${boot_initrd}"; then setenv boot_initrd "uInitrd"; fi
+if test -z "${boot_kernel}"; then setenv boot_kernel "uImage"; fi
+if test -z "${boot_dtb}"; then setenv boot_dtb "dtb/${fdtfile}"; fi
 
-load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}${boot_initrd}
+load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}${boot_kernel}
+
+load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}${boot_dtb}
 fdt addr ${fdt_addr_r}
 fdt resize 65536
 for overlay_file in ${overlays}; do

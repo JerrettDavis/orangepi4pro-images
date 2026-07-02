@@ -15,13 +15,20 @@ The board still uses vendor U-Boot and legacy `boot.scr`.
 
 Boot order in `/boot/boot.cmd`:
 
-1. Try GRUB EFI when `grub_first=true`.
-2. Try U-Boot extlinux menu when `extlinux_first=true`.
-3. Try direct U-Boot `booti` when `direct_booti_first=true`.
-4. Fall back to the previous legacy `bootm` flow.
+1. Run U-Boot `bootmenu` when `bootmenu_first=true`.
+2. Try GRUB EFI when `grub_first=true`.
+3. Try U-Boot extlinux menu when `extlinux_first=true`.
+4. Try direct U-Boot `booti` when `direct_booti_first=true`.
+5. Fall back to the previous legacy `bootm` flow.
 
 This keeps the known-good `uImage`/`uInitrd` path available if GRUB EFI or
 extlinux/direct `booti` returns.
+
+The current on-device selector test uses U-Boot `bootmenu` entries that set
+`boot_kernel`, `boot_initrd`, `boot_dtb`, `rootdev`, and a `bootchooser`
+marker, then continue through the existing legacy `bootm` path. That avoids
+changing the kernel boot mechanism while testing the on-screen selector and USB
+keyboard support from the new U-Boot package.
 
 The extlinux path is currently a default dispatcher, not a usable deck-local
 selector. It uses `PROMPT 0`, `TIMEOUT 30`, and plain `sysboot` without `-p`.
@@ -147,6 +154,12 @@ next boot can distinguish extlinux failure from an older boot script.
 
 The confirmed working extlinux path appends `bootchooser=extlinux-legacy-nvme`
 for the default NVMe entry.
+
+The U-Boot `bootmenu` path appends:
+
+- `bootchooser=uboot-bootmenu-nvme`
+- `bootchooser=uboot-bootmenu-sd`
+- `bootchooser=uboot-bootmenu-nvme-verbose`
 
 The direct `booti` probe used `bootchooser=direct-booti-nvme`. That marker was
 not present after reboot, confirming fallback to legacy `bootm`.
