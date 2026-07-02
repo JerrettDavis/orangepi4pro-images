@@ -173,6 +173,31 @@ selection:
 scripts/validate-u-boot-selector-capabilities.sh
 ```
 
+## Current Prompt Test
+
+The current reboot test is staged with `scripts/stage-extlinux-prompt-test.sh`.
+It keeps the same known-good legacy-image extlinux entries, but temporarily
+changes the live boot files to:
+
+```text
+PROMPT 1
+TIMEOUT 100
+DEFAULT ubuntu-nvme
+selector_console=true
+```
+
+`selector_console=true` makes `boot.cmd` set `stdout` and `stderr` to
+`serial,vidconsole` before invoking `sysboot`. `stdin` remains `serial` because
+the installed U-Boot does not include USB keyboard support. The practical test
+is whether the selector is visible and whether the timeout falls through to the
+NVMe default without hanging.
+
+Backups from this staging pass are stored below each boot directory as:
+
+```text
+backups/extlinux-prompt-test-<timestamp>/
+```
+
 ## Validation
 
 Run:

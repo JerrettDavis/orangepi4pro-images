@@ -7,3 +7,4 @@ rootfstype=ext4
 grub_first=false
 extlinux_first=true
 direct_booti_first=false
+selector_console=false

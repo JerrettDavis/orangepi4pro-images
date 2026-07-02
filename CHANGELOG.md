@@ -13,6 +13,10 @@
 
 ## Unreleased
 
+- Added a bounded extlinux prompt visibility test that mirrors staged boot files
+  to NVMe and SD boot sources without flashing boot sectors.
+- Taught boot-menu validation to accept temporary prompt, timeout, and selector
+  console overrides.
 - Staged GRUB ARM64 EFI assets and a hand-authored GRUB menu for NVMe Ubuntu and
   SD Ubuntu.
 - Added an extlinux menu with the same Ubuntu entries because vendor U-Boot

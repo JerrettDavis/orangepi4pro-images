@@ -20,6 +20,13 @@ if test -e ${devtype} ${devnum} ${prefix}orangepiEnv.txt; then
 	env import -t ${load_addr} ${filesize}
 fi
 
+if test "${selector_console}" = "true"; then
+	echo "Forcing selector output to serial and video console"
+	setenv stdout "serial,vidconsole"
+	setenv stderr "serial,vidconsole"
+	setenv stdin "serial"
+fi
+
 if test "${grub_first}" = "true"; then
 	echo "Trying GRUB EFI from ${devtype} ${devnum} ${prefix}EFI/BOOT/BOOTAA64.EFI"
 	if load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}EFI/BOOT/BOOTAA64.EFI; then

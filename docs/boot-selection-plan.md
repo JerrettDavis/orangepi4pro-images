@@ -48,6 +48,37 @@ sudo scripts/set-extlinux-default.sh --apply ubuntu-nvme
 This is not an on-screen boot picker; it is the safe selector until U-Boot input
 support is fixed.
 
+## Prompt Visibility Test
+
+The bounded test mode for the current vendor U-Boot is:
+
+```bash
+sudo scripts/stage-extlinux-prompt-test.sh
+sudo EXPECTED_EXTLINUX_PROMPT=1 \
+  EXPECTED_EXTLINUX_TIMEOUT=100 \
+  EXPECTED_SELECTOR_CONSOLE=true \
+  scripts/validate-boot-menu-assets.sh
+```
+
+This does not write boot sectors or SPI flash. It mirrors the prompt-enabled
+extlinux files to NVMe `/boot`, NVMe `/boot/efi`, and the SD boot source when
+mounted at `/mnt/opisd-ro/boot`.
+
+The staged state uses:
+
+```text
+PROMPT 1
+TIMEOUT 100
+DEFAULT ubuntu-nvme
+selector_console=true
+```
+
+The expected behavior is a visible prompt/menu attempt followed by automatic
+NVMe boot after about 10 seconds. USB-keyboard selection may still fail on the
+installed U-Boot because it lacks keyboard support; this test is meant to prove
+whether the video prompt path can be made readable without flashing a new
+loader.
+
 ## Required For On-Screen Selection
 
 The next boot-time selector attempt must start from a U-Boot build that has:
