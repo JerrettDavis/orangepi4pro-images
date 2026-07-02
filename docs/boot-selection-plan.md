@@ -128,6 +128,16 @@ After a test boot, inspect `/proc/cmdline`. A successful menu/default path
 should contain one of the `uboot-bootmenu-*` markers instead of the older
 `extlinux-legacy-*` marker.
 
+The boot script also preloads a diagnostic fallback before invoking `bootmenu`:
+
+```text
+bootchooser=uboot-bootmenu-nosel
+```
+
+If that marker appears, U-Boot entered the menu branch but returned without a
+selection. If `extlinux-legacy-*` still appears, U-Boot did not enter the menu
+branch even though the synced boot files contain it.
+
 ## Validation
 
 Safe dispatcher files:

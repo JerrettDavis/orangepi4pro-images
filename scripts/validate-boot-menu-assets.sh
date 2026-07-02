@@ -67,6 +67,7 @@ grep -q "^logo=${expected_logo}$" /boot/orangepiEnv.txt \
   || fail "logo should be ${expected_logo}"
 grep -q 'bootefi' /boot/boot.cmd || fail 'boot.cmd does not contain GRUB EFI handoff'
 grep -q 'bootmenu' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot bootmenu handoff'
+grep -q 'uboot-bootmenu-nosel' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot bootmenu no-selection marker'
 grep -q 'uboot-bootmenu-nvme' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot NVMe selector marker'
 grep -q 'uboot-bootmenu-sd' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot SD selector marker'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'

@@ -41,6 +41,13 @@ if test "${bootmenu_first}" = "true"; then
 	setenv stdout "serial,vidconsole"
 	setenv stderr "serial,vidconsole"
 	setenv bootmenu_delay "${bootmenu_timeout}"
+	setenv selected_boot true
+	setenv extlinux_first false
+	setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
+	setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
+	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
+	setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
+	setenv extraargs bootchooser=uboot-bootmenu-nosel
 	setenv bootmenu_boot_nvme "setenv selected_boot true; setenv extlinux_first false; setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck; setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck; setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b; setenv extraargs bootchooser=uboot-bootmenu-nvme"
 	setenv bootmenu_boot_sd "setenv selected_boot true; setenv extlinux_first false; setenv boot_kernel uImage-5.15.147-sun60iw2; setenv boot_initrd uInitrd-5.15.147-sun60iw2; setenv boot_dtb dtb-5.15.147-sun60iw2/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=dc683cb4-0847-4d2f-83f1-184d35749d4c; setenv extraargs bootchooser=uboot-bootmenu-sd"
 	setenv bootmenu_boot_verbose "setenv selected_boot true; setenv extlinux_first false; setenv verbosity 7; setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck; setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck; setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b; setenv extraargs bootchooser=uboot-bootmenu-nvme-verbose"

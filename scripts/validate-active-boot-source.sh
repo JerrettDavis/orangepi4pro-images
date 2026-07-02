@@ -37,6 +37,8 @@ if [ -d "$sd_mount/boot" ]; then
     || fail "SD boot.scr lacks the updated fallback marker"
   strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nvme' \
     || fail "SD boot.scr lacks the U-Boot NVMe bootmenu marker"
+  strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nosel' \
+    || fail "SD boot.scr lacks the U-Boot bootmenu no-selection marker"
   strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-sd' \
     || fail "SD boot.scr lacks the U-Boot SD bootmenu marker"
   # shellcheck disable=SC2016
