@@ -21,11 +21,11 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 expected_extlinux_default=${EXPECTED_EXTLINUX_DEFAULT:-ubuntu-nvme}
 expected_extlinux_prompt=${EXPECTED_EXTLINUX_PROMPT:-0}
 expected_extlinux_timeout=${EXPECTED_EXTLINUX_TIMEOUT:-30}
-expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-true}
+expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-false}
 expected_selector_prompt=${EXPECTED_SELECTOR_PROMPT:-false}
-expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-true}
-expected_bootlogo=${EXPECTED_BOOTLOGO:-false}
-expected_logo=${EXPECTED_LOGO:-disabled}
+expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-false}
+expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
+expected_logo=${EXPECTED_LOGO:-enabled}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-true}
 expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-10}
 

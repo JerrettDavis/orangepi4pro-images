@@ -19,38 +19,6 @@ require_file() {
   }
 }
 
-generate_selector_bitmap() {
-  local out=$1
-
-  python3 - "$out" <<'PY'
-import sys
-from PIL import Image, ImageDraw, ImageFont
-
-out = sys.argv[1]
-img = Image.new("RGB", (320, 240), (5, 7, 10))
-draw = ImageDraw.Draw(img)
-
-try:
-    title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 20)
-    body_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 15)
-    small_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12)
-except OSError:
-    title_font = body_font = small_font = None
-
-draw.rectangle((0, 0, 319, 239), fill=(5, 7, 10))
-draw.rectangle((0, 0, 319, 7), fill=(238, 137, 28))
-draw.text((18, 22), "Orange Pi 4 Pro", fill=(255, 185, 72), font=title_font)
-draw.text((18, 50), "Boot Selector", fill=(238, 244, 248), font=body_font)
-draw.line((18, 78, 302, 78), fill=(78, 86, 96), width=1)
-draw.text((24, 96), "Use USB keyboard arrows + Enter", fill=(240, 244, 248), font=small_font)
-draw.text((24, 122), "Ubuntu NVMe - cyberdeck kernel", fill=(240, 244, 248), font=body_font)
-draw.text((24, 148), "Ubuntu SD - stock kernel", fill=(240, 244, 248), font=body_font)
-draw.text((24, 174), "Ubuntu NVMe - verbose boot", fill=(240, 244, 248), font=body_font)
-draw.text((18, 210), "Default: NVMe after 10 seconds", fill=(168, 178, 190), font=small_font)
-img.save(out, "BMP")
-PY
-}
-
 install_to_boot_dir() {
   local target=$1
   require_file "$target/uImage-5.15.147-sun60iw2-cyberdeck"
@@ -65,7 +33,6 @@ install_to_boot_dir() {
   install -m 0644 "$repo_root/configs/boot.cmd" "$target/boot.cmd"
   install -m 0644 "$repo_root/configs/orangepiEnv.txt" "$target/orangepiEnv.txt"
   install -m 0644 "$repo_root/configs/extlinux.conf" "$target/extlinux/extlinux.conf"
-  generate_selector_bitmap "$target/boot.bmp"
   mkimage -C none -A arm -T script -d "$target/boot.cmd" "$target/boot.scr"
 }
 
@@ -101,7 +68,6 @@ if [ -d "$efi_dir" ]; then
   cp -a "$boot_dir/boot.scr" "$efi_dir/boot.scr"
   cp -a "$boot_dir/orangepiEnv.txt" "$efi_dir/orangepiEnv.txt"
   cp -a "$boot_dir/extlinux/extlinux.conf" "$efi_dir/extlinux/extlinux.conf"
-  cp -a "$boot_dir/boot.bmp" "$efi_dir/boot.bmp"
 fi
 
 if [ -n "$sd_boot_dir" ]; then
