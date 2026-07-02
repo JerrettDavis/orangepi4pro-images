@@ -6,6 +6,9 @@ Current status on 2026-07-02:
 - The SD-card bootloader package has been replaced with a validated
   menu-capable vendor U-Boot package built from `v2018.05-sun60iw2` plus
   `CONFIG_CMD_BOOTMENU`, `CONFIG_USB_KEYBOARD`, and `CONFIG_DM_KEYBOARD`.
+- The installed SD-card bootloader package was updated again with a
+  script-first distro scan patch so `/boot/boot.scr` is scanned before
+  `/boot/extlinux/extlinux.conf`.
 - The first reboot with the menu-capable package reached the NVMe desktop but
   showed a black screen before userspace, because the live boot files were
   still staged for the older extlinux visibility experiment.
@@ -137,6 +140,28 @@ bootchooser=uboot-bootmenu-nosel
 If that marker appears, U-Boot entered the menu branch but returned without a
 selection. If `extlinux-legacy-*` still appears, U-Boot did not enter the menu
 branch even though the synced boot files contain it.
+
+## Installed SD Boot Package
+
+Installed 2026-07-02:
+
+```text
+device=/dev/mmcblk1
+package=/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-bootmenu-scriptfirst.fex
+package_sha256=8a0393cbbbd27b980f8b7c2e9fc5070b3c1dd79aaf5b42f189f66daa00202289
+u_boot_item_sha256=f57faf0cc956e639176f48996c2388cfbb8c749d5707d872b09249dcebef3845
+backup=/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260702T222612Z.bin
+backup_sha256=55dcadb7f255ad4c6489dd8fc34d07af2eac0d2110a06a20a2546775378f214e
+```
+
+The installed bytes were read back from `/dev/mmcblk1` at `bs=8192 skip=2050`
+and matched the candidate package exactly. The package contains this compiled
+distro scan order:
+
+```text
+run scan_dev_for_scripts
+run scan_dev_for_extlinux
+```
 
 ## Validation
 
