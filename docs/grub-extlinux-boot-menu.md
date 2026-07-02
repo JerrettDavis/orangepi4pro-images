@@ -23,16 +23,17 @@ Boot order in `/boot/boot.cmd`:
 This keeps the known-good `uImage`/`uInitrd` path available if GRUB EFI or
 extlinux/direct `booti` returns.
 
-The extlinux path includes a short pre-menu pause and a bounded 5 second
-selector timeout. Do not use `TIMEOUT 0` on this vendor U-Boot. A reboot test
-showed that it can wedge at the Orange Pi bootloader loading graphic instead of
-presenting a usable indefinite prompt.
+The extlinux path is currently a default dispatcher, not a usable deck-local
+selector. It uses `PROMPT 0`, `TIMEOUT 30`, and plain `sysboot` without `-p`.
+Do not use `TIMEOUT 0` on this vendor U-Boot. A reboot test showed that it can
+wedge at the Orange Pi bootloader loading graphic instead of presenting a
+usable indefinite prompt.
 
 The installed U-Boot package has `CONFIG_MENU=y` and `CONFIG_CMD_PXE=y`, but it
 does not enable `CONFIG_USB_KEYBOARD` or `CONFIG_DM_KEYBOARD`. That means this
-extlinux path can select and boot the default entry, and may be interactable on
-serial console, but it should not be expected to provide a reliable HDMI plus
-USB-keyboard boot selector.
+extlinux path can select and boot the configured default entry, and may be
+interactable on serial console if forced manually, but it should not be expected
+to provide a reliable HDMI plus USB-keyboard boot selector.
 
 ## GRUB EFI Status
 
@@ -80,12 +81,11 @@ That makes extlinux the most likely functional boot selector on the current
 vendor bootloader.
 
 The local `/boot/boot.cmd` extlinux probe now mirrors that vendor form and uses
-`sysboot -p ${devtype} ${devnum}:${distro_bootpart} any ...`. The `-p` flag
-forces the PXE menu prompt; the partition-qualified device argument matters on
-the NVMe layout because the boot script is found from `OPI_BOOT`, not from the
-whole disk device. Extlinux kernel, initrd, and DTB paths are parent-relative
-paths such as `../uImage-...`, matching U-Boot's PXE loader behavior when the
-config file lives under `extlinux/`.
+`sysboot ${devtype} ${devnum}:${distro_bootpart} any ...`. The partition-
+qualified device argument matters on the NVMe layout because the boot script is
+found from `OPI_BOOT`, not from the whole disk device. Extlinux kernel, initrd,
+and DTB paths are parent-relative paths such as `../uImage-...`, matching
+U-Boot's PXE loader behavior when the config file lives under `extlinux/`.
 
 Reboot test results:
 
@@ -164,7 +164,7 @@ sudo scripts/set-extlinux-default.sh --apply ubuntu-sd
 ```
 
 Use `ubuntu-nvme` to return the default to NVMe Ubuntu. This keeps the bounded
-5 second timeout and does not depend on USB keyboard input in U-Boot.
+3 second timeout and does not depend on USB keyboard input in U-Boot.
 
 To confirm whether the currently installed U-Boot can support deck-local boot
 selection:

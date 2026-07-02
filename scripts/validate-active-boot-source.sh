@@ -34,7 +34,7 @@ if [ -d "$sd_mount/boot" ]; then
   strings "$sd_mount/boot/boot.scr" | grep -q 'bootchooser=legacy-bootm-fallback' \
     || fail "SD boot.scr lacks the updated fallback marker"
   # shellcheck disable=SC2016
-  strings "$sd_mount/boot/boot.scr" | grep -Fq 'sysboot -p ${devtype} ${devnum}:${distro_bootpart} any' \
+  strings "$sd_mount/boot/boot.scr" | grep -Fq 'sysboot ${devtype} ${devnum}:${distro_bootpart} any' \
     || fail "SD boot.scr lacks the partition-qualified sysboot probe"
   test -e "$sd_mount/boot/extlinux/extlinux.conf" \
     || fail "SD extlinux.conf missing"

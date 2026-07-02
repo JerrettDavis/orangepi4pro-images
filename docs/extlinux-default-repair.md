@@ -45,7 +45,8 @@ NVMe boot-partition backup:
 Helper:
 
 ```bash
-scripts/set-extlinux-default.sh ubuntu-nvme 30 0
+scripts/set-extlinux-default.sh ubuntu-nvme
+sudo scripts/set-extlinux-default.sh --apply ubuntu-nvme
 ```
 
 Post-reboot success check:
