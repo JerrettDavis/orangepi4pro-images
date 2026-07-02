@@ -28,6 +28,7 @@ expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
 expected_logo=${EXPECTED_LOGO:-enabled}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-true}
 expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-20}
+expected_bootmenu_default=${EXPECTED_BOOTMENU_DEFAULT:-nvme}
 
 for file in \
   /boot/boot.cmd \
@@ -55,6 +56,8 @@ grep -q "^bootmenu_first=${expected_bootmenu_first}$" /boot/orangepiEnv.txt \
   || fail "bootmenu_first should be ${expected_bootmenu_first}"
 grep -q "^bootmenu_timeout=${expected_bootmenu_timeout}$" /boot/orangepiEnv.txt \
   || fail "bootmenu_timeout should be ${expected_bootmenu_timeout}"
+grep -q "^bootmenu_default=${expected_bootmenu_default}$" /boot/orangepiEnv.txt \
+  || fail "bootmenu_default should be ${expected_bootmenu_default}"
 grep -q "^selector_console=${expected_selector_console}$" /boot/orangepiEnv.txt \
   || fail "selector_console should be ${expected_selector_console}"
 grep -q "^selector_prompt=${expected_selector_prompt}$" /boot/orangepiEnv.txt \
@@ -71,6 +74,7 @@ grep -q 'uboot-bootmenu-nosel' /boot/boot.cmd || fail 'boot.cmd does not contain
 grep -q 'uboot-bootmenu-nvme' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot NVMe selector marker'
 grep -q 'uboot-bootmenu-sd' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot SD selector marker'
 grep -q 'usb start' /boot/boot.cmd || fail 'boot.cmd does not start USB before bootmenu'
+grep -q 'bootmenu_default' /boot/boot.cmd || fail 'boot.cmd does not support deterministic bootmenu default tests'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
 grep -q 'booti' /boot/boot.cmd || fail 'boot.cmd does not contain direct booti probe'
 grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallback'
@@ -118,6 +122,7 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
   | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
+  | sed -E "s/^bootmenu_default=.*/bootmenu_default=${expected_bootmenu_default}/" \
   > "$repo_env_cmp"
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   /boot/orangepiEnv.txt \
@@ -127,6 +132,7 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
   | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
+  | sed -E "s/^bootmenu_default=.*/bootmenu_default=${expected_bootmenu_default}/" \
   > "$boot_env_cmp"
 cmp -s "$repo_env_cmp" "$boot_env_cmp" \
   || fail '/boot/orangepiEnv.txt differs from configs/orangepiEnv.txt beyond allowed prompt-test overrides'

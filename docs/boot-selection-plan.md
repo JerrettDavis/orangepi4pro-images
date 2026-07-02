@@ -11,6 +11,11 @@ Current status on 2026-07-02:
   extlinux. That package is not currently installed after recovery.
 - A second file-only package candidate now embeds a static selector logo in
   vendor U-Boot's early-logo path instead of drawing a BMP from `boot.scr`.
+- Reboots with the selector-logo package prove that script-first U-Boot enters
+  `bootmenu` and boots the NVMe entry, because Linux reports
+  `bootchooser=uboot-bootmenu-nvme`.
+- The deck display still stays black during U-Boot and a blind Down+Enter test
+  did not select SD, so keyboard input and display visibility remain unproven.
 - The first reboot with the menu-capable package reached the NVMe desktop but
   showed a black screen before userspace, because the live boot files were
   still staged for the older extlinux visibility experiment.
@@ -121,6 +126,7 @@ The current selector flow is:
 ```text
 bootmenu_first=true
 bootmenu_timeout=20
+bootmenu_default=nvme
 Ubuntu NVMe - cyberdeck kernel -> bootchooser=uboot-bootmenu-nvme
 Ubuntu SD - stock kernel       -> bootchooser=uboot-bootmenu-sd
 Ubuntu NVMe - verbose boot     -> bootchooser=uboot-bootmenu-nvme-verbose
@@ -195,6 +201,41 @@ timeout and checking `/proc/cmdline` after boot for
 `bootchooser=uboot-bootmenu-sd`. The boot script explicitly runs `usb start`
 before entering `bootmenu`; without that, U-Boot can expose `usbkbd` in
 `stdin` while the USB keyboard stack is still stopped.
+
+## Deterministic Bootmenu Tests
+
+Use deterministic default-entry tests before more visual work. This avoids
+guessing at a black screen.
+
+Stage SD as bootmenu entry 0:
+
+```bash
+sudo scripts/stage-bootmenu-default-test.sh \
+  --target sd \
+  --sd-boot-dir /mnt/opisd-check/boot
+sudo EXPECTED_BOOTMENU_DEFAULT=sd scripts/validate-boot-menu-assets.sh
+```
+
+After reboot, the pass condition is:
+
+```bash
+scripts/assert-bootchooser.sh uboot-bootmenu-sd
+```
+
+Restore NVMe as entry 0:
+
+```bash
+sudo scripts/stage-bootmenu-default-test.sh \
+  --target nvme \
+  --sd-boot-dir /mnt/opisd-check/boot
+sudo EXPECTED_BOOTMENU_DEFAULT=nvme scripts/validate-boot-menu-assets.sh
+```
+
+After reboot, the pass condition is:
+
+```bash
+scripts/assert-bootchooser.sh uboot-bootmenu-nvme
+```
 
 ## Validation
 

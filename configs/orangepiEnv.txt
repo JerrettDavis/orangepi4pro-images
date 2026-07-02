@@ -9,6 +9,7 @@ extlinux_first=true
 direct_booti_first=false
 bootmenu_first=true
 bootmenu_timeout=20
+bootmenu_default=nvme
 selector_console=false
 selector_prompt=false
 selector_bitmap=false
