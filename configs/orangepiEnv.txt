@@ -9,4 +9,5 @@ extlinux_first=true
 direct_booti_first=false
 selector_console=false
 selector_prompt=false
+selector_bitmap=false
 logo=enabled

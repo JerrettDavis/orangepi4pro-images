@@ -28,6 +28,11 @@ if test "${selector_console}" = "true"; then
 	cls
 fi
 
+if test "${selector_bitmap}" = "true"; then
+	echo "Showing selector bitmap through sunxi DRM logo path"
+	sunxi_show_bmp boot.bmp
+fi
+
 if test "${grub_first}" = "true"; then
 	echo "Trying GRUB EFI from ${devtype} ${devnum} ${prefix}EFI/BOOT/BOOTAA64.EFI"
 	if load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}EFI/BOOT/BOOTAA64.EFI; then

@@ -74,13 +74,16 @@ bootlogo=false
 logo=disabled
 selector_console=true
 selector_prompt=true
+selector_bitmap=true
 ```
 
 The expected behavior is a visible prompt/menu attempt followed by automatic
-NVMe boot after about 10 seconds. USB-keyboard selection may still fail on the
-installed U-Boot because it lacks keyboard support; this test is meant to prove
-whether the video prompt path can be made readable without flashing a new
-loader.
+NVMe boot after about 10 seconds. The staged script also replaces `boot.bmp`
+with a generated selector bitmap and has `boot.cmd` call `sunxi_show_bmp
+boot.bmp`, because the vendor DRM logo path is visible even when the text
+console is not. USB-keyboard selection may still fail on the installed U-Boot
+because it lacks keyboard support; this test is meant to prove whether the
+visible logo path can be controlled without flashing a new loader.
 
 ## Required For On-Screen Selection
 

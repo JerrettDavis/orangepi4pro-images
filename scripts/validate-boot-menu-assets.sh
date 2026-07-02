@@ -23,6 +23,7 @@ expected_extlinux_prompt=${EXPECTED_EXTLINUX_PROMPT:-0}
 expected_extlinux_timeout=${EXPECTED_EXTLINUX_TIMEOUT:-30}
 expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-false}
 expected_selector_prompt=${EXPECTED_SELECTOR_PROMPT:-false}
+expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-false}
 expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
 expected_logo=${EXPECTED_LOGO:-enabled}
 
@@ -31,6 +32,7 @@ for file in \
   /boot/boot.scr \
   /boot/orangepiEnv.txt \
   /boot/extlinux/extlinux.conf \
+  /boot/boot.bmp \
   /boot/uImage-5.15.147-sun60iw2-cyberdeck \
   /boot/uInitrd-5.15.147-sun60iw2-cyberdeck \
   /boot/uImage-5.15.147-sun60iw2 \
@@ -51,6 +53,8 @@ grep -q "^selector_console=${expected_selector_console}$" /boot/orangepiEnv.txt 
   || fail "selector_console should be ${expected_selector_console}"
 grep -q "^selector_prompt=${expected_selector_prompt}$" /boot/orangepiEnv.txt \
   || fail "selector_prompt should be ${expected_selector_prompt}"
+grep -q "^selector_bitmap=${expected_selector_bitmap}$" /boot/orangepiEnv.txt \
+  || fail "selector_bitmap should be ${expected_selector_bitmap}"
 grep -q "^bootlogo=${expected_bootlogo}$" /boot/orangepiEnv.txt \
   || fail "bootlogo should be ${expected_bootlogo}"
 grep -q "^logo=${expected_logo}$" /boot/orangepiEnv.txt \
@@ -62,6 +66,8 @@ grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallbac
 grep -q 'Forcing selector output to serial and video console' /boot/boot.cmd \
   || fail 'boot.cmd does not contain selector console override'
 grep -q 'sysboot -p' /boot/boot.cmd || fail 'boot.cmd does not contain prompted sysboot path'
+grep -q 'sunxi_show_bmp boot.bmp' /boot/boot.cmd \
+  || fail 'boot.cmd does not contain selector bitmap display path'
 
 grep -q 'Ubuntu NVMe - cyberdeck kernel' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe menu entry missing'
 grep -q 'Ubuntu SD - stock kernel' /boot/extlinux/extlinux.conf || fail 'extlinux SD menu entry missing'
@@ -96,12 +102,14 @@ trap 'rm -f "$repo_env_cmp" "$boot_env_cmp" "$repo_extlinux_cmp" "$boot_extlinux
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   "$repo_root/configs/orangepiEnv.txt" \
   | sed -E "s/^selector_prompt=.*/selector_prompt=${expected_selector_prompt}/" \
+  | sed -E "s/^selector_bitmap=.*/selector_bitmap=${expected_selector_bitmap}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   > "$repo_env_cmp"
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   /boot/orangepiEnv.txt \
   | sed -E "s/^selector_prompt=.*/selector_prompt=${expected_selector_prompt}/" \
+  | sed -E "s/^selector_bitmap=.*/selector_bitmap=${expected_selector_bitmap}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   > "$boot_env_cmp"
@@ -124,10 +132,12 @@ printf 'Hashes for mirrored files:\n'
 hash_files=(
   /boot/extlinux/extlinux.conf
   /boot/boot.scr
+  /boot/boot.bmp
 )
 for optional_file in \
   /boot/efi/extlinux/extlinux.conf \
   /boot/efi/boot.scr \
+  /boot/efi/boot.bmp \
   /boot/grub/grub.cfg \
   /boot/EFI/BOOT/BOOTAA64.EFI \
   /boot/EFI/BOOT/grub.cfg \

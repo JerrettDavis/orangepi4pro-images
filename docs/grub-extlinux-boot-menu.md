@@ -187,14 +187,17 @@ bootlogo=false
 logo=disabled
 selector_console=true
 selector_prompt=true
+selector_bitmap=true
 ```
 
 `selector_console=true` makes `boot.cmd` set `stdout` and `stderr` to
 `vidconsole,serial`, clear the display with `cls`, and then invoke U-Boot
-`sysboot`. `selector_prompt=true` makes that handoff use `sysboot -p`. `stdin`
+`sysboot`. `selector_prompt=true` makes that handoff use `sysboot -p`.
+`selector_bitmap=true` has `boot.cmd` call `sunxi_show_bmp boot.bmp`, and the
+staging script replaces `boot.bmp` with a generated selector bitmap. `stdin`
 remains `serial` because the installed U-Boot does not include USB keyboard
-support. The practical test is whether the selector is visible and whether the
-timeout falls through to the NVMe default without hanging.
+support. The practical test is whether the selector bitmap is visible and
+whether the timeout falls through to the NVMe default without hanging.
 
 Backups from this staging pass are stored below each boot directory as:
 

@@ -19,6 +19,8 @@
   console overrides.
 - Strengthened the prompt test to disable splash/logo variables, clear the
   U-Boot video console, and use explicit `sysboot -p`.
+- Added a selector bitmap stage that uses the vendor `sunxi_show_bmp` display
+  path when U-Boot text output is hidden by the factory splash.
 - Staged GRUB ARM64 EFI assets and a hand-authored GRUB menu for NVMe Ubuntu and
   SD Ubuntu.
 - Added an extlinux menu with the same Ubuntu entries because vendor U-Boot
