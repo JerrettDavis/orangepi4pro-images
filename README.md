@@ -24,6 +24,18 @@ about the target path and preconditions.
 - Kernel: `5.15.147-sun60iw2-cyberdeck`
 - Boot flow: vendor U-Boot tries GRUB EFI, then extlinux, then legacy `bootm`
   fallback
+- Confirmed selector: extlinux boots the NVMe Ubuntu entry with
+  `bootchooser=extlinux-legacy-nvme`
+- While the SD card is inserted, vendor U-Boot still loads the active
+  `boot.scr` from SD, then mounts the NVMe root via `rootdev`.
+
+The current text boot templates are committed under `configs/`. To reinstall
+them onto the mounted NVMe boot partitions and an explicitly mounted SD boot
+source:
+
+```bash
+sudo scripts/install-extlinux-selector.sh /boot /boot/efi /mnt/opisd-ro/boot
+```
 
 ## Validation
 
@@ -33,6 +45,7 @@ Run before pushing:
 scripts/ci-checks.sh
 scripts/validate-nvme-cyberdeck-kernel.sh /
 scripts/validate-boot-menu-assets.sh
+scripts/validate-active-boot-source.sh /mnt/opisd-ro
 ```
 
 ## Releases

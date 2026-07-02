@@ -32,3 +32,7 @@
   on the SD `/boot` path and added active boot-source validation.
 - Corrected extlinux asset paths to parent-relative `../uImage...` form after
   confirming vendor `sysboot` resolves label files relative to `extlinux.conf`.
+- Confirmed extlinux boots the NVMe entry and added a pre-menu pause plus a
+  longer selector timeout for better visibility on HDMI.
+- Added committed boot selector templates and an installer for reproducing the
+  live `/boot`, `/boot/efi`, and active SD boot-source state.

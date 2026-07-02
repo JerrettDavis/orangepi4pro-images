@@ -23,6 +23,11 @@ Boot order in `/boot/boot.cmd`:
 This keeps the known-good `uImage`/`uInitrd` path available if GRUB EFI or
 extlinux/direct `booti` returns.
 
+The extlinux path includes a short pre-menu pause and a 30 second extlinux
+timeout. If the selector still appears only as fast text on HDMI, treat that as
+a display/input limitation of the vendor U-Boot console path rather than an
+extlinux boot failure.
+
 ## GRUB EFI Status
 
 Installed files:
@@ -47,6 +52,8 @@ Installed files:
 
 - `/boot/extlinux/extlinux.conf`
 - `/boot/efi/extlinux/extlinux.conf`
+- repo templates in `configs/boot.cmd`, `configs/orangepiEnv.txt`, and
+  `configs/extlinux.conf`
 
 Important current boot-source finding: while the SD card is inserted, vendor
 U-Boot is still loading `/boot/boot.scr` and `/boot/orangepiEnv.txt` from the
@@ -132,6 +139,9 @@ from fallback legacy `bootm`.
 The legacy fallback path appends `bootchooser=legacy-bootm-fallback`, so the
 next boot can distinguish extlinux failure from an older boot script.
 
+The confirmed working extlinux path appends `bootchooser=extlinux-legacy-nvme`
+for the default NVMe entry.
+
 The direct `booti` probe used `bootchooser=direct-booti-nvme`. That marker was
 not present after reboot, confirming fallback to legacy `bootm`.
 
@@ -143,6 +153,12 @@ Run:
 scripts/validate-boot-menu-assets.sh
 sudo mount -o ro /dev/mmcblk1p1 /mnt/opisd-ro
 scripts/validate-active-boot-source.sh /mnt/opisd-ro
+```
+
+To reinstall the committed selector templates:
+
+```bash
+sudo scripts/install-extlinux-selector.sh /boot /boot/efi /mnt/opisd-ro/boot
 ```
 
 This validates files, hashes, GRUB config syntax, and the expected UUID-bearing

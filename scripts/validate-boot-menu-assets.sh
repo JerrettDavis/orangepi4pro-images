@@ -17,6 +17,8 @@ require_file() {
 
 printf 'Validating Orange Pi 4 Pro GRUB/extlinux boot-menu assets\n\n'
 
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+
 for file in \
   /boot/boot.cmd \
   /boot/boot.scr \
@@ -77,6 +79,12 @@ grep -q '^  LINUX ../uImage-5.15.147-sun60iw2-cyberdeck$' /boot/extlinux/extlinu
   || fail 'extlinux must use parent-relative legacy cyberdeck uImage path'
 grep -q '^  LINUX ../uImage-5.15.147-sun60iw2$' /boot/extlinux/extlinux.conf \
   || fail 'extlinux must use parent-relative legacy stock uImage path'
+
+cmp -s "$repo_root/configs/boot.cmd" /boot/boot.cmd || fail '/boot/boot.cmd differs from configs/boot.cmd'
+cmp -s "$repo_root/configs/orangepiEnv.txt" /boot/orangepiEnv.txt \
+  || fail '/boot/orangepiEnv.txt differs from configs/orangepiEnv.txt'
+cmp -s "$repo_root/configs/extlinux.conf" /boot/extlinux/extlinux.conf \
+  || fail '/boot/extlinux/extlinux.conf differs from configs/extlinux.conf'
 
 printf 'Hashes for mirrored files:\n'
 sha256sum \
