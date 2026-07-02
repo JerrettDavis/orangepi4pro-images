@@ -13,7 +13,8 @@ Prepared on 2026-07-02 from the running Orange Pi Ubuntu Jammy SD system.
 - Wrote target `/etc/fstab` for the NVMe layout.
 - Copied current vendor legacy boot assets to `OPI_BOOT`.
 - Rebuilt `OPI_BOOT/boot.scr` from `boot.cmd`.
-- Mirrored boot assets to `OPI_EFI` with symlinks dereferenced for FAT32.
+- Mirrored boot-critical fallback assets to `OPI_EFI` with symlinks
+  dereferenced for FAT32.
 
 ## Target Root
 
@@ -50,8 +51,17 @@ rootdev=UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
 rootfstype=ext4
 ```
 
-`OPI_BOOT` keeps Unix symlinks. `OPI_EFI` is FAT32, so its mirror was created
-with symlinks dereferenced into real files/directories.
+`OPI_BOOT` keeps Unix symlinks and full versioned boot artifacts. `OPI_EFI` is
+FAT32, so it keeps only boot-critical fallback assets with symlinks dereferenced
+into real files/directories:
+
+- `boot.cmd`
+- `boot.scr`
+- `orangepiEnv.txt`
+- `uImage`
+- `uInitrd`
+- `dtb/`
+- splash and first-run text assets
 
 ## Cyberdeck Kernel Added
 
@@ -112,6 +122,21 @@ The Xorg `evdev` touchscreen override was moved under:
 ```
 
 This leaves libinput as the default handler for the native HID event device.
+
+## Yocto Direction
+
+Yocto should be introduced after the NVMe 5.15 boot is confirmed, not before.
+The intended split is:
+
+- `orangepi4pro-board-support`: kernel fork, DTS/DTSI, config fragments,
+  firmware notes, validation.
+- `orangepi4pro-images`: image assembly, rootfs policy, boot asset packaging,
+  Yocto layer integration, release artifacts.
+- `orangepi4pro-cyberdeck`: project-level integration, recovery checklist, user
+  workflows, hardware notes.
+
+This keeps future Ubuntu, Kali, and Yocto images consuming the same board-support
+source instead of growing separate BSP copies.
 
 ## Bootloader Caveat
 

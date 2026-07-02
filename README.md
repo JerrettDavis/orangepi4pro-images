@@ -12,4 +12,5 @@ actions unless a future reviewed session enables explicit execution.
 - Generate boot assets compatible with stock/vendor U-Boot first.
 - Keep GRUB/EFI output experimental.
 - Generate a conservative M.2 partition plan without writing it.
-
+- Add Yocto/OpenEmbedded after the vendor 5.15 NVMe boot path is confirmed,
+  with board support consumed from `orangepi4pro-board-support`.
