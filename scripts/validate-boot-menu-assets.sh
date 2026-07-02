@@ -22,6 +22,9 @@ expected_extlinux_default=${EXPECTED_EXTLINUX_DEFAULT:-ubuntu-nvme}
 expected_extlinux_prompt=${EXPECTED_EXTLINUX_PROMPT:-0}
 expected_extlinux_timeout=${EXPECTED_EXTLINUX_TIMEOUT:-30}
 expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-false}
+expected_selector_prompt=${EXPECTED_SELECTOR_PROMPT:-false}
+expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
+expected_logo=${EXPECTED_LOGO:-enabled}
 
 for file in \
   /boot/boot.cmd \
@@ -46,12 +49,19 @@ grep -q '^extlinux_first=true$' /boot/orangepiEnv.txt || fail 'extlinux_first sh
 grep -q '^direct_booti_first=false$' /boot/orangepiEnv.txt || fail 'direct_booti_first should be disabled after failed reboot tests'
 grep -q "^selector_console=${expected_selector_console}$" /boot/orangepiEnv.txt \
   || fail "selector_console should be ${expected_selector_console}"
+grep -q "^selector_prompt=${expected_selector_prompt}$" /boot/orangepiEnv.txt \
+  || fail "selector_prompt should be ${expected_selector_prompt}"
+grep -q "^bootlogo=${expected_bootlogo}$" /boot/orangepiEnv.txt \
+  || fail "bootlogo should be ${expected_bootlogo}"
+grep -q "^logo=${expected_logo}$" /boot/orangepiEnv.txt \
+  || fail "logo should be ${expected_logo}"
 grep -q 'bootefi' /boot/boot.cmd || fail 'boot.cmd does not contain GRUB EFI handoff'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
 grep -q 'booti' /boot/boot.cmd || fail 'boot.cmd does not contain direct booti probe'
 grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallback'
 grep -q 'Forcing selector output to serial and video console' /boot/boot.cmd \
   || fail 'boot.cmd does not contain selector console override'
+grep -q 'sysboot -p' /boot/boot.cmd || fail 'boot.cmd does not contain prompted sysboot path'
 
 grep -q 'Ubuntu NVMe - cyberdeck kernel' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe menu entry missing'
 grep -q 'Ubuntu SD - stock kernel' /boot/extlinux/extlinux.conf || fail 'extlinux SD menu entry missing'
@@ -84,11 +94,19 @@ repo_extlinux_cmp=$(mktemp)
 boot_extlinux_cmp=$(mktemp)
 trap 'rm -f "$repo_env_cmp" "$boot_env_cmp" "$repo_extlinux_cmp" "$boot_extlinux_cmp"' EXIT
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
-  "$repo_root/configs/orangepiEnv.txt" > "$repo_env_cmp"
+  "$repo_root/configs/orangepiEnv.txt" \
+  | sed -E "s/^selector_prompt=.*/selector_prompt=${expected_selector_prompt}/" \
+  | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
+  | sed -E "s/^logo=.*/logo=${expected_logo}/" \
+  > "$repo_env_cmp"
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
-  /boot/orangepiEnv.txt > "$boot_env_cmp"
+  /boot/orangepiEnv.txt \
+  | sed -E "s/^selector_prompt=.*/selector_prompt=${expected_selector_prompt}/" \
+  | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
+  | sed -E "s/^logo=.*/logo=${expected_logo}/" \
+  > "$boot_env_cmp"
 cmp -s "$repo_env_cmp" "$boot_env_cmp" \
-  || fail '/boot/orangepiEnv.txt differs from configs/orangepiEnv.txt beyond allowed selector_console override'
+  || fail '/boot/orangepiEnv.txt differs from configs/orangepiEnv.txt beyond allowed prompt-test overrides'
 sed -E "s/^DEFAULT .*/DEFAULT ${expected_extlinux_default}/" \
   "$repo_root/configs/extlinux.conf" \
   | sed -E "s/^PROMPT .*/PROMPT ${expected_extlinux_prompt}/" \

@@ -22,9 +22,10 @@ fi
 
 if test "${selector_console}" = "true"; then
 	echo "Forcing selector output to serial and video console"
-	setenv stdout "serial,vidconsole"
-	setenv stderr "serial,vidconsole"
+	setenv stdout "vidconsole,serial"
+	setenv stderr "vidconsole,serial"
 	setenv stdin "serial"
+	cls
 fi
 
 if test "${grub_first}" = "true"; then
@@ -45,7 +46,11 @@ if test "${extlinux_first}" = "true"; then
 	echo "Orange Pi 4 Pro extlinux dispatcher starting; default boots configured DEFAULT entry"
 	echo "Trying extlinux from ${devtype} ${devnum} ${prefix}extlinux/extlinux.conf"
 	if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}extlinux/extlinux.conf; then
-		sysboot ${devtype} ${devnum}:${distro_bootpart} any ${scriptaddr} ${prefix}extlinux/extlinux.conf
+		if test "${selector_prompt}" = "true"; then
+			sysboot -p ${devtype} ${devnum}:${distro_bootpart} any ${scriptaddr} ${prefix}extlinux/extlinux.conf
+		else
+			sysboot ${devtype} ${devnum}:${distro_bootpart} any ${scriptaddr} ${prefix}extlinux/extlinux.conf
+		fi
 	fi
 	echo "extlinux path returned or failed; falling back to legacy bootm"
 fi

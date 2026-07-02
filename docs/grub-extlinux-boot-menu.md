@@ -183,14 +183,18 @@ changes the live boot files to:
 PROMPT 1
 TIMEOUT 100
 DEFAULT ubuntu-nvme
+bootlogo=false
+logo=disabled
 selector_console=true
+selector_prompt=true
 ```
 
 `selector_console=true` makes `boot.cmd` set `stdout` and `stderr` to
-`serial,vidconsole` before invoking `sysboot`. `stdin` remains `serial` because
-the installed U-Boot does not include USB keyboard support. The practical test
-is whether the selector is visible and whether the timeout falls through to the
-NVMe default without hanging.
+`vidconsole,serial`, clear the display with `cls`, and then invoke U-Boot
+`sysboot`. `selector_prompt=true` makes that handoff use `sysboot -p`. `stdin`
+remains `serial` because the installed U-Boot does not include USB keyboard
+support. The practical test is whether the selector is visible and whether the
+timeout falls through to the NVMe default without hanging.
 
 Backups from this staging pass are stored below each boot directory as:
 

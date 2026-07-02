@@ -17,6 +17,8 @@
   to NVMe and SD boot sources without flashing boot sectors.
 - Taught boot-menu validation to accept temporary prompt, timeout, and selector
   console overrides.
+- Strengthened the prompt test to disable splash/logo variables, clear the
+  U-Boot video console, and use explicit `sysboot -p`.
 - Staged GRUB ARM64 EFI assets and a hand-authored GRUB menu for NVMe Ubuntu and
   SD Ubuntu.
 - Added an extlinux menu with the same Ubuntu entries because vendor U-Boot

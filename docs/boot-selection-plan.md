@@ -70,7 +70,10 @@ The staged state uses:
 PROMPT 1
 TIMEOUT 100
 DEFAULT ubuntu-nvme
+bootlogo=false
+logo=disabled
 selector_console=true
+selector_prompt=true
 ```
 
 The expected behavior is a visible prompt/menu attempt followed by automatic

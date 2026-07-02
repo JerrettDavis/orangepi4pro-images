@@ -18,6 +18,8 @@ Defaults:
   PROMPT_VALUE=1
   TIMEOUT_VALUE=100
   DEFAULT_LABEL=ubuntu-nvme
+  The staged env also sets bootlogo=false, logo=disabled,
+  selector_console=true, and selector_prompt=true.
   BOOT_DIR=/boot
   EFI_DIR=/boot/efi
   SD_BOOT_DIR=/mnt/opisd-ro/boot
@@ -82,7 +84,12 @@ prepare_tree() {
     -e "s/^TIMEOUT .*/TIMEOUT $timeout/" \
     -e "s/^DEFAULT .*/DEFAULT $default_label/" \
     "$target/extlinux/extlinux.conf"
-  sed -i 's/^selector_console=.*/selector_console=true/' "$target/orangepiEnv.txt"
+  sed -i \
+    -e 's/^bootlogo=.*/bootlogo=false/' \
+    -e 's/^selector_console=.*/selector_console=true/' \
+    -e 's/^selector_prompt=.*/selector_prompt=true/' \
+    -e 's/^logo=.*/logo=disabled/' \
+    "$target/orangepiEnv.txt"
 
   mkimage -C none -A arm -T script -d "$target/boot.cmd" "$target/boot.scr" >/dev/null
 }
