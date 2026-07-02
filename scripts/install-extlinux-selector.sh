@@ -36,6 +36,30 @@ install_to_boot_dir() {
   mkimage -C none -A arm -T script -d "$target/boot.cmd" "$target/boot.scr"
 }
 
+with_writable_mount() {
+  local target=$1
+  local mount_dir
+  local remounted=false
+
+  mount_dir=$(findmnt -n -o TARGET --target "$target" || true)
+  if [ -z "$mount_dir" ]; then
+    install_to_boot_dir "$target"
+    return
+  fi
+
+  if findmnt -n -o OPTIONS --target "$target" | grep -qw ro; then
+    mount -o remount,rw "$mount_dir"
+    remounted=true
+  fi
+
+  install_to_boot_dir "$target"
+
+  if [ "$remounted" = true ]; then
+    sync
+    mount -o remount,ro "$mount_dir"
+  fi
+}
+
 install_to_boot_dir "$boot_dir"
 
 if [ -d "$efi_dir" ]; then
@@ -47,7 +71,7 @@ if [ -d "$efi_dir" ]; then
 fi
 
 if [ -n "$sd_boot_dir" ]; then
-  install_to_boot_dir "$sd_boot_dir"
+  with_writable_mount "$sd_boot_dir"
 fi
 
 sync

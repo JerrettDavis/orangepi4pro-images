@@ -73,7 +73,9 @@ Important current boot-source finding: while the SD card is inserted, vendor
 U-Boot is still loading `/boot/boot.scr` and `/boot/orangepiEnv.txt` from the
 SD filesystem, then using the SD env's `rootdev=UUID=eb86...` value to mount the
 NVMe Ubuntu root. The NVMe is the Linux root, but the active U-Boot script
-source is SD until proven otherwise after removing the card.
+source is SD until proven otherwise after removing the card. A failed black
+screen bootmenu test was traced to this: NVMe `/boot` had the new bootmenu
+assets, but SD `/boot` still had the old extlinux prompt/bitmap test assets.
 
 The same corrected extlinux probe and menu assets have therefore been installed
 on the SD `/boot` path as well as the NVMe `OPI_BOOT` and `OPI_EFI` partitions.

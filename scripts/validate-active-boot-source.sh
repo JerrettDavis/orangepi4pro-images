@@ -31,8 +31,14 @@ if [ -d "$sd_mount/boot" ]; then
   printf '\nChecking SD boot script at %s/boot\n' "$sd_mount"
   grep -q '^extlinux_first=true$' "$sd_mount/boot/orangepiEnv.txt" \
     || fail "SD orangepiEnv.txt does not enable extlinux_first"
+  grep -q '^bootmenu_first=true$' "$sd_mount/boot/orangepiEnv.txt" \
+    || fail "SD orangepiEnv.txt does not enable bootmenu_first"
   strings "$sd_mount/boot/boot.scr" | grep -q 'bootchooser=legacy-bootm-fallback' \
     || fail "SD boot.scr lacks the updated fallback marker"
+  strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nvme' \
+    || fail "SD boot.scr lacks the U-Boot NVMe bootmenu marker"
+  strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-sd' \
+    || fail "SD boot.scr lacks the U-Boot SD bootmenu marker"
   # shellcheck disable=SC2016
   strings "$sd_mount/boot/boot.scr" | grep -Eq 'sysboot( -p)? [$][{]devtype[}] [$][{]devnum[}]:[$][{]distro_bootpart[}] any' \
     || fail "SD boot.scr lacks the partition-qualified sysboot probe"

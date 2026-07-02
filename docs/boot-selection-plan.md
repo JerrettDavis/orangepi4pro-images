@@ -12,6 +12,10 @@ Current status on 2026-07-02:
 - The current live boot files now call U-Boot `bootmenu` first, with a
   10-second default to NVMe, then continue through the known-good legacy
   `bootm` image path selected by menu variables.
+- While the SD card is inserted, U-Boot reads `/boot/boot.scr` and
+  `/boot/orangepiEnv.txt` from the SD root filesystem, even though Linux mounts
+  NVMe `OPI_BOOT` at `/boot`. Always install selector assets to the SD `/boot`
+  copy before reboot tests.
 - `TIMEOUT 0` is unsafe on this BSP. It has already wedged at the Orange Pi
   bootloader loading graphic.
 
@@ -131,6 +135,16 @@ Safe dispatcher files:
 ```bash
 sudo scripts/validate-boot-menu-assets.sh
 sudo mount -o ro /dev/mmcblk1p1 /mnt/opisd-ro
+sudo scripts/validate-active-boot-source.sh /mnt/opisd-ro
+```
+
+Install the same selector assets to NVMe `/boot`, NVMe `/boot/efi`, and the
+active SD `/boot` copy:
+
+```bash
+sudo mkdir -p /mnt/opisd-ro
+sudo mount -o ro /dev/mmcblk1p1 /mnt/opisd-ro
+sudo scripts/install-extlinux-selector.sh /boot /boot/efi /mnt/opisd-ro/boot
 sudo scripts/validate-active-boot-source.sh /mnt/opisd-ro
 ```
 
