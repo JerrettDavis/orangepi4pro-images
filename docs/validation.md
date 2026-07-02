@@ -27,6 +27,12 @@ sed -n '1,40p' /boot/boot.cmd
 ls -l /boot/boot.cmd.sd-original-* /boot/boot.scr.sd-original-*
 ```
 
+For the reboot resume checklist, see:
+
+```text
+docs/reboot-resume-2026-07-02.md
+```
+
 After the first NVMe boot, expected checks:
 
 ```bash
