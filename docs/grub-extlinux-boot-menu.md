@@ -23,9 +23,14 @@ Boot order in `/boot/boot.cmd`:
 This keeps the known-good `uImage`/`uInitrd` path available if GRUB EFI or
 extlinux/direct `booti` returns.
 
-The extlinux path includes a short pre-menu pause and a 30 second extlinux
-timeout. If the selector still appears only as fast text on HDMI, treat that as
-a display/input limitation of the vendor U-Boot console path rather than an
+The extlinux path includes a short pre-menu pause and an indefinite extlinux
+selector prompt. The U-Boot PXE/extlinux parser stores `TIMEOUT` in tenths of a
+second and passes `TIMEOUT 0` to the generic menu code as no timeout. With
+`PROMPT 1`, the menu should stop at `Enter choice:` until `1`, `2`, or `3` is
+entered.
+
+If the selector still appears only as fast text on HDMI, treat that as a
+display/input limitation of the vendor U-Boot console path rather than an
 extlinux boot failure.
 
 ## GRUB EFI Status

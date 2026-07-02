@@ -36,6 +36,8 @@ fi
 
 if test "${extlinux_first}" = "true"; then
 	echo "Orange Pi 4 Pro boot selector starting; default boots NVMe Ubuntu"
+	echo "Selector should stop at: Enter choice:"
+	echo "Use 1=NVMe Ubuntu, 2=SD Ubuntu, 3=NVMe verbose, then press Enter"
 	sleep 3
 	echo "Trying extlinux menu from ${devtype} ${devnum} ${prefix}extlinux/extlinux.conf"
 	if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}extlinux/extlinux.conf; then
