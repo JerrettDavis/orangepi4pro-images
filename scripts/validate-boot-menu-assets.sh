@@ -73,10 +73,10 @@ grep -q 'bootchooser=extlinux-legacy-sd' /boot/extlinux/extlinux.conf || fail 'e
 grep -q 'bootchooser=legacy-bootm-fallback' /boot/boot.cmd || fail 'legacy fallback marker missing from boot.cmd'
 grep -Fq 'sysboot -p ${devtype} ${devnum}:${distro_bootpart} any' /boot/boot.cmd \
   || fail 'boot.cmd should use partition-qualified prompted sysboot'
-grep -q '^  LINUX uImage-5.15.147-sun60iw2-cyberdeck$' /boot/extlinux/extlinux.conf \
-  || fail 'extlinux must use relative legacy cyberdeck uImage path'
-grep -q '^  LINUX uImage-5.15.147-sun60iw2$' /boot/extlinux/extlinux.conf \
-  || fail 'extlinux must use relative legacy stock uImage path'
+grep -q '^  LINUX ../uImage-5.15.147-sun60iw2-cyberdeck$' /boot/extlinux/extlinux.conf \
+  || fail 'extlinux must use parent-relative legacy cyberdeck uImage path'
+grep -q '^  LINUX ../uImage-5.15.147-sun60iw2$' /boot/extlinux/extlinux.conf \
+  || fail 'extlinux must use parent-relative legacy stock uImage path'
 
 printf 'Hashes for mirrored files:\n'
 sha256sum \

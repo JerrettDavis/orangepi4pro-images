@@ -30,3 +30,5 @@
 - Confirmed that the inserted SD card remains the active U-Boot script source
   even while Linux mounts NVMe as root; installed the corrected extlinux assets
   on the SD `/boot` path and added active boot-source validation.
+- Corrected extlinux asset paths to parent-relative `../uImage...` form after
+  confirming vendor `sysboot` resolves label files relative to `extlinux.conf`.

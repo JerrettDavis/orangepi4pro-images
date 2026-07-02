@@ -70,8 +70,9 @@ The local `/boot/boot.cmd` extlinux probe now mirrors that vendor form and uses
 `sysboot -p ${devtype} ${devnum}:${distro_bootpart} any ...`. The `-p` flag
 forces the PXE menu prompt; the partition-qualified device argument matters on
 the NVMe layout because the boot script is found from `OPI_BOOT`, not from the
-whole disk device. Extlinux kernel, initrd, and DTB paths are relative paths,
-matching U-Boot's PXE loader behavior.
+whole disk device. Extlinux kernel, initrd, and DTB paths are parent-relative
+paths such as `../uImage-...`, matching U-Boot's PXE loader behavior when the
+config file lives under `extlinux/`.
 
 Reboot test results:
 
