@@ -18,6 +18,7 @@ require_file() {
 printf 'Validating Orange Pi 4 Pro GRUB/extlinux boot-menu assets\n\n'
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+expected_extlinux_default=${EXPECTED_EXTLINUX_DEFAULT:-ubuntu-nvme}
 
 for file in \
   /boot/boot.cmd \
@@ -67,6 +68,8 @@ grep -q 'Ubuntu NVMe - cyberdeck kernel' /boot/extlinux/extlinux.conf || fail 'e
 grep -q 'Ubuntu SD - stock kernel' /boot/extlinux/extlinux.conf || fail 'extlinux SD menu entry missing'
 grep -q '^PROMPT 1$' /boot/extlinux/extlinux.conf || fail 'extlinux prompt must be enabled'
 grep -q '^TIMEOUT 50$' /boot/extlinux/extlinux.conf || fail 'extlinux menu should use bounded 5 second timeout'
+grep -q "^DEFAULT ${expected_extlinux_default}$" /boot/extlinux/extlinux.conf \
+  || fail "extlinux default should be ${expected_extlinux_default}"
 
 grep -q 'eb86cfeb-60c7-4513-bc69-f6d28e9d561b' /boot/grub/grub.cfg /boot/extlinux/extlinux.conf \
   || fail 'NVMe root UUID missing from boot menus'
@@ -86,8 +89,15 @@ grep -q '^  LINUX ../uImage-5.15.147-sun60iw2$' /boot/extlinux/extlinux.conf \
 cmp -s "$repo_root/configs/boot.cmd" /boot/boot.cmd || fail '/boot/boot.cmd differs from configs/boot.cmd'
 cmp -s "$repo_root/configs/orangepiEnv.txt" /boot/orangepiEnv.txt \
   || fail '/boot/orangepiEnv.txt differs from configs/orangepiEnv.txt'
-cmp -s "$repo_root/configs/extlinux.conf" /boot/extlinux/extlinux.conf \
-  || fail '/boot/extlinux/extlinux.conf differs from configs/extlinux.conf'
+repo_extlinux_cmp=$(mktemp)
+boot_extlinux_cmp=$(mktemp)
+trap 'rm -f "$repo_extlinux_cmp" "$boot_extlinux_cmp"' EXIT
+sed -E "s/^DEFAULT .*/DEFAULT ${expected_extlinux_default}/" \
+  "$repo_root/configs/extlinux.conf" > "$repo_extlinux_cmp"
+sed -E "s/^DEFAULT .*/DEFAULT ${expected_extlinux_default}/" \
+  /boot/extlinux/extlinux.conf > "$boot_extlinux_cmp"
+cmp -s "$repo_extlinux_cmp" "$boot_extlinux_cmp" \
+  || fail '/boot/extlinux/extlinux.conf differs from configs/extlinux.conf beyond allowed DEFAULT override'
 
 printf 'Hashes for mirrored files:\n'
 sha256sum \
