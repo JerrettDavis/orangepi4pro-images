@@ -68,6 +68,7 @@ grep '^rootdev=UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b$' "$boot/orangepiEnv.tx
 grep ' / ext4 ' "$root/etc/fstab"
 
 printf '\nNative touch userspace:\n'
+# shellcheck disable=SC2016
 "${chroot_prefix[@]}" dpkg-query -W -f='${Package}\t${Version}\n' \
   onboard libinput-tools evtest xinput xserver-xorg-input-libinput
 
