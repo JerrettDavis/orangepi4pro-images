@@ -11,6 +11,8 @@ about the target path and preconditions.
 
 - Build Ubuntu and Kali arm64 rootfs trees from official distro repositories.
 - Generate boot assets compatible with stock/vendor U-Boot first.
+- Track the current safe boot-selection boundary in
+  `docs/boot-selection-plan.md`.
 - Keep GRUB/EFI output experimental.
 - Generate a conservative M.2 partition plan without writing it.
 - Add Yocto/OpenEmbedded after the vendor 5.15 NVMe boot path is confirmed,

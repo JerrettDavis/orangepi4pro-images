@@ -52,6 +52,12 @@ If reboot lands on SD with `bootchooser=extlinux-legacy-sd`, see:
 docs/extlinux-default-repair.md
 ```
 
+For the current boot-selection boundary and next gated U-Boot work, see:
+
+```text
+docs/boot-selection-plan.md
+```
+
 After the first NVMe boot, expected checks:
 
 ```bash
