@@ -73,6 +73,7 @@ grep -q 'dc683cb4-0847-4d2f-83f1-184d35749d4c' /boot/grub/grub.cfg /boot/extlinu
 grep -q 'bootchooser=extlinux-legacy-nvme' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe marker missing'
 grep -q 'bootchooser=extlinux-legacy-sd' /boot/extlinux/extlinux.conf || fail 'extlinux SD marker missing'
 grep -q 'bootchooser=legacy-bootm-fallback' /boot/boot.cmd || fail 'legacy fallback marker missing from boot.cmd'
+# shellcheck disable=SC2016
 grep -Fq 'sysboot -p ${devtype} ${devnum}:${distro_bootpart} any' /boot/boot.cmd \
   || fail 'boot.cmd should use partition-qualified prompted sysboot'
 grep -q '^  LINUX ../uImage-5.15.147-sun60iw2-cyberdeck$' /boot/extlinux/extlinux.conf \
