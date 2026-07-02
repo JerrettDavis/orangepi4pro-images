@@ -56,6 +56,13 @@ boot_extlinux=sysboot ${devtype} ${devnum}:${distro_bootpart} any ${scriptaddr} 
 That makes extlinux the most likely functional boot selector on the current
 vendor bootloader.
 
+After the first reboot test, the system still booted with the legacy `bootm`
+kernel command line. The likely cause was that U-Boot loaded `boot.scr` from
+the FAT `OPI_EFI` partition, where `uImage`/`uInitrd` existed but the raw
+`Image-*`, stock `vmlinux-*`, versioned initrds, and versioned DTB directories
+referenced by extlinux did not. Those files were mirrored onto `OPI_EFI`, and
+the `sysboot` calls were changed to try `fat`, then `ext2`, then `any`.
+
 ## Entries
 
 NVMe Ubuntu:
@@ -74,6 +81,11 @@ SD Ubuntu:
 
 The SD entry deliberately uses the stock kernel because the SD root only has
 stock `5.15.147-sun60iw2` modules.
+
+The extlinux entries include `bootchooser=extlinux-nvme` or
+`bootchooser=extlinux-sd` in `APPEND`. If the menu is not visible on HDMI, check
+`/proc/cmdline` after boot to distinguish a hidden extlinux boot from fallback
+legacy `bootm`.
 
 ## Validation
 
@@ -105,4 +117,3 @@ sudo cp /boot/boot.scr /boot/efi/boot.scr
 sudo cp /boot/orangepiEnv.txt /boot/efi/orangepiEnv.txt
 sync
 ```
-

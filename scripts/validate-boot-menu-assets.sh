@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ "${EUID:-$(id -u)}" -ne 0 ] && [ -d /boot/efi ] && ! [ -x /boot/efi ]; then
+  printf 'ERROR: /boot/efi is not accessible by this user; rerun with sudo\n' >&2
+  exit 1
+fi
+
 fail() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 1
@@ -21,6 +26,12 @@ for file in \
   /boot/efi/EFI/BOOT/BOOTAA64.EFI \
   /boot/efi/EFI/orangepi/grubaa64.efi \
   /boot/EFI/BOOT/BOOTAA64.EFI \
+  /boot/efi/Image-5.15.147-sun60iw2-cyberdeck \
+  /boot/efi/initrd.img-5.15.147-sun60iw2-cyberdeck \
+  /boot/efi/dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb \
+  /boot/efi/vmlinux-5.15.147-sun60iw2 \
+  /boot/efi/initrd.img-5.15.147-sun60iw2 \
+  /boot/efi/dtb-5.15.147-sun60iw2/allwinner/sun60i-a733-orangepi-4-pro.dtb \
   /boot/Image-5.15.147-sun60iw2-cyberdeck \
   /boot/initrd.img-5.15.147-sun60iw2-cyberdeck \
   /boot/dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb \
@@ -47,6 +58,8 @@ grep -q 'eb86cfeb-60c7-4513-bc69-f6d28e9d561b' /boot/grub/grub.cfg /boot/extlinu
   || fail 'NVMe root UUID missing from boot menus'
 grep -q 'dc683cb4-0847-4d2f-83f1-184d35749d4c' /boot/grub/grub.cfg /boot/extlinux/extlinux.conf \
   || fail 'SD root UUID missing from boot menus'
+grep -q 'bootchooser=extlinux-nvme' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe marker missing'
+grep -q 'bootchooser=extlinux-sd' /boot/extlinux/extlinux.conf || fail 'extlinux SD marker missing'
 
 printf 'Hashes for mirrored files:\n'
 sha256sum \
@@ -61,4 +74,3 @@ sha256sum \
   /boot/efi/boot.scr
 
 printf '\nBoot-menu asset validation passed.\n'
-
