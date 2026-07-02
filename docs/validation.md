@@ -33,6 +33,12 @@ For the reboot resume checklist, see:
 docs/reboot-resume-2026-07-02.md
 ```
 
+For the second boot attempt using SD boot files with NVMe root, see:
+
+```text
+docs/reboot-attempt-2-sd-kernel-nvme-root.md
+```
+
 After the first NVMe boot, expected checks:
 
 ```bash
