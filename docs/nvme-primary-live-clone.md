@@ -155,3 +155,7 @@ boot locations.
 
 If SD-less boot fails, reinsert the SD card and inspect the serial console or
 U-Boot environment before writing any firmware.
+
+If the SD card remains inserted, the SD `/boot/boot.scr` has been converted into
+an NVMe-first loader with fallback to the original SD boot flow. See
+`docs/sd-nvme-first-loader.md`.

@@ -19,6 +19,14 @@ For the prepared cyberdeck kernel on the mounted NVMe target, use:
 scripts/validate-nvme-cyberdeck-kernel.sh /mnt/orangepi4pro-m2
 ```
 
+For the SD NVMe-first loader, confirm:
+
+```bash
+file /boot/boot.scr
+sed -n '1,40p' /boot/boot.cmd
+ls -l /boot/boot.cmd.sd-original-* /boot/boot.scr.sd-original-*
+```
+
 After the first NVMe boot, expected checks:
 
 ```bash
