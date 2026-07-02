@@ -66,7 +66,7 @@ grep -q 'Ubuntu SD - stock kernel' /boot/grub/grub.cfg || fail 'GRUB SD menu ent
 grep -q 'Ubuntu NVMe - cyberdeck kernel' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe menu entry missing'
 grep -q 'Ubuntu SD - stock kernel' /boot/extlinux/extlinux.conf || fail 'extlinux SD menu entry missing'
 grep -q '^PROMPT 1$' /boot/extlinux/extlinux.conf || fail 'extlinux prompt must be enabled'
-grep -q '^TIMEOUT 0$' /boot/extlinux/extlinux.conf || fail 'extlinux menu should wait indefinitely for a boot choice'
+grep -q '^TIMEOUT 50$' /boot/extlinux/extlinux.conf || fail 'extlinux menu should use bounded 5 second timeout'
 
 grep -q 'eb86cfeb-60c7-4513-bc69-f6d28e9d561b' /boot/grub/grub.cfg /boot/extlinux/extlinux.conf \
   || fail 'NVMe root UUID missing from boot menus'

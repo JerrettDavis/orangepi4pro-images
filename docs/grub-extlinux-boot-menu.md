@@ -23,15 +23,16 @@ Boot order in `/boot/boot.cmd`:
 This keeps the known-good `uImage`/`uInitrd` path available if GRUB EFI or
 extlinux/direct `booti` returns.
 
-The extlinux path includes a short pre-menu pause and an indefinite extlinux
-selector prompt. The U-Boot PXE/extlinux parser stores `TIMEOUT` in tenths of a
-second and passes `TIMEOUT 0` to the generic menu code as no timeout. With
-`PROMPT 1`, the menu should stop at `Enter choice:` until `1`, `2`, or `3` is
-entered.
+The extlinux path includes a short pre-menu pause and a bounded 5 second
+selector timeout. Do not use `TIMEOUT 0` on this vendor U-Boot. A reboot test
+showed that it can wedge at the Orange Pi bootloader loading graphic instead of
+presenting a usable indefinite prompt.
 
-If the selector still appears only as fast text on HDMI, treat that as a
-display/input limitation of the vendor U-Boot console path rather than an
-extlinux boot failure.
+The installed U-Boot package has `CONFIG_MENU=y` and `CONFIG_CMD_PXE=y`, but it
+does not enable `CONFIG_USB_KEYBOARD` or `CONFIG_DM_KEYBOARD`. That means this
+extlinux path can select and boot the default entry, and may be interactable on
+serial console, but it should not be expected to provide a reliable HDMI plus
+USB-keyboard boot selector.
 
 ## GRUB EFI Status
 
@@ -149,6 +150,28 @@ for the default NVMe entry.
 
 The direct `booti` probe used `bootchooser=direct-booti-nvme`. That marker was
 not present after reboot, confirming fallback to legacy `bootm`.
+
+## Safe Selection Today
+
+Until a keyboard-enabled U-Boot package is installed on recoverable test media,
+the safe selectable path is changing the extlinux default from Linux, then
+rebooting normally:
+
+```bash
+scripts/set-extlinux-default.sh --list
+scripts/set-extlinux-default.sh ubuntu-sd
+sudo scripts/set-extlinux-default.sh --apply ubuntu-sd
+```
+
+Use `ubuntu-nvme` to return the default to NVMe Ubuntu. This keeps the bounded
+5 second timeout and does not depend on USB keyboard input in U-Boot.
+
+To confirm whether the currently installed U-Boot can support deck-local boot
+selection:
+
+```bash
+scripts/validate-u-boot-selector-capabilities.sh
+```
 
 ## Validation
 
