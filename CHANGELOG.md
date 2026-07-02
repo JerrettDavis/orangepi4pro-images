@@ -27,3 +27,6 @@
 - Corrected the extlinux probe to match vendor distro boot syntax with
   partition-qualified `sysboot -p` and relative PXE asset paths, and added a
   `bootchooser=legacy-bootm-fallback` marker to the fallback path.
+- Confirmed that the inserted SD card remains the active U-Boot script source
+  even while Linux mounts NVMe as root; installed the corrected extlinux assets
+  on the SD `/boot` path and added active boot-source validation.

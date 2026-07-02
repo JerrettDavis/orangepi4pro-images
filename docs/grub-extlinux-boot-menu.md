@@ -48,6 +48,15 @@ Installed files:
 - `/boot/extlinux/extlinux.conf`
 - `/boot/efi/extlinux/extlinux.conf`
 
+Important current boot-source finding: while the SD card is inserted, vendor
+U-Boot is still loading `/boot/boot.scr` and `/boot/orangepiEnv.txt` from the
+SD filesystem, then using the SD env's `rootdev=UUID=eb86...` value to mount the
+NVMe Ubuntu root. The NVMe is the Linux root, but the active U-Boot script
+source is SD until proven otherwise after removing the card.
+
+The same corrected extlinux probe and menu assets have therefore been installed
+on the SD `/boot` path as well as the NVMe `OPI_BOOT` and `OPI_EFI` partitions.
+
 The vendor U-Boot package advertises:
 
 ```text
@@ -131,6 +140,8 @@ Run:
 
 ```bash
 scripts/validate-boot-menu-assets.sh
+sudo mount -o ro /dev/mmcblk1p1 /mnt/opisd-ro
+scripts/validate-active-boot-source.sh /mnt/opisd-ro
 ```
 
 This validates files, hashes, GRUB config syntax, and the expected UUID-bearing
