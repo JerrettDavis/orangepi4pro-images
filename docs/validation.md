@@ -13,6 +13,12 @@ After a future M.2 boot, use:
 ../orangepi4pro-cyberdeck/scripts/validate-future-m2.sh
 ```
 
+For the current NVMe-primary baseline, also run:
+
+```bash
+scripts/validate-nvme-cyberdeck-kernel.sh /
+```
+
 For the prepared cyberdeck kernel on the mounted NVMe target, use:
 
 ```bash

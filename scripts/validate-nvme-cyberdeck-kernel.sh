@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base="${1:-/mnt/orangepi4pro-m2}"
+base="${1:-/}"
 krel="${2:-5.15.147-sun60iw2-cyberdeck}"
-root="$base/ubuntu-root"
-boot="$base/boot"
-efi="$base/efi"
+
+if [ "$base" = "/" ]; then
+  root="/"
+  boot="/boot"
+  efi="/boot/efi"
+  chroot_prefix=()
+else
+  root="$base/ubuntu-root"
+  boot="$base/boot"
+  efi="$base/efi"
+  chroot_prefix=(sudo chroot "$root")
+fi
 
 fail() {
   printf 'ERROR: %s\n' "$*" >&2
@@ -41,7 +50,7 @@ for opt in \
 done
 
 printf '\nModule metadata:\n'
-sudo chroot "$root" modinfo -k "$krel" hid-multitouch uhid uinput >/tmp/orangepi4pro-modinfo.$$
+"${chroot_prefix[@]}" modinfo -k "$krel" hid-multitouch uhid uinput >/tmp/orangepi4pro-modinfo.$$
 grep -E '^(filename|name|vermagic):' /tmp/orangepi4pro-modinfo.$$
 rm -f /tmp/orangepi4pro-modinfo.$$
 
@@ -59,7 +68,7 @@ grep '^rootdev=UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b$' "$boot/orangepiEnv.tx
 grep ' / ext4 ' "$root/etc/fstab"
 
 printf '\nNative touch userspace:\n'
-sudo chroot "$root" dpkg-query -W -f='${Package}\t${Version}\n' \
+"${chroot_prefix[@]}" dpkg-query -W -f='${Package}\t${Version}\n' \
   onboard libinput-tools evtest xinput xserver-xorg-input-libinput
 
 printf '\nValidation passed. No writes performed.\n'
