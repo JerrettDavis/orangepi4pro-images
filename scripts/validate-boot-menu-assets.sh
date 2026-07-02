@@ -27,7 +27,7 @@ expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-false}
 expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
 expected_logo=${EXPECTED_LOGO:-enabled}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-true}
-expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-10}
+expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-20}
 
 for file in \
   /boot/boot.cmd \
@@ -70,6 +70,7 @@ grep -q 'bootmenu' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot boot
 grep -q 'uboot-bootmenu-nosel' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot bootmenu no-selection marker'
 grep -q 'uboot-bootmenu-nvme' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot NVMe selector marker'
 grep -q 'uboot-bootmenu-sd' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot SD selector marker'
+grep -q 'usb start' /boot/boot.cmd || fail 'boot.cmd does not start USB before bootmenu'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
 grep -q 'booti' /boot/boot.cmd || fail 'boot.cmd does not contain direct booti probe'
 grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallback'

@@ -15,7 +15,7 @@ Current status on 2026-07-02:
   showed a black screen before userspace, because the live boot files were
   still staged for the older extlinux visibility experiment.
 - The repo selector templates can call U-Boot `bootmenu` first, with a
-  10-second default to NVMe, then continue through the known-good legacy
+  20-second default to NVMe, then continue through the known-good legacy
   `bootm` image path selected by menu variables. The live recovered SD
   `boot.scr` is the conservative direct `bootm` script.
 - While the SD card is inserted, U-Boot reads `/boot/boot.scr` and
@@ -120,7 +120,7 @@ The current selector flow is:
 
 ```text
 bootmenu_first=true
-bootmenu_timeout=10
+bootmenu_timeout=20
 Ubuntu NVMe - cyberdeck kernel -> bootchooser=uboot-bootmenu-nvme
 Ubuntu SD - stock kernel       -> bootchooser=uboot-bootmenu-sd
 Ubuntu NVMe - verbose boot     -> bootchooser=uboot-bootmenu-nvme-verbose
@@ -192,7 +192,9 @@ unsafe `sunxi_show_bmp boot.bmp` call. The expected visual result is at least a
 static selector/logo screen during the U-Boot window. If the text menu still is
 not visible, test keyboard selection by pressing Down then Enter during the
 timeout and checking `/proc/cmdline` after boot for
-`bootchooser=uboot-bootmenu-sd`.
+`bootchooser=uboot-bootmenu-sd`. The boot script explicitly runs `usb start`
+before entering `bootmenu`; without that, U-Boot can expose `usbkbd` in
+`stdin` while the USB keyboard stack is still stopped.
 
 ## Validation
 

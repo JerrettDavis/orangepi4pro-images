@@ -17,11 +17,17 @@ printf 'Kernel command line:\n'
 cat /proc/cmdline
 printf '\n\n'
 
-if grep -qw 'bootchooser=extlinux-legacy-nvme' /proc/cmdline; then
+if grep -q 'bootchooser=extlinux-legacy-nvme' /proc/cmdline; then
   printf 'Current boot came through extlinux NVMe entry.\n'
-elif grep -qw 'bootchooser=extlinux-legacy-sd' /proc/cmdline; then
+elif grep -q 'bootchooser=extlinux-legacy-sd' /proc/cmdline; then
   printf 'Current boot came through extlinux SD entry.\n'
-elif grep -qw 'bootchooser=legacy-bootm-fallback' /proc/cmdline; then
+elif grep -q 'bootchooser=uboot-bootmenu-nvme' /proc/cmdline; then
+  printf 'Current boot came through U-Boot bootmenu NVMe entry.\n'
+elif grep -q 'bootchooser=uboot-bootmenu-sd' /proc/cmdline; then
+  printf 'Current boot came through U-Boot bootmenu SD entry.\n'
+elif grep -q 'bootchooser=uboot-bootmenu-nosel' /proc/cmdline; then
+  printf 'Current boot entered U-Boot bootmenu but returned without a selection.\n'
+elif grep -q 'bootchooser=legacy-bootm-fallback' /proc/cmdline; then
   printf 'Current boot used the updated legacy bootm fallback.\n'
 else
   printf 'Current boot has no bootchooser marker; U-Boot likely used an older boot.scr.\n'

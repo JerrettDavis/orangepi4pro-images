@@ -13,7 +13,7 @@ setenv rootfstype "ext4"
 setenv docker_optimizations "on"
 setenv earlycon "on"
 setenv bootmenu_first "false"
-setenv bootmenu_timeout "10"
+setenv bootmenu_timeout "20"
 
 echo "Boot script loaded from ${devtype} ${devnum}"
 
@@ -36,6 +36,8 @@ fi
 
 if test "${bootmenu_first}" = "true"; then
 	echo "Starting U-Boot bootmenu selector"
+	echo "Starting USB for bootmenu keyboard input"
+	usb start
 	setenv stdin "serial,usbkbd"
 	setenv stdout "serial,vidconsole"
 	setenv stderr "serial,vidconsole"
