@@ -26,6 +26,10 @@ for file in \
   /boot/efi/EFI/BOOT/BOOTAA64.EFI \
   /boot/efi/EFI/orangepi/grubaa64.efi \
   /boot/EFI/BOOT/BOOTAA64.EFI \
+  /boot/efi/uImage-5.15.147-sun60iw2-cyberdeck \
+  /boot/efi/uInitrd-5.15.147-sun60iw2-cyberdeck \
+  /boot/efi/uImage-5.15.147-sun60iw2 \
+  /boot/efi/uInitrd-5.15.147-sun60iw2 \
   /boot/efi/Image-5.15.147-sun60iw2-cyberdeck \
   /boot/efi/initrd.img-5.15.147-sun60iw2-cyberdeck \
   /boot/efi/dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb \
@@ -34,6 +38,10 @@ for file in \
   /boot/efi/dtb-5.15.147-sun60iw2/allwinner/sun60i-a733-orangepi-4-pro.dtb \
   /boot/Image-5.15.147-sun60iw2-cyberdeck \
   /boot/initrd.img-5.15.147-sun60iw2-cyberdeck \
+  /boot/uImage-5.15.147-sun60iw2-cyberdeck \
+  /boot/uInitrd-5.15.147-sun60iw2-cyberdeck \
+  /boot/uImage-5.15.147-sun60iw2 \
+  /boot/uInitrd-5.15.147-sun60iw2 \
   /boot/dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb \
   /boot/vmlinux-5.15.147-sun60iw2 \
   /boot/initrd.img-5.15.147-sun60iw2 \
@@ -44,7 +52,7 @@ done
 grub-script-check /boot/grub/grub.cfg
 
 grep -q '^grub_first=false$' /boot/orangepiEnv.txt || fail 'grub_first should be disabled after failed reboot tests'
-grep -q '^extlinux_first=false$' /boot/orangepiEnv.txt || fail 'extlinux_first should be disabled after failed reboot tests'
+grep -q '^extlinux_first=true$' /boot/orangepiEnv.txt || fail 'extlinux_first should be enabled for legacy-image menu test'
 grep -q '^direct_booti_first=false$' /boot/orangepiEnv.txt || fail 'direct_booti_first should be disabled after failed reboot tests'
 grep -q 'bootefi' /boot/boot.cmd || fail 'boot.cmd does not contain GRUB EFI handoff'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
@@ -60,8 +68,10 @@ grep -q 'eb86cfeb-60c7-4513-bc69-f6d28e9d561b' /boot/grub/grub.cfg /boot/extlinu
   || fail 'NVMe root UUID missing from boot menus'
 grep -q 'dc683cb4-0847-4d2f-83f1-184d35749d4c' /boot/grub/grub.cfg /boot/extlinux/extlinux.conf \
   || fail 'SD root UUID missing from boot menus'
-grep -q 'bootchooser=extlinux-nvme' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe marker missing'
-grep -q 'bootchooser=extlinux-sd' /boot/extlinux/extlinux.conf || fail 'extlinux SD marker missing'
+grep -q 'bootchooser=extlinux-legacy-nvme' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe marker missing'
+grep -q 'bootchooser=extlinux-legacy-sd' /boot/extlinux/extlinux.conf || fail 'extlinux SD marker missing'
+grep -q '/uImage-5.15.147-sun60iw2-cyberdeck' /boot/extlinux/extlinux.conf || fail 'extlinux must use legacy cyberdeck uImage'
+grep -q '/uImage-5.15.147-sun60iw2' /boot/extlinux/extlinux.conf || fail 'extlinux must use legacy stock uImage'
 
 printf 'Hashes for mirrored files:\n'
 sha256sum \

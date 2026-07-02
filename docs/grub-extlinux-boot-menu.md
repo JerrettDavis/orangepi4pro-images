@@ -60,17 +60,24 @@ vendor bootloader.
 Reboot test results:
 
 - GRUB EFI did not boot.
-- Extlinux did not boot, even after mirroring raw kernel/initrd/DTB assets onto
-  `OPI_EFI` and trying `sysboot` with `fat`, `ext2`, and `any`.
+- Extlinux did not boot while using raw `Image-*` kernel paths, even after
+  mirroring raw kernel/initrd/DTB assets onto `OPI_EFI` and trying `sysboot`
+  with `fat`, `ext2`, and `any`.
 - Direct `booti` with the raw cyberdeck kernel, initrd, and DTB did not boot.
 - Every test fell through to the existing legacy `bootm` path.
+
+Source review explained the failure: this vendor U-Boot has
+`CONFIG_EFI_LOADER` disabled, and although `CONFIG_CMD_BOOTI=y` is present, the
+working path on this board is the legacy image flow. The extlinux menu has been
+changed to use `uImage` and `uInitrd`, so the PXE/extlinux code should dispatch
+through `bootm`, matching the proven boot mechanism.
 
 The probes remain in `/boot/boot.cmd`, but they are disabled in
 `/boot/orangepiEnv.txt`:
 
 ```text
 grub_first=false
-extlinux_first=false
+extlinux_first=true
 direct_booti_first=false
 ```
 
@@ -83,24 +90,24 @@ medium.
 NVMe Ubuntu:
 
 - Root UUID: `eb86cfeb-60c7-4513-bc69-f6d28e9d561b`
-- Kernel: `/boot/Image-5.15.147-sun60iw2-cyberdeck`
-- Initrd: `/boot/initrd.img-5.15.147-sun60iw2-cyberdeck`
+- Kernel: `/boot/uImage-5.15.147-sun60iw2-cyberdeck`
+- Initrd: `/boot/uInitrd-5.15.147-sun60iw2-cyberdeck`
 - DTB: `/boot/dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb`
 
 SD Ubuntu:
 
 - Root UUID: `dc683cb4-0847-4d2f-83f1-184d35749d4c`
-- Kernel: `/boot/vmlinux-5.15.147-sun60iw2`
-- Initrd: `/boot/initrd.img-5.15.147-sun60iw2`
+- Kernel: `/boot/uImage-5.15.147-sun60iw2`
+- Initrd: `/boot/uInitrd-5.15.147-sun60iw2`
 - DTB: `/boot/dtb-5.15.147-sun60iw2/allwinner/sun60i-a733-orangepi-4-pro.dtb`
 
 The SD entry deliberately uses the stock kernel because the SD root only has
 stock `5.15.147-sun60iw2` modules.
 
-The extlinux entries include `bootchooser=extlinux-nvme` or
-`bootchooser=extlinux-sd` in `APPEND`. If the menu is not visible on HDMI, check
-`/proc/cmdline` after boot to distinguish a hidden extlinux boot from fallback
-legacy `bootm`.
+The extlinux entries include `bootchooser=extlinux-legacy-nvme` or
+`bootchooser=extlinux-legacy-sd` in `APPEND`. If the menu is not visible on
+HDMI, check `/proc/cmdline` after boot to distinguish a hidden extlinux boot
+from fallback legacy `bootm`.
 
 The direct `booti` probe used `bootchooser=direct-booti-nvme`. That marker was
 not present after reboot, confirming fallback to legacy `bootm`.

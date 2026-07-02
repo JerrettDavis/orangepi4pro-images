@@ -21,3 +21,6 @@
   `bootm` fallback.
 - Reboot-tested GRUB EFI, extlinux, and direct `booti`; all fell through to
   legacy `bootm`, so the probes are disabled by default in `orangepiEnv.txt`.
+- Reviewed vendor U-Boot source and changed the extlinux menu to use legacy
+  `uImage`/`uInitrd` entries so the PXE/extlinux code can dispatch through the
+  working `bootm` path.
