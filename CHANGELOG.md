@@ -11,3 +11,11 @@
 - Added CI checks for shell syntax, optional ShellCheck, secret patterns, and
   committed binary artifacts.
 
+## Unreleased
+
+- Staged GRUB ARM64 EFI assets and a hand-authored GRUB menu for NVMe Ubuntu and
+  SD Ubuntu.
+- Added an extlinux menu with the same Ubuntu entries because vendor U-Boot
+  advertises `sysboot/extlinux` but not clear `bootefi` support.
+- Updated `/boot/boot.cmd` order to try GRUB EFI, then extlinux, then legacy
+  `bootm` fallback.

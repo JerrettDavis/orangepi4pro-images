@@ -22,7 +22,8 @@ about the target path and preconditions.
 - Boot: `OPI_BOOT` on `/dev/nvme0n1p2`
 - EFI/fallback assets: `OPI_EFI` on `/dev/nvme0n1p1`
 - Kernel: `5.15.147-sun60iw2-cyberdeck`
-- Boot flow: vendor legacy U-Boot `bootm` with `uImage`, `uInitrd`, and DTB
+- Boot flow: vendor U-Boot tries GRUB EFI, then extlinux, then legacy `bootm`
+  fallback
 
 ## Validation
 
@@ -31,6 +32,7 @@ Run before pushing:
 ```bash
 scripts/ci-checks.sh
 scripts/validate-nvme-cyberdeck-kernel.sh /
+scripts/validate-boot-menu-assets.sh
 ```
 
 ## Releases

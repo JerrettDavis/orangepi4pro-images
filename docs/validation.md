@@ -17,6 +17,7 @@ For the current NVMe-primary baseline, also run:
 
 ```bash
 scripts/validate-nvme-cyberdeck-kernel.sh /
+scripts/validate-boot-menu-assets.sh
 ```
 
 For the prepared cyberdeck kernel on the mounted NVMe target, use:
