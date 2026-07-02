@@ -24,3 +24,6 @@
 - Reviewed vendor U-Boot source and changed the extlinux menu to use legacy
   `uImage`/`uInitrd` entries so the PXE/extlinux code can dispatch through the
   working `bootm` path.
+- Corrected the extlinux probe to match vendor distro boot syntax with
+  partition-qualified `sysboot -p` and relative PXE asset paths, and added a
+  `bootchooser=legacy-bootm-fallback` marker to the fallback path.

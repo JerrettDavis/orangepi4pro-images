@@ -57,6 +57,13 @@ boot_extlinux=sysboot ${devtype} ${devnum}:${distro_bootpart} any ${scriptaddr} 
 That makes extlinux the most likely functional boot selector on the current
 vendor bootloader.
 
+The local `/boot/boot.cmd` extlinux probe now mirrors that vendor form and uses
+`sysboot -p ${devtype} ${devnum}:${distro_bootpart} any ...`. The `-p` flag
+forces the PXE menu prompt; the partition-qualified device argument matters on
+the NVMe layout because the boot script is found from `OPI_BOOT`, not from the
+whole disk device. Extlinux kernel, initrd, and DTB paths are relative paths,
+matching U-Boot's PXE loader behavior.
+
 Reboot test results:
 
 - GRUB EFI did not boot.
@@ -65,6 +72,9 @@ Reboot test results:
   with `fat`, `ext2`, and `any`.
 - Direct `booti` with the raw cyberdeck kernel, initrd, and DTB did not boot.
 - Every test fell through to the existing legacy `bootm` path.
+- A follow-up probe with legacy `uImage`/`uInitrd` still fell through when it
+  used unqualified `${devnum}` and absolute asset paths. That has been corrected
+  for the next reboot test.
 
 Source review explained the failure: this vendor U-Boot has
 `CONFIG_EFI_LOADER` disabled, and although `CONFIG_CMD_BOOTI=y` is present, the
@@ -108,6 +118,9 @@ The extlinux entries include `bootchooser=extlinux-legacy-nvme` or
 `bootchooser=extlinux-legacy-sd` in `APPEND`. If the menu is not visible on
 HDMI, check `/proc/cmdline` after boot to distinguish a hidden extlinux boot
 from fallback legacy `bootm`.
+
+The legacy fallback path appends `bootchooser=legacy-bootm-fallback`, so the
+next boot can distinguish extlinux failure from an older boot script.
 
 The direct `booti` probe used `bootchooser=direct-booti-nvme`. That marker was
 not present after reboot, confirming fallback to legacy `bootm`.
