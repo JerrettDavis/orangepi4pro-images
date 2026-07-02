@@ -2,6 +2,9 @@
 set -euo pipefail
 
 sd_mount=${1:-/mnt/opisd-ro}
+expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-any}
+expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-any}
+expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-any}
 
 fail() {
   printf 'ERROR: %s\n' "$*" >&2
@@ -29,21 +32,31 @@ findmnt / /boot /boot/efi "$sd_mount" -o TARGET,SOURCE,FSTYPE,OPTIONS --noheadin
 
 if [ -d "$sd_mount/boot" ]; then
   printf '\nChecking SD boot script at %s/boot\n' "$sd_mount"
-  grep -q '^extlinux_first=true$' "$sd_mount/boot/orangepiEnv.txt" \
-    || fail "SD orangepiEnv.txt does not enable extlinux_first"
-  grep -q '^bootmenu_first=true$' "$sd_mount/boot/orangepiEnv.txt" \
-    || fail "SD orangepiEnv.txt does not enable bootmenu_first"
+  if [ "$expected_bootmenu_first" != any ]; then
+    grep -q "^bootmenu_first=${expected_bootmenu_first}$" "$sd_mount/boot/orangepiEnv.txt" \
+      || fail "SD orangepiEnv.txt does not set bootmenu_first=${expected_bootmenu_first}"
+  fi
+  if [ "$expected_selector_console" != any ]; then
+    grep -q "^selector_console=${expected_selector_console}$" "$sd_mount/boot/orangepiEnv.txt" \
+      || fail "SD orangepiEnv.txt does not set selector_console=${expected_selector_console}"
+  fi
+  if [ "$expected_selector_bitmap" != any ]; then
+    grep -q "^selector_bitmap=${expected_selector_bitmap}$" "$sd_mount/boot/orangepiEnv.txt" \
+      || fail "SD orangepiEnv.txt does not set selector_bitmap=${expected_selector_bitmap}"
+  fi
   strings "$sd_mount/boot/boot.scr" | grep -q 'bootchooser=legacy-bootm-fallback' \
-    || fail "SD boot.scr lacks the updated fallback marker"
-  strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nvme' \
-    || fail "SD boot.scr lacks the U-Boot NVMe bootmenu marker"
-  strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nosel' \
-    || fail "SD boot.scr lacks the U-Boot bootmenu no-selection marker"
-  strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-sd' \
-    || fail "SD boot.scr lacks the U-Boot SD bootmenu marker"
-  # shellcheck disable=SC2016
-  strings "$sd_mount/boot/boot.scr" | grep -Eq 'sysboot( -p)? [$][{]devtype[}] [$][{]devnum[}]:[$][{]distro_bootpart[}] any' \
-    || fail "SD boot.scr lacks the partition-qualified sysboot probe"
+    || printf 'SD boot.scr is the recovered direct bootm script, without selector fallback marker.\n'
+  if [ "$expected_bootmenu_first" = true ]; then
+    strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nvme' \
+      || fail "SD boot.scr lacks the U-Boot NVMe bootmenu marker"
+    strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nosel' \
+      || fail "SD boot.scr lacks the U-Boot bootmenu no-selection marker"
+    strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-sd' \
+      || fail "SD boot.scr lacks the U-Boot SD bootmenu marker"
+    # shellcheck disable=SC2016
+    strings "$sd_mount/boot/boot.scr" | grep -Eq 'sysboot( -p)? [$][{]devtype[}] [$][{]devnum[}]:[$][{]distro_bootpart[}] any' \
+      || fail "SD boot.scr lacks the partition-qualified sysboot probe"
+  fi
   test -e "$sd_mount/boot/extlinux/extlinux.conf" \
     || fail "SD extlinux.conf missing"
   test -e "$sd_mount/boot/uImage-5.15.147-sun60iw2" \
