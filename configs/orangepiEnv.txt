@@ -1,5 +1,5 @@
 verbosity=1
-bootlogo=true
+bootlogo=false
 overlay_prefix=sun60i-a733
 fdtfile=allwinner/sun60i-a733-orangepi-4-pro.dtb
 rootdev=UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
@@ -9,7 +9,7 @@ extlinux_first=true
 direct_booti_first=false
 bootmenu_first=true
 bootmenu_timeout=10
-selector_console=false
+selector_console=true
 selector_prompt=false
-selector_bitmap=false
-logo=enabled
+selector_bitmap=true
+logo=disabled

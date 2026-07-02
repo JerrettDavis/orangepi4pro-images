@@ -20,6 +20,14 @@ elif grep -qw 'bootchooser=extlinux-legacy-sd' /proc/cmdline; then
   printf 'Current boot came through extlinux SD entry.\n'
 elif grep -qw 'bootchooser=legacy-bootm-fallback' /proc/cmdline; then
   printf 'Current boot used the updated legacy bootm fallback.\n'
+elif grep -qw 'bootchooser=uboot-bootmenu-nvme' /proc/cmdline; then
+  printf 'Current boot came through U-Boot bootmenu NVMe entry.\n'
+elif grep -qw 'bootchooser=uboot-bootmenu-sd' /proc/cmdline; then
+  printf 'Current boot came through U-Boot bootmenu SD entry.\n'
+elif grep -qw 'bootchooser=uboot-bootmenu-nvme-verbose' /proc/cmdline; then
+  printf 'Current boot came through U-Boot bootmenu verbose NVMe entry.\n'
+elif grep -qw 'bootchooser=uboot-bootmenu-nosel' /proc/cmdline; then
+  printf 'Current boot entered U-Boot bootmenu but returned without a selection.\n'
 else
   printf 'Current boot has no bootchooser marker; U-Boot likely used an older boot.scr.\n'
 fi
@@ -33,6 +41,12 @@ if [ -d "$sd_mount/boot" ]; then
     || fail "SD orangepiEnv.txt does not enable extlinux_first"
   grep -q '^bootmenu_first=true$' "$sd_mount/boot/orangepiEnv.txt" \
     || fail "SD orangepiEnv.txt does not enable bootmenu_first"
+  grep -q '^selector_console=true$' "$sd_mount/boot/orangepiEnv.txt" \
+    || fail "SD orangepiEnv.txt does not force selector console output"
+  grep -q '^selector_bitmap=true$' "$sd_mount/boot/orangepiEnv.txt" \
+    || fail "SD orangepiEnv.txt does not enable selector bitmap"
+  test -e "$sd_mount/boot/boot.bmp" \
+    || fail "SD selector boot.bmp missing"
   strings "$sd_mount/boot/boot.scr" | grep -q 'bootchooser=legacy-bootm-fallback' \
     || fail "SD boot.scr lacks the updated fallback marker"
   strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nvme' \

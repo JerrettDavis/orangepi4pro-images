@@ -15,6 +15,9 @@ Current status on 2026-07-02:
 - The current live boot files now call U-Boot `bootmenu` first, with a
   10-second default to NVMe, then continue through the known-good legacy
   `bootm` image path selected by menu variables.
+- The current live boot files force `vidconsole,serial` output, enable a
+  320x240 `boot.bmp` selector bitmap, and put USB keyboard before serial input
+  for the U-Boot bootmenu.
 - While the SD card is inserted, U-Boot reads `/boot/boot.scr` and
   `/boot/orangepiEnv.txt` from the SD root filesystem, even though Linux mounts
   NVMe `OPI_BOOT` at `/boot`. Always install selector assets to the SD `/boot`
@@ -122,10 +125,17 @@ The current selector flow is:
 ```text
 bootmenu_first=true
 bootmenu_timeout=10
+selector_console=true
+selector_bitmap=true
 Ubuntu NVMe - cyberdeck kernel -> bootchooser=uboot-bootmenu-nvme
 Ubuntu SD - stock kernel       -> bootchooser=uboot-bootmenu-sd
 Ubuntu NVMe - verbose boot     -> bootchooser=uboot-bootmenu-nvme-verbose
 ```
+
+The expected visual path is a static Orange Pi 4 Pro boot selector bitmap first,
+then U-Boot `bootmenu` text if the vendor video console renders it. If only the
+bitmap is visible, selection may still work with a USB keyboard because the menu
+is active behind the bitmap; use arrows plus Enter during the 10-second window.
 
 After a test boot, inspect `/proc/cmdline`. A successful menu/default path
 should contain one of the `uboot-bootmenu-*` markers instead of the older

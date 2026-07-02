@@ -37,9 +37,9 @@ fi
 
 if test "${bootmenu_first}" = "true"; then
 	echo "Starting U-Boot bootmenu selector"
-	setenv stdin "serial,usbkbd"
-	setenv stdout "serial,vidconsole"
-	setenv stderr "serial,vidconsole"
+	setenv stdin "usbkbd,serial"
+	setenv stdout "vidconsole,serial"
+	setenv stderr "vidconsole,serial"
 	setenv bootmenu_delay "${bootmenu_timeout}"
 	setenv selected_boot true
 	setenv extlinux_first false
