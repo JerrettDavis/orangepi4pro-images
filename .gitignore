@@ -1,0 +1,14 @@
+*.img
+*.img.*
+*.tar
+*.tar.*
+*.log
+*.tmp
+build/
+cache/
+downloads/
+mnt/
+out/
+rootfs/
+sources/
+
