@@ -46,6 +46,12 @@ For the second boot attempt using SD boot files with NVMe root, see:
 docs/reboot-attempt-2-sd-kernel-nvme-root.md
 ```
 
+If reboot lands on SD with `bootchooser=extlinux-legacy-sd`, see:
+
+```text
+docs/extlinux-default-repair.md
+```
+
 After the first NVMe boot, expected checks:
 
 ```bash
