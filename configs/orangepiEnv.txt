@@ -5,7 +5,7 @@ fdtfile=allwinner/sun60i-a733-orangepi-4-pro.dtb
 rootdev=UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
 rootfstype=ext4
 grub_first=false
-extlinux_first=true
+extlinux_first=false
 direct_booti_first=false
 bootmenu_first=false
 bootmenu_timeout=20

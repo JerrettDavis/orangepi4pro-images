@@ -10,6 +10,7 @@ sd_boot_device=/dev/mmcblk1p1
 sd_boot_mount=/mnt/opisd-check
 bootonce_relative_path=boot/orangepiBootOnce.txt
 clear_only=false
+mirror_nvme_boot=true
 
 if [ -r "$config_file" ]; then
   # shellcheck source=/dev/null
@@ -23,6 +24,7 @@ sd_boot_device=${SD_BOOT_DEVICE:-$sd_boot_device}
 sd_boot_mount=${SD_BOOT_MOUNT:-$sd_boot_mount}
 bootonce_relative_path=${BOOTONCE_RELATIVE_PATH:-$bootonce_relative_path}
 clear_only=${BOOT_SELECTOR_CLEAR_ONLY:-$clear_only}
+mirror_nvme_boot=${MIRROR_NVME_BOOT:-$mirror_nvme_boot}
 
 log() {
   printf 'orangepi4pro-linux-boot-selector: %s\n' "$*" >&2
@@ -43,6 +45,13 @@ ensure_sd_mounted() {
 
 write_bootonce() {
   local target=$1
+  if [ "$mirror_nvme_boot" = true ] && [ -d /boot ]; then
+    {
+      printf 'bootonce_target=%s\n' "$target"
+      printf 'bootonce_source=linux-selector\n'
+    } > "/$bootonce_relative_path"
+    sync "/$bootonce_relative_path"
+  fi
   ensure_sd_mounted
   mkdir -p "$sd_boot_mount/$(dirname "$bootonce_relative_path")"
   {

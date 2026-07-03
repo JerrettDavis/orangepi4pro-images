@@ -57,6 +57,19 @@ if test "${bootonce_target}" = "nvme"; then
 	setenv extraargs bootchooser=linux-selector-nvme
 fi
 
+if test "${selected_boot}" != "true"; then
+	echo "Default boot target: NVMe Ubuntu"
+	setenv selected_boot true
+	setenv extlinux_first false
+	setenv bootmenu_first false
+	setenv selector_visual_test none
+	setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
+	setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
+	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
+	setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
+	setenv extraargs bootchooser=boot-script-default-nvme
+fi
+
 if test "${selector_console}" = "true"; then
 	echo "Forcing selector output to serial and video console"
 	setenv stdout "vidconsole,serial"

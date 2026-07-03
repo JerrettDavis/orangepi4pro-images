@@ -52,7 +52,7 @@ if [ -e /boot/grub/grub.cfg ]; then
 fi
 
 grep -q '^grub_first=false$' /boot/orangepiEnv.txt || fail 'grub_first should be disabled after failed reboot tests'
-grep -q '^extlinux_first=true$' /boot/orangepiEnv.txt || fail 'extlinux_first should be enabled for legacy-image menu test'
+grep -q '^extlinux_first=false$' /boot/orangepiEnv.txt || fail 'extlinux_first should be disabled so boot.scr remains the selector entry point'
 grep -q '^direct_booti_first=false$' /boot/orangepiEnv.txt || fail 'direct_booti_first should be disabled after failed reboot tests'
 grep -q "^bootmenu_first=${expected_bootmenu_first}$" /boot/orangepiEnv.txt \
   || fail "bootmenu_first should be ${expected_bootmenu_first}"
@@ -89,6 +89,7 @@ grep -q 'uboot-visual-fbtest-ok' /boot/boot.cmd || fail 'boot.cmd lacks fbtest s
 grep -q 'orangepiBootOnce.txt' /boot/boot.cmd || fail 'boot.cmd does not import Linux selector bootonce requests'
 grep -q 'bootchooser=linux-selector-sd' /boot/boot.cmd || fail 'boot.cmd lacks Linux selector SD marker'
 grep -q 'bootchooser=linux-selector-nvme' /boot/boot.cmd || fail 'boot.cmd lacks Linux selector NVMe marker'
+grep -q 'bootchooser=boot-script-default-nvme' /boot/boot.cmd || fail 'boot.cmd lacks boot-script default NVMe marker'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
 grep -q 'booti' /boot/boot.cmd || fail 'boot.cmd does not contain direct booti probe'
 grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallback'

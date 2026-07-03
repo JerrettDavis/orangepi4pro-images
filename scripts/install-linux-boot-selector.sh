@@ -48,9 +48,7 @@ if [ ! -d "$target_root" ]; then
 fi
 
 install -d -m 0755 \
-  "$target_root/usr/local/bin" \
   "$target_root/usr/local/sbin" \
-  "$target_root/etc/xdg/autostart" \
   "$target_root/etc/systemd/system" \
   "$target_root/etc/systemd/system/multi-user.target.wants" \
   "$target_root/etc/sudoers.d" \
@@ -58,16 +56,15 @@ install -d -m 0755 \
 
 install -m 0755 "$repo_root/scripts/orangepi4pro-linux-boot-selector" \
   "$target_root/usr/local/sbin/orangepi4pro-linux-boot-selector"
-install -m 0755 "$repo_root/scripts/orangepi4pro-x11-boot-selector" \
-  "$target_root/usr/local/bin/orangepi4pro-x11-boot-selector"
 install -m 0644 "$repo_root/systemd/orangepi4pro-linux-boot-selector.service" \
   "$target_root/etc/systemd/system/orangepi4pro-linux-boot-selector.service"
 install -m 0644 "$repo_root/configs/orangepi4pro-boot-selector.conf" \
   "$target_root/etc/orangepi4pro-boot-selector.conf"
-install -m 0644 "$repo_root/configs/orangepi4pro-x11-boot-selector.desktop" \
-  "$target_root/etc/xdg/autostart/orangepi4pro-x11-boot-selector.desktop"
 install -m 0440 "$repo_root/configs/orangepi4pro-boot-selector.sudoers" \
   "$target_root/etc/sudoers.d/orangepi4pro-boot-selector"
+
+rm -f "$target_root/etc/xdg/autostart/orangepi4pro-x11-boot-selector.desktop" \
+  "$target_root/usr/local/bin/orangepi4pro-x11-boot-selector"
 
 if command -v visudo >/dev/null 2>&1 && [ "$target_root" = "/" ]; then
   visudo -cf "$target_root/etc/sudoers.d/orangepi4pro-boot-selector"

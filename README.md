@@ -24,11 +24,11 @@ about the target path and preconditions.
 - Boot: `OPI_BOOT` on `/dev/nvme0n1p2`
 - EFI/fallback assets: `OPI_EFI` on `/dev/nvme0n1p1`
 - Kernel: `5.15.147-sun60iw2-cyberdeck`
-- Boot flow: vendor U-Boot tries GRUB EFI, then extlinux, then legacy `bootm`
-  fallback
-- Confirmed visible selector target: X11 selector at XFCE session start.
-  U-Boot visual diagnostics and tty prompts execute but are not visible on the
-  deck panel before X initializes display output.
+- Boot flow: vendor U-Boot loads `boot.scr`; the boot script selects NVMe by
+  default or SD/NVMe from `orangepiBootOnce.txt`, then boots via legacy `bootm`.
+- Current selector target: bootloader-stage selection only. X11/userland
+  selectors were removed from the active path because they defer selection
+  until after a full Linux boot.
 - While the SD card is inserted, vendor U-Boot still loads the active
   `boot.scr` from SD, then mounts the NVMe root via `rootdev`.
 
@@ -40,17 +40,16 @@ source:
 sudo scripts/install-extlinux-selector.sh /boot /boot/efi /mnt/opisd-ro/boot
 ```
 
-Install the Linux selector into the current root, and into the mounted SD root
-if the SD card is present:
+Install the bootloader request-file helper into the current root, and into the
+mounted SD root if the SD card is present:
 
 ```bash
 sudo scripts/install-linux-boot-selector.sh
 sudo scripts/install-linux-boot-selector.sh --target-root /mnt/opisd-ro
 ```
 
-The systemd unit clears stale one-shot boot files before LightDM. The visible
-prompt is launched by `/etc/xdg/autostart/orangepi4pro-x11-boot-selector.desktop`
-after XFCE starts.
+The systemd unit only clears stale one-shot boot files before LightDM. It does
+not display a selector and does not defer selection to the desktop.
 
 ## Validation
 
