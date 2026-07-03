@@ -61,7 +61,7 @@ Installed components:
   Clears stale one-shot boot files before LightDM.
 
 /etc/xdg/autostart/orangepi4pro-x11-boot-selector.desktop
-  Starts the visible X11 prompt in the XFCE session.
+  Starts the visible full-screen GTK/X11 prompt in the XFCE session.
 
 /etc/sudoers.d/orangepi4pro-boot-selector
   Allows only the scoped SD one-shot helper:

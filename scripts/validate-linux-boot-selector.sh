@@ -43,7 +43,7 @@ grep -q 'NOPASSWD: /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-sd' \
   || fail 'sudoers rule must be scoped to the SD boot request helper'
 
 bash -n "$target_root/usr/local/sbin/orangepi4pro-linux-boot-selector"
-bash -n "$target_root/usr/local/bin/orangepi4pro-x11-boot-selector"
+python3 -m py_compile "$target_root/usr/local/bin/orangepi4pro-x11-boot-selector"
 
 if [ "$target_root" = "/" ]; then
   /usr/local/sbin/orangepi4pro-linux-boot-selector --validate

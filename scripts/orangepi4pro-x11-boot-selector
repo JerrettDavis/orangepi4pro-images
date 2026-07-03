@@ -1,57 +1,222 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env python3
+import os
+import subprocess
+import sys
+from pathlib import Path
 
-config_file=${BOOT_SELECTOR_CONFIG:-/etc/orangepi4pro-boot-selector.conf}
-timeout_seconds=30
+TIMEOUT_SECONDS = 30
+CONFIG_FILE = Path(os.environ.get("BOOT_SELECTOR_CONFIG", "/etc/orangepi4pro-boot-selector.conf"))
+LOG_FILE = Path.home() / ".cache" / "orangepi4pro-boot-selector.log"
 
-if [ -r "$config_file" ]; then
-  # shellcheck source=/dev/null
-  . "$config_file"
-fi
 
-enabled=${X11_SELECTOR_ENABLED:-true}
-timeout_seconds=${X11_SELECTOR_TIMEOUT:-$timeout_seconds}
+def log(message):
+    try:
+        LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with LOG_FILE.open("a", encoding="utf-8") as handle:
+            handle.write(message + "\n")
+    except OSError:
+        pass
 
-if [ "$enabled" != true ]; then
-  exit 0
-fi
 
-if [ -z "${DISPLAY:-}" ]; then
-  export DISPLAY=:0
-fi
+def read_config():
+    config = {
+        "X11_SELECTOR_ENABLED": "true",
+        "X11_SELECTOR_TIMEOUT": str(TIMEOUT_SECONDS),
+    }
+    try:
+        raw_config = CONFIG_FILE.read_text(encoding="utf-8") if CONFIG_FILE.is_file() else ""
+    except OSError as exc:
+        log(f"could not read config {CONFIG_FILE}: {exc}")
+        raw_config = ""
 
-if ! command -v xmessage >/dev/null 2>&1; then
-  exit 0
-fi
+    if raw_config:
+        for raw_line in raw_config.splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            config[key.strip()] = value.strip().strip('"').strip("'")
+    return config
 
-message='Orange Pi 4 Pro Boot Selector
 
-Choose a boot target.
+def request_sd_boot():
+    return subprocess.run(
+        ["sudo", "-n", "/usr/local/sbin/orangepi4pro-linux-boot-selector", "--boot-sd"],
+        check=False,
+    ).returncode
 
-Continue Ubuntu keeps this NVMe session.
-Boot SD Ubuntu writes a one-shot boot request and reboots.
 
-The default action runs automatically when the timer expires.'
+def fallback_xmessage(timeout):
+    message = (
+        "Orange Pi 4 Pro Boot Selector\n\n"
+        "Continue Ubuntu keeps this NVMe session.\n"
+        "Boot SD Ubuntu writes a one-shot request and reboots."
+    )
+    result = subprocess.run(
+        [
+            "xmessage",
+            "-center",
+            "-geometry",
+            "900x360",
+            "-timeout",
+            str(timeout),
+            "-default",
+            "Continue Ubuntu",
+            "-buttons",
+            "Continue Ubuntu:0,Boot SD Ubuntu:10",
+            message,
+        ],
+        check=False,
+    )
+    if result.returncode == 10:
+        return request_sd_boot()
+    return 0
 
-set +e
-xmessage \
-  -center \
-  -geometry 900x360 \
-  -timeout "$timeout_seconds" \
-  -default "Continue Ubuntu" \
-  -buttons "Continue Ubuntu:0,Boot SD Ubuntu:10" \
-  "$message"
-status=$?
-set -e
 
-case "$status" in
-  10)
-    if ! sudo -n /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-sd; then
-      xmessage -center -timeout 12 \
-        "Unable to request SD boot. Check /etc/sudoers.d/orangepi4pro-boot-selector."
-    fi
-    ;;
-  *)
-    exit 0
-    ;;
-esac
+def main():
+    config = read_config()
+    if config.get("X11_SELECTOR_ENABLED", "true").lower() != "true":
+        log("selector disabled")
+        return 0
+
+    timeout = int(config.get("X11_SELECTOR_TIMEOUT", str(TIMEOUT_SECONDS)))
+    if "DISPLAY" not in os.environ:
+        os.environ["DISPLAY"] = ":0"
+
+    try:
+        import gi
+
+        gi.require_version("Gdk", "3.0")
+        gi.require_version("Gtk", "3.0")
+        from gi.repository import Gdk, GLib, Gtk
+    except Exception as exc:
+        log(f"GTK unavailable, falling back to xmessage: {exc}")
+        return fallback_xmessage(timeout)
+
+    class Selector(Gtk.Window):
+        def __init__(self):
+            super().__init__(title="Orange Pi 4 Pro Boot Selector")
+            self.remaining = timeout
+            self.set_decorated(False)
+            self.set_keep_above(True)
+            self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+            self.fullscreen()
+            self.connect("key-press-event", self.on_key_press)
+            self.connect("destroy", Gtk.main_quit)
+
+            css = b"""
+            window { background: #111111; }
+            label { color: #f5f5f5; }
+            button {
+              font-size: 28px;
+              padding: 22px 34px;
+              border-radius: 6px;
+            }
+            #title { font-size: 44px; font-weight: 700; }
+            #subtitle { font-size: 24px; }
+            #countdown { font-size: 22px; color: #ffd166; }
+            #primary { background: #1f7a4d; color: #ffffff; }
+            #secondary { background: #315f9f; color: #ffffff; }
+            """
+            provider = Gtk.CssProvider()
+            provider.load_from_data(css)
+            Gtk.StyleContext.add_provider_for_screen(
+                Gdk.Screen.get_default(),
+                provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+            )
+
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=28)
+            box.set_border_width(48)
+            box.set_halign(Gtk.Align.CENTER)
+            box.set_valign(Gtk.Align.CENTER)
+            self.add(box)
+
+            title = Gtk.Label(label="Orange Pi 4 Pro Boot Selector")
+            title.set_name("title")
+            box.pack_start(title, False, False, 0)
+
+            subtitle = Gtk.Label(
+                label="Choose the boot target. Timeout keeps this NVMe Ubuntu session."
+            )
+            subtitle.set_name("subtitle")
+            box.pack_start(subtitle, False, False, 0)
+
+            buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=28)
+            buttons.set_halign(Gtk.Align.CENTER)
+            box.pack_start(buttons, False, False, 0)
+
+            continue_button = Gtk.Button(label="Continue NVMe Ubuntu")
+            continue_button.set_name("primary")
+            continue_button.connect("clicked", self.continue_boot)
+            buttons.pack_start(continue_button, False, False, 0)
+
+            sd_button = Gtk.Button(label="Boot SD Ubuntu Once")
+            sd_button.set_name("secondary")
+            sd_button.connect("clicked", self.boot_sd)
+            buttons.pack_start(sd_button, False, False, 0)
+
+            self.countdown = Gtk.Label()
+            self.countdown.set_name("countdown")
+            box.pack_start(self.countdown, False, False, 0)
+
+            hint = Gtk.Label(label="Keyboard: Enter continues, S boots SD once, Esc continues.")
+            box.pack_start(hint, False, False, 0)
+
+            continue_button.grab_focus()
+            self.update_countdown()
+            GLib.timeout_add_seconds(1, self.tick)
+
+        def update_countdown(self):
+            self.countdown.set_text(f"Continuing NVMe Ubuntu in {self.remaining} seconds")
+
+        def tick(self):
+            self.remaining -= 1
+            if self.remaining <= 0:
+                self.continue_boot()
+                return False
+            self.update_countdown()
+            return True
+
+        def continue_boot(self, *_args):
+            log("continue selected")
+            Gtk.main_quit()
+
+        def boot_sd(self, *_args):
+            log("SD boot selected")
+            if request_sd_boot() != 0:
+                dialog = Gtk.MessageDialog(
+                    transient_for=self,
+                    flags=0,
+                    message_type=Gtk.MessageType.ERROR,
+                    buttons=Gtk.ButtonsType.CLOSE,
+                    text="Unable to request SD boot",
+                )
+                dialog.format_secondary_text(
+                    "Check /etc/sudoers.d/orangepi4pro-boot-selector."
+                )
+                dialog.run()
+                dialog.destroy()
+                return
+            Gtk.main_quit()
+
+        def on_key_press(self, _widget, event):
+            key = Gdk.keyval_name(event.keyval)
+            if key in ("Return", "KP_Enter", "Escape"):
+                self.continue_boot()
+                return True
+            if key in ("s", "S"):
+                self.boot_sd()
+                return True
+            return False
+
+    log("starting GTK selector")
+    window = Selector()
+    window.show_all()
+    Gtk.main()
+    log("selector exited")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

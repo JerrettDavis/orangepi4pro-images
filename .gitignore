@@ -3,7 +3,9 @@
 *.tar
 *.tar.*
 *.log
+*.pyc
 *.tmp
+__pycache__/
 build/
 cache/
 downloads/
@@ -11,4 +13,3 @@ mnt/
 out/
 rootfs/
 sources/
-
