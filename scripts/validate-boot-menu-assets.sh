@@ -28,6 +28,7 @@ expected_selector_visual_test=${EXPECTED_SELECTOR_VISUAL_TEST:-none}
 expected_selector_visual_hold=${EXPECTED_SELECTOR_VISUAL_HOLD:-8}
 expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
 expected_logo=${EXPECTED_LOGO:-enabled}
+expected_extlinux_first=${EXPECTED_EXTLINUX_FIRST:-false}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-false}
 expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-20}
 expected_bootmenu_default=${EXPECTED_BOOTMENU_DEFAULT:-nvme}
@@ -55,7 +56,8 @@ if [ -e /boot/grub/grub.cfg ]; then
 fi
 
 grep -q '^grub_first=false$' /boot/orangepiEnv.txt || fail 'grub_first should be disabled after failed reboot tests'
-grep -q '^extlinux_first=false$' /boot/orangepiEnv.txt || fail 'extlinux_first should be disabled so boot.scr remains the selector entry point'
+grep -q "^extlinux_first=${expected_extlinux_first}$" /boot/orangepiEnv.txt \
+  || fail "extlinux_first should be ${expected_extlinux_first}"
 grep -q '^direct_booti_first=false$' /boot/orangepiEnv.txt || fail 'direct_booti_first should be disabled after failed reboot tests'
 grep -q "^bootmenu_first=${expected_bootmenu_first}$" /boot/orangepiEnv.txt \
   || fail "bootmenu_first should be ${expected_bootmenu_first}"
@@ -148,9 +150,11 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
+  | sed -E "s/^extlinux_first=.*/extlinux_first=${expected_extlinux_first}/" \
   | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
   | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
   | sed -E "s/^bootmenu_default=.*/bootmenu_default=${expected_bootmenu_default}/" \
+  | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
   > "$repo_env_cmp"
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   /boot/orangepiEnv.txt \
@@ -160,9 +164,11 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
+  | sed -E "s/^extlinux_first=.*/extlinux_first=${expected_extlinux_first}/" \
   | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
   | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
   | sed -E "s/^bootmenu_default=.*/bootmenu_default=${expected_bootmenu_default}/" \
+  | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
   > "$boot_env_cmp"
 cmp -s "$repo_env_cmp" "$boot_env_cmp" \
   || fail '/boot/orangepiEnv.txt differs from configs/orangepiEnv.txt beyond allowed prompt-test overrides'

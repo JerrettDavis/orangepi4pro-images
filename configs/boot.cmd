@@ -123,9 +123,10 @@ fi
 
 if test "${selector_console}" = "true"; then
 	echo "Forcing selector output to serial and video console"
+	usb start
 	setenv stdout "vidconsole,serial"
 	setenv stderr "vidconsole,serial"
-	setenv stdin "serial"
+	setenv stdin "serial,usbkbd"
 	cls
 fi
 
