@@ -841,6 +841,10 @@ than through the custom AW_DRM framebuffer/pattern-test path.
 
 - Candidate package:
   `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-fciter-1024x600.fex`
+- Package SHA-256:
+  `a6ff4344d16002f4274a30fee0c4ed861fb6e4e1cedd9251a810ab38e69a2db0`
+- U-Boot item SHA-256:
+  `531c73cf5f7ace30e2dfba95e52a0beaa3beccf830984f92d5a259649967e556`
 - U-Boot build artifact SHA-256:
   `002934b2dec68ac776a3fa1dd1c84ff15d13ab0ebe0753d76ffb01b1c5b7bd11`
 - Source patch:
