@@ -1096,6 +1096,28 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `opi_logo_recover=stale-reinit-d0-i0-p00-l00` or a similar code in
   `/proc/cmdline`, plus movement in `opi_logo_hdmi` away from
   `phy00,stat00,rst00,lock00`.
+- Reboot result: Linux reached NVMe and U-Boot diagnostics stayed present, but
+  `opi_logo_recover` was absent and `opi_logo_hdmi` still reported
+  `phy00,stat00,rst00,lock00`. The pre-logo stale check did not match the
+  state at that point.
+
+2026-07-03 post-logo HDMI lock retry diagnostic:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-diag-modeclock-force1024-hdmitvclk-topmc-postlogoretry.fex`
+- Package SHA-256:
+  `540e7a150ce0a7c74feed86da3c3c5efd3262c6c628ab4efb3942e15791fac0f`
+- U-Boot item SHA-256:
+  `f5f812a752f8dfb1674bf39c09e6130024d75498ffbf2a01db3392cbe30f4eab`
+- This package keeps the previous logo-path recovery and adds a second check
+  after `display_logo()` has drawn the BMP and called `display_enable()`. If
+  HDMI-A is still marked enabled but the PHY/MC lock registers remain unset,
+  U-Boot performs one `display_disable()`/`display_init()`/`display_enable()`
+  retry and records `opi_logo_recover=post-retry-...`.
+- Expected post-reboot evidence remains
+  `bootchooser=uboot-logo-preinit-ok`. The important new signal is whether
+  `/proc/cmdline` gains `opi_logo_recover=post-retry-...` and whether
+  `opi_logo_hdmi` moves away from `phy00,stat00,rst00,lock00`.
 
 ## Validation
 
