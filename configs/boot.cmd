@@ -193,6 +193,18 @@ if test "${selector_bitmap}" = "true"; then
 		setenv selector_bitmap_diag "uboot-bmp-load-fail"
 	fi
 	setenv extraargs "${extraargs} ${selector_bitmap_diag}"
+	if test "${selector_diag_force_bootm}" = "true"; then
+		echo "Forcing diagnostic legacy bootm after bitmap display test"
+		setenv selected_boot true
+		setenv extlinux_first false
+		setenv bootmenu_first false
+		setenv bootgui_selector false
+		setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
+		setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
+		setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
+		setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
+		setenv extraargs "bootchooser=${selector_bitmap_diag} ${extraargs}"
+	fi
 	sleep ${selector_visual_hold}
 fi
 

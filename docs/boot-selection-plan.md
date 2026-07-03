@@ -893,11 +893,13 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `sunxi_show_bmp` command.
 - The next bounded test stages a plain white `800x480` `boot.bmp` on NVMe and
   SD boot filesystems, sets `selector_bitmap=true`, holds for
-  `selector_visual_hold`, then enters prompted extlinux. If this path works,
-  the pre-Linux screen should go visibly white before the selector/default
-  boot continues. If it remains black/no-signal but Linux reaches
-  `uboot-bmp-display-ok`, the standard U-Boot video console is also writing to
-  an unscanned or disconnected framebuffer before Linux reinitializes HDMI.
+  `selector_visual_hold`, and can force the known-good legacy NVMe `bootm`
+  path with `selector_diag_force_bootm=true` so the Linux command line keeps
+  `bootchooser=uboot-bmp-display-ok|fail`. If this path works, the pre-Linux
+  screen should go visibly white before the default boot continues. If it
+  remains black/no-signal but Linux reaches `uboot-bmp-display-ok`, the
+  standard U-Boot video console is also writing to an unscanned or disconnected
+  framebuffer before Linux reinitializes HDMI.
 
 ## Validation
 
