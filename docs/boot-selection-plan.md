@@ -1141,6 +1141,27 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `bootchooser=uboot-logo-preinit-ok`. The important new signal is which
   `opi_logo_recover` value appears and whether `opi_logo_hdmi` moves away from
   `phy00,stat00,rst00,lock00`.
+- Reboot result: Linux reached NVMe and
+  `opi_logo_recover=post-skip-locked` appeared. U-Boot saw immediate lock after
+  logo enable, but the bootloader display was still invisible and the later
+  HDMI diagnostic still reported `phy00,stat00,rst00,lock00`.
+
+2026-07-03 forced post-logo HDMI visible reinit diagnostic:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-diag-modeclock-force1024-hdmitvclk-topmc-forcereinit.fex`
+- Package SHA-256:
+  `dac4949d4e5ad3fdb8c3db0bf16811f2ce8ed4948c242ffeebe3c052d940f7a1`
+- U-Boot item SHA-256:
+  `ca67510ad8e65130e29befbce2c0347e36fff1f8ecd6560bce3690f34d0e3087`
+- This package forces one post-logo
+  `display_disable()`/`display_init()`/`display_enable()` sequence even when
+  U-Boot's immediate DW/SNPS lock bits look successful. It keeps the same
+  `opi_logo_recover=post-retry-...` before/after register diagnostics.
+- Expected post-reboot evidence remains
+  `bootchooser=uboot-logo-preinit-ok`. The useful signal is
+  `opi_logo_recover=post-retry-...`; the desired outcome is a visible
+  bootloader splash/selector before Linux starts.
 
 ## Validation
 
