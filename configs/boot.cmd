@@ -117,6 +117,10 @@ if test -n "${opi_bootselect_diag}"; then
 	setenv extraargs "${extraargs} ${opi_bootselect_diag}"
 fi
 
+if test -n "${opi_bootselect_logo}"; then
+	setenv extraargs "${extraargs} opibootlogo=${opi_bootselect_logo}"
+fi
+
 if test "${selector_console}" = "true"; then
 	echo "Forcing selector output to serial and video console"
 	setenv stdout "vidconsole,serial"
