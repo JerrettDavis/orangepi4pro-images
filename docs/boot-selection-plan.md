@@ -750,6 +750,23 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   display should be visible before the selector. If no key is pressed, the
   extlinux default should boot NVMe with `bootchooser=extlinux-legacy-nvme`.
 
+2026-07-03 HDMI full-reinit pattern retest:
+
+- Installed SD TOC1 package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-fullreinit-pattern-1024x600.fex`
+- Package SHA-256:
+  `5c70ff4fd05d4983ccaba08e22efece301ce2bf745618b0b1b46721823502a45`
+- U-Boot item SHA-256:
+  `e852404440cf42e0f7e9bcdb72306d6d11d436a32ddf0377090b2ba69666cead`
+- Staged boot assets:
+  `scripts/stage-uboot-visual-test.sh --test hdmi20_pattern --hold 20 --sd-boot-dir /mnt/opisd-rw/boot`
+- Intent: repeat the HDMI20 pattern test after changing the U-Boot diagnostic
+  from low-level HDMI enable to full HDMI DRM disable, mode-set, and enable.
+- Expected Linux evidence:
+  `bootchooser=uboot-visual-hdmi20-pattern-ok` and
+  `opi_pat_hdmipat=req1,reconfig0,...`, ideally with nonzero `opi_post_hdmi`
+  core fields or a visible pre-OS red pattern.
+
 ## Validation
 
 Safe dispatcher files:
