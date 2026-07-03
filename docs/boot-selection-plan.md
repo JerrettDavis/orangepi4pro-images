@@ -859,6 +859,22 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   test should exercise only the HDMI20 internal pattern command plus the
   current U-Boot HDMI register diagnostics.
 
+2026-07-03 HDMI RX-sense wait candidate:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-rxsense-1024x600.fex`
+- Package SHA-256:
+  `59fe28f8c629ff194e413cc7dd2878c6a6aec7103744a0422a4a1c537576d3ff`
+- U-Boot build artifact SHA-256:
+  `7c9c6e781017a82dff400f5e31049cfdf69563d39b0b6d91aff2d5e31b5a4610`
+- U-Boot item SHA-256:
+  `1f0cd3409f43a11909f3b18f199554258c69b434332bbd8bf61e6fa05c07498b`
+- Intent: keep the HDMI20 internal pattern test but wait up to 100 ms after
+  SNPS PHY lock for RX-sense lane status before handing control back to the
+  boot script.
+- Safety: no full DRM reinit command; timeout is non-fatal and should still
+  boot through the known NVMe legacy `bootm` path.
+
 ## Validation
 
 Safe dispatcher files:
