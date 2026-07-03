@@ -900,6 +900,28 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   remains black/no-signal but Linux reaches `uboot-bmp-display-ok`, the
   standard U-Boot video console is also writing to an unscanned or disconnected
   framebuffer before Linux reinitializes HDMI.
+- Reboot result: Linux reached
+  `bootchooser=uboot-bmp-display-ok`, proving that U-Boot loaded the white BMP
+  and the standard `bmp display ${load_addr}` command returned success before
+  the legacy NVMe boot continued. The screen still did not show a pre-OS image.
+  This rules out a missing boot script or failed BMP decode; the remaining
+  blocker is U-Boot display scanout/signal visibility before Linux reinitializes
+  HDMI.
+
+2026-07-03 staged stock-logo preinit diagnostic:
+
+- Current installed SD TOC1 package remains
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-nvme-scriptfirst.fex`,
+  SHA-256 `d798104ccd705e542842fac409b1e2694c6ca19fcfac75fc30036a4535a7d318`.
+- Extracted package strings confirm the vendor U-Boot still contains
+  `sunxi_show_logo`, `boot.bmp decompressed OK`, and the Orange Pi upstream
+  embedded BMP fallback for NVMe.
+- The next staged test disables the standard BMP diagnostic, sets
+  `selector_logo_preinit=true`, holds for 10 seconds, and forces the known-good
+  legacy NVMe `bootm` path so the kernel command line should preserve
+  `bootchooser=uboot-logo-preinit-ok|fail`.
+- This test intentionally writes only boot filesystem assets. It does not
+  install a new U-Boot package or touch NVMe/SD bootloader sectors.
 
 ## Validation
 
