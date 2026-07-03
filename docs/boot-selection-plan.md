@@ -815,6 +815,28 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   byte-matched in the SD bootloader slot and booting NVMe with
   `bootchooser=extlinux-legacy-nvme`.
 
+2026-07-03 factory-logo preinit result:
+
+- The script-first vendor NVMe package
+  `boot_package_vendor-nvme-scriptfirst.fex`, SHA-256
+  `d798104ccd705e542842fac409b1e2694c6ca19fcfac75fc30036a4535a7d318`,
+  booted through the SD boot script and reached Linux with
+  `bootchooser=uboot-logo-preinit-ok bootchooser=boot-script-default-nvme`.
+- The screen still stayed black until the Linux/Ubuntu splash. That proves
+  `sunxi_show_logo` can return success while pre-Linux HDMI remains invisible.
+
+2026-07-03 HDMI TCON clock-sequence candidate:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-tconseq-1024x600.fex`
+- Package SHA-256:
+  `18ed3b2a21c7c5a4563d21b426a2b0b34a972312c2bb0d1394ddfee74e199d49`
+- U-Boot item SHA-256:
+  `5cc7a6837af0f3ced7a554c9d5704bbdee056f3efa2af7b43a0dcedbf8d3df18`
+- Intent: change only the HDMI TCON clock/reset preparation sequence to better
+  match Linux's working 1024x600 mode-change path. The known-unsafe full DRM
+  reinit diagnostic remains disabled.
+
 ## Validation
 
 Safe dispatcher files:
