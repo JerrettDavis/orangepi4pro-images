@@ -25,6 +25,38 @@ if test -e ${devtype} ${devnum} ${prefix}orangepiEnv.txt; then
 	env import -t ${load_addr} ${filesize}
 fi
 
+if test -e ${devtype} ${devnum} ${prefix}orangepiBootOnce.txt; then
+	echo "Importing one-shot boot request from ${devtype} ${devnum} ${prefix}orangepiBootOnce.txt"
+	load ${devtype} ${devnum} ${load_addr} ${prefix}orangepiBootOnce.txt
+	env import -t ${load_addr} ${filesize}
+fi
+
+if test "${bootonce_target}" = "sd"; then
+	echo "One-shot boot target: SD Ubuntu"
+	setenv selected_boot true
+	setenv extlinux_first false
+	setenv bootmenu_first false
+	setenv selector_visual_test none
+	setenv boot_kernel uImage-5.15.147-sun60iw2
+	setenv boot_initrd uInitrd-5.15.147-sun60iw2
+	setenv boot_dtb dtb-5.15.147-sun60iw2/allwinner/sun60i-a733-orangepi-4-pro.dtb
+	setenv rootdev UUID=dc683cb4-0847-4d2f-83f1-184d35749d4c
+	setenv extraargs bootchooser=linux-selector-sd
+fi
+
+if test "${bootonce_target}" = "nvme"; then
+	echo "One-shot boot target: NVMe Ubuntu"
+	setenv selected_boot true
+	setenv extlinux_first false
+	setenv bootmenu_first false
+	setenv selector_visual_test none
+	setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
+	setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
+	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
+	setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
+	setenv extraargs bootchooser=linux-selector-nvme
+fi
+
 if test "${selector_console}" = "true"; then
 	echo "Forcing selector output to serial and video console"
 	setenv stdout "vidconsole,serial"

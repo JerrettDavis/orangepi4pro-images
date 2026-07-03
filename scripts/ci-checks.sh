@@ -25,6 +25,15 @@ grep -q 'No boot assets were generated' /tmp/orangepi4pro-build-boot-assets.out
 rm -f /tmp/orangepi4pro-bootstrap-ubuntu.out /tmp/orangepi4pro-bootstrap-kali.out \
   /tmp/orangepi4pro-build-kernel.out /tmp/orangepi4pro-build-boot-assets.out
 
+printf 'Checking Linux boot selector templates...\n'
+bash -n scripts/orangepi4pro-linux-boot-selector \
+  scripts/install-linux-boot-selector.sh \
+  scripts/validate-linux-boot-selector.sh
+grep -q 'Before=display-manager.service getty@tty1.service' \
+  systemd/orangepi4pro-linux-boot-selector.service
+grep -q 'bootonce_target=sd' scripts/orangepi4pro-linux-boot-selector
+grep -q 'orangepiBootOnce.txt' configs/boot.cmd
+
 printf 'Checking boot-script safety guards...\n'
 if grep -RInE '^[[:space:]]*sunxi_show_bmp[[:space:]]+boot[.]bmp' configs scripts docs; then
   printf 'ERROR: sunxi_show_bmp boot.bmp must not be called from boot scripts\n' >&2

@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+config_file=${BOOT_SELECTOR_CONFIG:-/etc/orangepi4pro-boot-selector.conf}
+
+enabled=true
+timeout_seconds=20
+default_choice="continue"
+sd_boot_device=/dev/mmcblk1p1
+sd_boot_mount=/mnt/opisd-check
+bootonce_relative_path=boot/orangepiBootOnce.txt
+clear_only=false
+
+if [ -r "$config_file" ]; then
+  # shellcheck source=/dev/null
+  . "$config_file"
+fi
+
+enabled=${SELECTOR_ENABLED:-$enabled}
+timeout_seconds=${SELECTOR_TIMEOUT:-$timeout_seconds}
+default_choice=${SELECTOR_DEFAULT:-$default_choice}
+sd_boot_device=${SD_BOOT_DEVICE:-$sd_boot_device}
+sd_boot_mount=${SD_BOOT_MOUNT:-$sd_boot_mount}
+bootonce_relative_path=${BOOTONCE_RELATIVE_PATH:-$bootonce_relative_path}
+clear_only=${BOOT_SELECTOR_CLEAR_ONLY:-$clear_only}
+
+log() {
+  printf 'orangepi4pro-linux-boot-selector: %s\n' "$*" >&2
+}
+
+remove_bootonce_file() {
+  local root=$1
+  rm -f "$root/$bootonce_relative_path"
+}
+
+ensure_sd_mounted() {
+  mkdir -p "$sd_boot_mount"
+  if mountpoint -q "$sd_boot_mount"; then
+    return 0
+  fi
+  mount "$sd_boot_device" "$sd_boot_mount"
+}
+
+write_sd_bootonce() {
+  ensure_sd_mounted
+  mkdir -p "$sd_boot_mount/$(dirname "$bootonce_relative_path")"
+  {
+    printf 'bootonce_target=sd\n'
+    printf 'bootonce_source=linux-selector\n'
+  } > "$sd_boot_mount/$bootonce_relative_path"
+  sync "$sd_boot_mount/$bootonce_relative_path"
+}
+
+clear_bootonce_files() {
+  remove_bootonce_file ""
+  if [ -b "$sd_boot_device" ]; then
+    if ensure_sd_mounted; then
+      remove_bootonce_file "$sd_boot_mount"
+    else
+      log "could not mount $sd_boot_device to clear SD bootonce file"
+    fi
+  fi
+}
+
+show_menu() {
+  local choice status
+
+  if [ ! -c /dev/tty1 ]; then
+    log "/dev/tty1 is unavailable; continuing current boot"
+    return 0
+  fi
+
+  chvt 1 >/dev/null 2>&1 || true
+  plymouth quit >/dev/null 2>&1 || true
+
+  exec </dev/tty1 >/dev/tty1 2>&1
+  setterm -blank 0 -powersave off -cursor on || true
+  clear || true
+
+  if command -v whiptail >/dev/null 2>&1; then
+    set +e
+    choice=$(timeout "$timeout_seconds" whiptail \
+      --clear \
+      --title "Orange Pi 4 Pro Boot" \
+      --default-item "$default_choice" \
+      --menu "Select the boot target. Timeout continues the current boot." \
+      18 74 6 \
+      continue "Continue this Ubuntu boot" \
+      sd "Reboot once into SD Ubuntu" \
+      shell "Drop to maintenance shell" \
+      3>&1 1>&2 2>&3)
+    status=$?
+    set -e
+  elif command -v dialog >/dev/null 2>&1; then
+    set +e
+    choice=$(timeout "$timeout_seconds" dialog \
+      --clear \
+      --title "Orange Pi 4 Pro Boot" \
+      --default-item "$default_choice" \
+      --menu "Select the boot target. Timeout continues the current boot." \
+      18 74 6 \
+      continue "Continue this Ubuntu boot" \
+      sd "Reboot once into SD Ubuntu" \
+      shell "Drop to maintenance shell" \
+      3>&1 1>&2 2>&3)
+    status=$?
+    set -e
+  else
+    log "whiptail/dialog unavailable; continuing current boot"
+    return 0
+  fi
+
+  if [ "$status" -eq 124 ]; then
+    choice="continue"
+  elif [ "$status" -ne 0 ]; then
+    choice="continue"
+  fi
+
+  case "$choice" in
+    sd)
+      write_sd_bootonce
+      printf '\nRebooting once into SD Ubuntu...\n'
+      sleep 1
+      systemctl reboot
+      ;;
+    shell)
+      printf '\nMaintenance shell. Type exit to continue boot.\n'
+      /bin/bash -l || true
+      ;;
+    continue | *)
+      clear_bootonce_files
+      ;;
+  esac
+}
+
+case "${1:-}" in
+  --clear)
+    clear_bootonce_files
+    exit 0
+    ;;
+  --validate)
+    command -v whiptail >/dev/null 2>&1 || command -v dialog >/dev/null 2>&1
+    [ -c /dev/tty1 ]
+    exit 0
+    ;;
+esac
+
+clear_bootonce_files
+
+if [ "$enabled" != true ]; then
+  log "selector disabled"
+  exit 0
+fi
+
+if [ "$clear_only" = true ]; then
+  log "clear-only mode"
+  exit 0
+fi
+
+show_menu

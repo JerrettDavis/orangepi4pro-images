@@ -1,8 +1,11 @@
 # Boot Selection Plan
 
-Current status on 2026-07-02:
+Current status on 2026-07-03:
 
 - The machine boots NVMe Ubuntu through extlinux.
+- The practical visible selector is now moving to early Linux on tty1, before
+  LightDM. U-Boot remains the boot target router through a plain text
+  `orangepiBootOnce.txt` file.
 - The SD-card bootloader package is currently the recovered extlinux-first
   package. It scans `/boot/extlinux/extlinux.conf` before `/boot/boot.scr`.
 - A validated menu-capable vendor U-Boot package was built from
@@ -29,6 +32,55 @@ Current status on 2026-07-02:
   copy before reboot tests.
 - `TIMEOUT 0` is unsafe on this BSP. It has already wedged at the Orange Pi
   bootloader loading graphic.
+
+## Early Linux Selector
+
+U-Boot framebuffer diagnostics now prove the script path and framebuffer writes
+run before Linux:
+
+```text
+bootchooser=uboot-visual-fbtest-ok
+opi_fb_fbtest=ok,w=1024,h=600
+opi_pre_drm=...init=1,en=1,bl=1,mode=1024x600...
+opi_post_drm=...init=1,en=1,bl=1,mode=1024x600...
+```
+
+The panel still stays black until Linux userspace, so the visible selector is a
+systemd service on `/dev/tty1`:
+
+```bash
+sudo scripts/install-linux-boot-selector.sh
+sudo scripts/validate-linux-boot-selector.sh /
+```
+
+If the SD root is mounted, install the same clear/selector service there so a
+one-shot SD request does not loop:
+
+```bash
+sudo mount /dev/mmcblk1p1 /mnt/opisd-check
+sudo scripts/install-linux-boot-selector.sh --target-root /mnt/opisd-check
+sudo scripts/validate-linux-boot-selector.sh /mnt/opisd-check
+```
+
+The selector writes this boot-readable file when SD is selected:
+
+```text
+/boot/orangepiBootOnce.txt
+bootonce_target=sd
+bootonce_source=linux-selector
+```
+
+`boot.cmd` imports that file before any U-Boot visual/menu experiments and sets
+the known-good legacy image path directly:
+
+```text
+bootchooser=linux-selector-sd
+bootchooser=linux-selector-nvme
+```
+
+The Linux service removes stale `orangepiBootOnce.txt` files at startup before
+showing the menu, which prevents repeat SD boots after a successful one-shot
+selection.
 
 ## Safe Baseline
 
