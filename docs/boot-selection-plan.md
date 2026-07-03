@@ -409,6 +409,23 @@ Current staged test:
 - Expected marker after reboot remains `bootchooser=uboot-visual-fbtest-ok`,
   with `opi_fb_fbtest=...fbid=...,plane=...,en=...`.
 
+2026-07-03 third attempt result:
+
+- The system booted NVMe with `bootchooser=uboot-visual-fbtest-ok`.
+- U-Boot reported `opi_fb_fbtest=ok,...fbid=0,plane=0,en=1`, proving the
+  active framebuffer was committed to the primary plane.
+- The next package is
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-fbtest-planecommit-hdmi-power-tconclk.fex`,
+  SHA-256
+  `2a4268c4dc2ce8f5731c87390e555ceeabd12b0f4223739675bbb2bb374154a9`.
+  It adds the missing `clk_tcon_tv` clock-name to the packed U-Boot HDMI node
+  so `_sunxi_drv_hdmi_set_rate()` can set the HDMI clock from the active TCON
+  clock before enabling output.
+- Expected marker after reboot remains `bootchooser=uboot-visual-fbtest-ok`,
+  with the same `opi_fb_fbtest=...fbid=0,plane=0,en=1` marker. The visual pass
+  condition is a visible high-contrast framebuffer test during the 20 second
+  U-Boot hold.
+
 ## Validation
 
 Safe dispatcher files:
