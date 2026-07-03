@@ -148,7 +148,13 @@ if test "${selector_logo_preinit}" = "true"; then
 	else
 		setenv selector_logo_diag "uboot-logo-preinit-fail"
 	fi
+	if sunxi_hdmi_env; then
+		setenv selector_logo_hdmi "${opi_hdmi_diag}"
+	else
+		setenv selector_logo_hdmi "hdmi=diag-missing"
+	fi
 	setenv extraargs "${extraargs} ${selector_logo_diag}"
+	setenv extraargs "${extraargs} opi_logo_${selector_logo_hdmi}"
 	sleep ${selector_logo_hold}
 fi
 
@@ -193,6 +199,11 @@ if test "${selector_visual_test}" = "colorbar"; then
 	else
 		setenv pre_colorbar_diag "drm_diag=missing"
 	fi
+	if sunxi_hdmi_env; then
+		setenv pre_colorbar_hdmi "${opi_hdmi_diag}"
+	else
+		setenv pre_colorbar_hdmi "hdmi=diag-missing"
+	fi
 	sunxi_backlihgt on
 	if sunxi_drm colorbar 1; then
 		setenv extraargs bootchooser=uboot-visual-colorbar-ok
@@ -204,7 +215,12 @@ if test "${selector_visual_test}" = "colorbar"; then
 	else
 		setenv post_colorbar_diag "drm_diag=missing"
 	fi
-	setenv extraargs "${extraargs} opi_pre_${pre_colorbar_diag} opi_post_${post_colorbar_diag}"
+	if sunxi_hdmi_env; then
+		setenv post_colorbar_hdmi "${opi_hdmi_diag}"
+	else
+		setenv post_colorbar_hdmi "hdmi=diag-missing"
+	fi
+	setenv extraargs "${extraargs} opi_pre_${pre_colorbar_diag} opi_pre_${pre_colorbar_hdmi} opi_post_${post_colorbar_diag} opi_post_${post_colorbar_hdmi}"
 	sleep ${selector_visual_hold}
 fi
 
@@ -222,6 +238,11 @@ if test "${selector_visual_test}" = "fbtest"; then
 	else
 		setenv pre_fbtest_diag "drm_diag=missing"
 	fi
+	if sunxi_hdmi_env; then
+		setenv pre_fbtest_hdmi "${opi_hdmi_diag}"
+	else
+		setenv pre_fbtest_hdmi "hdmi=diag-missing"
+	fi
 	sunxi_backlihgt on
 	if sunxi_drm fbtest; then
 		setenv extraargs bootchooser=uboot-visual-fbtest-ok
@@ -236,7 +257,12 @@ if test "${selector_visual_test}" = "fbtest"; then
 	else
 		setenv post_fbtest_diag "drm_diag=missing"
 	fi
-	setenv extraargs "${extraargs} opi_pre_${pre_fbtest_diag} opi_fb_${opi_fbtest_diag} opi_post_${post_fbtest_diag}"
+	if sunxi_hdmi_env; then
+		setenv post_fbtest_hdmi "${opi_hdmi_diag}"
+	else
+		setenv post_fbtest_hdmi "hdmi=diag-missing"
+	fi
+	setenv extraargs "${extraargs} opi_pre_${pre_fbtest_diag} opi_pre_${pre_fbtest_hdmi} opi_fb_${opi_fbtest_diag} opi_post_${post_fbtest_diag} opi_post_${post_fbtest_hdmi}"
 	sleep ${selector_visual_hold}
 fi
 
@@ -254,6 +280,11 @@ if test "${selector_visual_test}" = "hdmi20_pattern"; then
 	else
 		setenv pre_hdmi20_diag "drm_diag=missing"
 	fi
+	if sunxi_hdmi_env; then
+		setenv pre_hdmi20_hdmi "${opi_hdmi_diag}"
+	else
+		setenv pre_hdmi20_hdmi "hdmi=diag-missing"
+	fi
 	sunxi_backlihgt on
 	if sunxi_hdmi20 pattern 1; then
 		setenv extraargs bootchooser=uboot-visual-hdmi20-pattern-ok
@@ -265,7 +296,12 @@ if test "${selector_visual_test}" = "hdmi20_pattern"; then
 	else
 		setenv post_hdmi20_diag "drm_diag=missing"
 	fi
-	setenv extraargs "${extraargs} opi_pre_${pre_hdmi20_diag} opi_post_${post_hdmi20_diag}"
+	if sunxi_hdmi_env; then
+		setenv post_hdmi20_hdmi "${opi_hdmi_diag}"
+	else
+		setenv post_hdmi20_hdmi "hdmi=diag-missing"
+	fi
+	setenv extraargs "${extraargs} opi_pre_${pre_hdmi20_diag} opi_pre_${pre_hdmi20_hdmi} opi_post_${post_hdmi20_diag} opi_post_${post_hdmi20_hdmi}"
 	sleep ${selector_visual_hold}
 	sunxi_hdmi20 pattern 0
 fi

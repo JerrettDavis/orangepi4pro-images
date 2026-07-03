@@ -104,6 +104,7 @@ grep -q 'sunxi_drm colorbar' /boot/boot.cmd || fail 'boot.cmd does not support b
 grep -q 'sunxi_drm fbtest' /boot/boot.cmd || fail 'boot.cmd does not support bounded framebuffer visual test'
 grep -q 'sunxi_hdmi20 pattern 1' /boot/boot.cmd || fail 'boot.cmd does not support bounded HDMI20 pattern visual test'
 grep -q 'sunxi_drm_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot DRM env diagnostics'
+grep -q 'sunxi_hdmi_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot HDMI env diagnostics'
 grep -q 'sunxi_show_logo' /boot/boot.cmd || fail 'boot.cmd does not pre-initialize U-Boot video with stock logo command'
 grep -q 'uboot-logo-preinit-ok' /boot/boot.cmd || fail 'boot.cmd lacks logo preinit success marker'
 grep -q 'selector_diag_force_bootm' /boot/boot.cmd || fail 'boot.cmd lacks diagnostic bootm path after logo preinit'
