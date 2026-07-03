@@ -767,6 +767,26 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `opi_pat_hdmipat=req1,reconfig0,...`, ideally with nonzero `opi_post_hdmi`
   core fields or a visible pre-OS red pattern.
 
+2026-07-03 HDMI reinit stage-diagnostic retest:
+
+- Installed SD TOC1 package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-reinitdiag-pattern-1024x600.fex`
+- Package SHA-256:
+  `78b54a1b96aea7ca0456d8085d915e2eaedcffef6117e7d4ca6889eeb87c50e7`
+- U-Boot item SHA-256:
+  `ad176262afd51248a3c61ccff72185a66bea7fbf2916a012b0c3112210a0facf`
+- Staged boot assets:
+  `scripts/stage-uboot-visual-test.sh --test hdmi20_pattern --hold 20 --sd-boot-dir /mnt/opisd-rw/boot`
+- Intent: keep the bounded HDMI20 internal red-pattern test, but record the
+  true internal U-Boot HDMI reinit stage returns and register state in
+  `opi_reinit_reinit=...`.
+- Expected Linux evidence:
+  `bootchooser=uboot-visual-hdmi20-pattern-ok`,
+  `opi_pat_hdmipat=req1,...`, and `opi_reinit_reinit=d...,x...,m...,t...`.
+  If there is still no pre-OS image, use that field to identify whether TCON
+  init, HDMI clocking, `sunxi_hdmi_config()`, TOP PHY, or DesignWare core state
+  is the remaining blocker.
+
 ## Validation
 
 Safe dispatcher files:

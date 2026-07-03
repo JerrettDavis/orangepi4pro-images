@@ -294,6 +294,9 @@ if test "${selector_visual_test}" = "hdmi20_pattern"; then
 	if test -z "${opi_hdmi_pattern_diag}"; then
 		setenv opi_hdmi_pattern_diag "hdmipat=unset"
 	fi
+	if test -z "${opi_hdmi_reinit_diag}"; then
+		setenv opi_hdmi_reinit_diag "reinit=unset"
+	fi
 	if sunxi_drm_env; then
 		setenv post_hdmi20_diag "${opi_drm_diag}"
 	else
@@ -304,7 +307,7 @@ if test "${selector_visual_test}" = "hdmi20_pattern"; then
 	else
 		setenv post_hdmi20_hdmi "hdmi=diag-missing"
 	fi
-	setenv extraargs "${extraargs} opi_pre_${pre_hdmi20_diag} opi_pre_${pre_hdmi20_hdmi} opi_pat_${opi_hdmi_pattern_diag} opi_post_${post_hdmi20_diag} opi_post_${post_hdmi20_hdmi}"
+	setenv extraargs "${extraargs} opi_pre_${pre_hdmi20_diag} opi_pre_${pre_hdmi20_hdmi} opi_pat_${opi_hdmi_pattern_diag} opi_reinit_${opi_hdmi_reinit_diag} opi_post_${post_hdmi20_diag} opi_post_${post_hdmi20_hdmi}"
 	sleep ${selector_visual_hold}
 	sunxi_hdmi20 pattern 0
 fi

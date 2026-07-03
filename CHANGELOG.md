@@ -44,3 +44,5 @@
   longer selector timeout for better visibility on HDMI.
 - Added committed boot selector templates and an installer for reproducing the
   live `/boot`, `/boot/efi`, and active SD boot-source state.
+- Captured the U-Boot HDMI reinit stage diagnostics in the HDMI20 pattern test
+  kernel command line as `opi_reinit_reinit=...`.
