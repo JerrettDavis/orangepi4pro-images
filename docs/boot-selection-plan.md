@@ -692,6 +692,18 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   with bit 1 clear, ideally changing the prior `top0_00000017` reading to
   `top0_00000015`.
 
+2026-07-03 corrected top-PHY PDDQ retest:
+
+- Installed SD TOC1 package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-toppddq-applied-1024x600.fex`
+- Package SHA-256:
+  `ee6df304753d62319a499f148d9e56b8a5f065f27548672ccb955f9cd93fc2a7`
+- Note: this supersedes the earlier `d16c515a...` top-PHY package, which was
+  built before the new `0013` patch was wired into the U-Boot build script.
+- Expected Linux evidence:
+  `bootchooser=uboot-visual-hdmi20-pattern-ok` and `opi_pre_hdmi=*top0_*`
+  changing away from the previous `top0_00000017` reading.
+
 ## Validation
 
 Safe dispatcher files:
