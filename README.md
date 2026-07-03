@@ -63,6 +63,12 @@ scripts/validate-linux-boot-selector.sh /
 scripts/validate-active-boot-source.sh /mnt/opisd-ro
 ```
 
+Run before any bootloader-test reboot:
+
+```bash
+sudo scripts/settlement-validate-before-reboot.sh --write-log
+```
+
 ## Releases
 
 Push a `v*` tag after CI passes to publish a GitHub release containing a source

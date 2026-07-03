@@ -20,6 +20,17 @@ scripts/validate-nvme-cyberdeck-kernel.sh /
 scripts/validate-boot-menu-assets.sh
 ```
 
+Before any reboot during bootloader work, run the settlement gate:
+
+```bash
+sudo scripts/settlement-validate-before-reboot.sh --write-log
+```
+
+The gate fails unless both local repos are clean and pushed, the live boot
+assets match the current NVMe-primary selector test state, the running kernel
+has the expected `bootchooser=extlinux-legacy-nvme` marker, and the SD
+bootloader slot byte-matches the expected TOC1 package.
+
 For the prepared cyberdeck kernel on the mounted NVMe target, use:
 
 ```bash
