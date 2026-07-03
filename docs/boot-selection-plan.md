@@ -1118,6 +1118,29 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `bootchooser=uboot-logo-preinit-ok`. The important new signal is whether
   `/proc/cmdline` gains `opi_logo_recover=post-retry-...` and whether
   `opi_logo_hdmi` moves away from `phy00,stat00,rst00,lock00`.
+- Reboot result: Linux reached NVMe and diagnostics stayed present, but
+  `opi_logo_recover` was absent and `opi_logo_hdmi` still reported
+  `phy00,stat00,rst00,lock00`. The next package removes the stricter state
+  checks from the retry decision and records skip reasons.
+
+2026-07-03 relaxed post-logo HDMI retry diagnostic:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-diag-modeclock-force1024-hdmitvclk-topmc-relaxedretry.fex`
+- Package SHA-256:
+  `4e0941a6eb25f7a9e40a7496dc6957eea43f533e636b85813ee972ae5bf7cf9a`
+- U-Boot item SHA-256:
+  `6337413c6991aed676e669e279db964e72163372626f84953a3e8c36e8a918bb`
+- This package makes the post-logo check read `PHY_STAT0` and `MC_LOCKONCLOCK`
+  directly. If lock is missing after `display_enable()`, it performs one
+  disable/init/enable retry without requiring `state->is_enable` or a connector
+  type match. It always records either `opi_logo_recover=post-retry-...`,
+  `opi_logo_recover=post-skip-not-init`, or
+  `opi_logo_recover=post-skip-locked`.
+- Expected post-reboot evidence remains
+  `bootchooser=uboot-logo-preinit-ok`. The important new signal is which
+  `opi_logo_recover` value appears and whether `opi_logo_hdmi` moves away from
+  `phy00,stat00,rst00,lock00`.
 
 ## Validation
 
