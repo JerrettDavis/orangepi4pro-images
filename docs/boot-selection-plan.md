@@ -1026,6 +1026,29 @@ than through the custom AW_DRM framebuffer/pattern-test path.
 - Expected post-reboot evidence remains
   `bootchooser=uboot-logo-preinit-ok`; the important diagnostic is whether
   `opi_logo_hdmi` remains present and gains a `tv49000000`-style value.
+- Reboot result: Linux reached NVMe and diagnostics stayed present.
+  `opi_logo_hdmi` included `tv49000000`, proving the named `hdmi_tv` fallback
+  worked. The bootloader display stayed black because the low-level PHY/MC
+  state was still not locked (`stat00`, `lock00`) before Linux reinitialized
+  HDMI.
+
+2026-07-03 HDMI TV clock plus TOP/MC parity diagnostic:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-diag-modeclock-force1024-hdmitvclk-topmc.fex`
+- Package SHA-256:
+  `9a71e37c0773a3b9d408d651db12037e7d7bbe5d7624244961f5610f38c89989`
+- U-Boot item SHA-256:
+  `bb53b2a56f12fb52d9db076890e1ac64adfb659a6ed2497acbb6e7ca25a4e21e`
+- This package keeps the stock embedded U-Boot DTB and vendor monitor/SCP
+  blobs. It combines the successful `hdmi_tv` fallback with Linux TOP PHY PLL
+  auto-calculation, Linux-like MC clock enable order, normal-path TCON format
+  propagation, and passive TOP PHY register diagnostics. It does not include
+  the unsafe full DRM reinit command.
+- Expected post-reboot evidence remains
+  `bootchooser=uboot-logo-preinit-ok`; useful diagnostics are retained
+  `tv49000000`, new `top20_` through `top40_` fields, and any movement of
+  `stat`/`lock` toward Linux's locked HDMI PHY state.
 
 ## Validation
 
