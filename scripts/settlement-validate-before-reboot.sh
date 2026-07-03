@@ -132,9 +132,9 @@ readback_package() {
   [ "$package_size" -gt 0 ] || fail "package is empty: $package"
   verify_blocks=$(((package_size + block_size - 1) / block_size))
   verify_path=$(mktemp)
-  trap 'rm -f "$verify_path"' RETURN
   dd if="$device" of="$verify_path" bs="$block_size" skip="$seek_blocks" count="$verify_blocks" status=none
   cmp -n "$package_size" "$package" "$verify_path"
+  rm -f "$verify_path"
   printf 'SD bootloader slot byte-matches expected package.\n'
 }
 
