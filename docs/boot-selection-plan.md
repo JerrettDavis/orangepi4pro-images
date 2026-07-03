@@ -602,6 +602,32 @@ the remaining failure is in the AW_DRM plane/framebuffer rendering path. If the
 pattern is still invisible, U-Boot's HDMI link/output is not actually reaching
 the display even though the current diagnostics report success.
 
+2026-07-03 factory logo filename finding:
+
+- The post-reboot HDMI pattern-status test reached Linux with
+  `bootchooser=uboot-visual-hdmi20-pattern-ok` and
+  `opi_pat_hdmipat=req1,tcon0,force01,rff,g00,b00`, proving U-Boot set the
+  DesignWare frame-composer force-video registers for a red output. The display
+  still showed no pre-OS image.
+- The SD `boot0_sdcard.fex` region byte-matches the vendor file, so the
+  missing factory splash is not explained by boot0 corruption.
+- The current A733 U-Boot logo loader searches `/boot/boot1.bmp` and
+  `/boot/boot.bmp`. The Orange Pi factory-style asset still exists as
+  `/boot/logo.bmp` and `/boot/efi/logo.bmp`, but `boot.bmp` and `boot1.bmp`
+  had been replaced with the generated 320x240 selector/test bitmap.
+- Stage the next test with:
+
+```bash
+sudo scripts/stage-factory-logo-preinit-test.sh \
+  --hold 20 \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+This restores `logo.bmp` to the filenames U-Boot actually loads, runs
+`sunxi_show_logo`, holds for 20 seconds, and then boots NVMe through the
+known-good legacy `bootm` path. Expected Linux evidence is
+`bootchooser=uboot-logo-preinit-ok` plus `opi_logo_*` HDMI diagnostics.
+
 ## Validation
 
 Safe dispatcher files:
