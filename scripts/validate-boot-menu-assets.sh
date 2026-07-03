@@ -28,6 +28,7 @@ expected_selector_visual_test=${EXPECTED_SELECTOR_VISUAL_TEST:-none}
 expected_selector_visual_hold=${EXPECTED_SELECTOR_VISUAL_HOLD:-8}
 expected_selector_logo_preinit=${EXPECTED_SELECTOR_LOGO_PREINIT:-true}
 expected_selector_logo_hold=${EXPECTED_SELECTOR_LOGO_HOLD:-5}
+expected_selector_diag_force_bootm=${EXPECTED_SELECTOR_DIAG_FORCE_BOOTM:-true}
 expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
 expected_logo=${EXPECTED_LOGO:-enabled}
 expected_extlinux_first=${EXPECTED_EXTLINUX_FIRST:-true}
@@ -86,6 +87,8 @@ grep -q "^selector_logo_preinit=${expected_selector_logo_preinit}$" /boot/orange
   || fail "selector_logo_preinit should be ${expected_selector_logo_preinit}"
 grep -q "^selector_logo_hold=${expected_selector_logo_hold}$" /boot/orangepiEnv.txt \
   || fail "selector_logo_hold should be ${expected_selector_logo_hold}"
+grep -q "^selector_diag_force_bootm=${expected_selector_diag_force_bootm}$" /boot/orangepiEnv.txt \
+  || fail "selector_diag_force_bootm should be ${expected_selector_diag_force_bootm}"
 grep -q "^bootlogo=${expected_bootlogo}$" /boot/orangepiEnv.txt \
   || fail "bootlogo should be ${expected_bootlogo}"
 grep -q "^logo=${expected_logo}$" /boot/orangepiEnv.txt \
@@ -102,6 +105,7 @@ grep -q 'sunxi_drm fbtest' /boot/boot.cmd || fail 'boot.cmd does not support bou
 grep -q 'sunxi_drm_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot DRM env diagnostics'
 grep -q 'sunxi_show_logo' /boot/boot.cmd || fail 'boot.cmd does not pre-initialize U-Boot video with stock logo command'
 grep -q 'uboot-logo-preinit-ok' /boot/boot.cmd || fail 'boot.cmd lacks logo preinit success marker'
+grep -q 'selector_diag_force_bootm' /boot/boot.cmd || fail 'boot.cmd lacks diagnostic bootm path after logo preinit'
 grep -q 'uboot-visual-colorbar-ok' /boot/boot.cmd || fail 'boot.cmd lacks colorbar success marker'
 grep -q 'uboot-visual-fbtest-ok' /boot/boot.cmd || fail 'boot.cmd lacks fbtest success marker'
 grep -q 'orangepiBootOnce.txt' /boot/boot.cmd || fail 'boot.cmd does not import Linux selector bootonce requests'
@@ -158,6 +162,7 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
   | sed -E "s/^selector_logo_preinit=.*/selector_logo_preinit=${expected_selector_logo_preinit}/" \
   | sed -E "s/^selector_logo_hold=.*/selector_logo_hold=${expected_selector_logo_hold}/" \
+  | sed -E "s/^selector_diag_force_bootm=.*/selector_diag_force_bootm=${expected_selector_diag_force_bootm}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   | sed -E "s/^extlinux_first=.*/extlinux_first=${expected_extlinux_first}/" \
@@ -174,6 +179,7 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
   | sed -E "s/^selector_logo_preinit=.*/selector_logo_preinit=${expected_selector_logo_preinit}/" \
   | sed -E "s/^selector_logo_hold=.*/selector_logo_hold=${expected_selector_logo_hold}/" \
+  | sed -E "s/^selector_diag_force_bootm=.*/selector_diag_force_bootm=${expected_selector_diag_force_bootm}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   | sed -E "s/^extlinux_first=.*/extlinux_first=${expected_extlinux_first}/" \

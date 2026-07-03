@@ -17,6 +17,7 @@ selector_visual_test=none
 selector_visual_hold=8
 selector_logo_preinit=true
 selector_logo_hold=5
+selector_diag_force_bootm=true
 bootgui_selector=false
 bootgui_selector_timeout=10
 logo=enabled
