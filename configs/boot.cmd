@@ -62,6 +62,11 @@ fi
 
 if test "${bootgui_selector}" = "true"; then
 	echo "Starting Orange Pi boot GUI selector"
+	if sunxi_drm_env; then
+		setenv opi_bootselect_pre_drm "${opi_drm_diag}"
+	else
+		setenv opi_bootselect_pre_drm "drm=missing"
+	fi
 	if opi_bootselect ${bootgui_selector_timeout}; then
 		if test "${opi_bootselect_target}" = "sd"; then
 			setenv bootonce_target sd
@@ -74,6 +79,11 @@ if test "${bootgui_selector}" = "true"; then
 		echo "Boot GUI selector failed; defaulting to NVMe"
 		setenv bootonce_target nvme
 		setenv bootchooser bootgui-selector-fail-nvme
+	fi
+	if sunxi_drm_env; then
+		setenv opi_bootselect_post_drm "${opi_drm_diag}"
+	else
+		setenv opi_bootselect_post_drm "drm=missing"
 	fi
 fi
 
@@ -122,6 +132,14 @@ fi
 
 if test -n "${opi_bootselect_logo}"; then
 	setenv extraargs "${extraargs} opibootlogo=${opi_bootselect_logo}"
+fi
+
+if test -n "${opi_bootselect_pre_drm}"; then
+	setenv extraargs "${extraargs} opi_pre_${opi_bootselect_pre_drm}"
+fi
+
+if test -n "${opi_bootselect_post_drm}"; then
+	setenv extraargs "${extraargs} opi_post_${opi_bootselect_post_drm}"
 fi
 
 if test "${selector_logo_preinit}" = "true"; then
