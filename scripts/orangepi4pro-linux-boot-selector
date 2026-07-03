@@ -41,14 +41,23 @@ ensure_sd_mounted() {
   mount "$sd_boot_device" "$sd_boot_mount"
 }
 
-write_sd_bootonce() {
+write_bootonce() {
+  local target=$1
   ensure_sd_mounted
   mkdir -p "$sd_boot_mount/$(dirname "$bootonce_relative_path")"
   {
-    printf 'bootonce_target=sd\n'
+    printf 'bootonce_target=%s\n' "$target"
     printf 'bootonce_source=linux-selector\n'
   } > "$sd_boot_mount/$bootonce_relative_path"
   sync "$sd_boot_mount/$bootonce_relative_path"
+}
+
+write_sd_bootonce() {
+  write_bootonce sd
+}
+
+write_nvme_bootonce() {
+  write_bootonce nvme
 }
 
 clear_bootonce_files() {
@@ -140,6 +149,10 @@ case "${1:-}" in
     ;;
   --boot-sd)
     write_sd_bootonce
+    systemctl reboot
+    ;;
+  --boot-nvme)
+    write_nvme_bootonce
     systemctl reboot
     ;;
   --validate)

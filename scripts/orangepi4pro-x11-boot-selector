@@ -39,18 +39,52 @@ def read_config():
     return config
 
 
-def request_sd_boot():
+NVME_UUID = "eb86cfeb-60c7-4513-bc69-f6d28e9d561b"
+SD_UUID = "dc683cb4-0847-4d2f-83f1-184d35749d4c"
+
+
+def current_target():
+    try:
+        cmdline = Path("/proc/cmdline").read_text(encoding="utf-8")
+    except OSError:
+        cmdline = ""
+    if NVME_UUID in cmdline:
+        return "nvme"
+    if SD_UUID in cmdline:
+        return "sd"
+    return "unknown"
+
+
+def request_boot(target):
     return subprocess.run(
-        ["sudo", "-n", "/usr/local/sbin/orangepi4pro-linux-boot-selector", "--boot-sd"],
+        ["sudo", "-n", "/usr/local/sbin/orangepi4pro-linux-boot-selector", f"--boot-{target}"],
         check=False,
     ).returncode
 
 
-def fallback_xmessage(timeout):
+def labels_for_target(target):
+    if target == "sd":
+        return {
+            "continue": "Continue SD Ubuntu",
+            "other": "Boot NVMe Ubuntu Once",
+            "other_target": "nvme",
+            "key": "N",
+            "hint": "Keyboard: Enter continues, N boots NVMe once, Esc continues.",
+        }
+    return {
+        "continue": "Continue NVMe Ubuntu",
+        "other": "Boot SD Ubuntu Once",
+        "other_target": "sd",
+        "key": "S",
+        "hint": "Keyboard: Enter continues, S boots SD once, Esc continues.",
+    }
+
+
+def fallback_xmessage(timeout, labels):
     message = (
         "Orange Pi 4 Pro Boot Selector\n\n"
-        "Continue Ubuntu keeps this NVMe session.\n"
-        "Boot SD Ubuntu writes a one-shot request and reboots."
+        f"{labels['continue']} keeps this session.\n"
+        f"{labels['other']} writes a one-shot request and reboots."
     )
     result = subprocess.run(
         [
@@ -61,15 +95,15 @@ def fallback_xmessage(timeout):
             "-timeout",
             str(timeout),
             "-default",
-            "Continue Ubuntu",
+            labels["continue"],
             "-buttons",
-            "Continue Ubuntu:0,Boot SD Ubuntu:10",
+            f"{labels['continue']}:0,{labels['other']}:10",
             message,
         ],
         check=False,
     )
     if result.returncode == 10:
-        return request_sd_boot()
+        return request_boot(labels["other_target"])
     return 0
 
 
@@ -82,6 +116,8 @@ def main():
     timeout = int(config.get("X11_SELECTOR_TIMEOUT", str(TIMEOUT_SECONDS)))
     if "DISPLAY" not in os.environ:
         os.environ["DISPLAY"] = ":0"
+    target = current_target()
+    labels = labels_for_target(target)
 
     try:
         import gi
@@ -91,7 +127,7 @@ def main():
         from gi.repository import Gdk, GLib, Gtk
     except Exception as exc:
         log(f"GTK unavailable, falling back to xmessage: {exc}")
-        return fallback_xmessage(timeout)
+        return fallback_xmessage(timeout, labels)
 
     class Selector(Gtk.Window):
         def __init__(self):
@@ -137,7 +173,7 @@ def main():
             box.pack_start(title, False, False, 0)
 
             subtitle = Gtk.Label(
-                label="Choose the boot target. Timeout keeps this NVMe Ubuntu session."
+                label=f"Choose the boot target. Timeout runs: {labels['continue']}."
             )
             subtitle.set_name("subtitle")
             box.pack_start(subtitle, False, False, 0)
@@ -146,21 +182,21 @@ def main():
             buttons.set_halign(Gtk.Align.CENTER)
             box.pack_start(buttons, False, False, 0)
 
-            continue_button = Gtk.Button(label="Continue NVMe Ubuntu")
+            continue_button = Gtk.Button(label=labels["continue"])
             continue_button.set_name("primary")
             continue_button.connect("clicked", self.continue_boot)
             buttons.pack_start(continue_button, False, False, 0)
 
-            sd_button = Gtk.Button(label="Boot SD Ubuntu Once")
-            sd_button.set_name("secondary")
-            sd_button.connect("clicked", self.boot_sd)
-            buttons.pack_start(sd_button, False, False, 0)
+            other_button = Gtk.Button(label=labels["other"])
+            other_button.set_name("secondary")
+            other_button.connect("clicked", self.boot_other)
+            buttons.pack_start(other_button, False, False, 0)
 
             self.countdown = Gtk.Label()
             self.countdown.set_name("countdown")
             box.pack_start(self.countdown, False, False, 0)
 
-            hint = Gtk.Label(label="Keyboard: Enter continues, S boots SD once, Esc continues.")
+            hint = Gtk.Label(label=labels["hint"])
             box.pack_start(hint, False, False, 0)
 
             continue_button.grab_focus()
@@ -168,7 +204,7 @@ def main():
             GLib.timeout_add_seconds(1, self.tick)
 
         def update_countdown(self):
-            self.countdown.set_text(f"Continuing NVMe Ubuntu in {self.remaining} seconds")
+            self.countdown.set_text(f"{labels['continue']} in {self.remaining} seconds")
 
         def tick(self):
             self.remaining -= 1
@@ -182,15 +218,15 @@ def main():
             log("continue selected")
             Gtk.main_quit()
 
-        def boot_sd(self, *_args):
-            log("SD boot selected")
-            if request_sd_boot() != 0:
+        def boot_other(self, *_args):
+            log(f"{labels['other_target']} boot selected")
+            if request_boot(labels["other_target"]) != 0:
                 dialog = Gtk.MessageDialog(
                     transient_for=self,
                     flags=0,
                     message_type=Gtk.MessageType.ERROR,
                     buttons=Gtk.ButtonsType.CLOSE,
-                    text="Unable to request SD boot",
+                    text=f"Unable to request {labels['other_target']} boot",
                 )
                 dialog.format_secondary_text(
                     "Check /etc/sudoers.d/orangepi4pro-boot-selector."
@@ -205,8 +241,8 @@ def main():
             if key in ("Return", "KP_Enter", "Escape"):
                 self.continue_boot()
                 return True
-            if key in ("s", "S"):
-                self.boot_sd()
+            if key in (labels["key"].lower(), labels["key"].upper()):
+                self.boot_other()
                 return True
             return False
 

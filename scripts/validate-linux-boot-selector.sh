@@ -41,6 +41,9 @@ grep -q '^BOOTONCE_RELATIVE_PATH=boot/orangepiBootOnce.txt$' \
 grep -q 'NOPASSWD: /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-sd' \
   "$target_root/etc/sudoers.d/orangepi4pro-boot-selector" \
   || fail 'sudoers rule must be scoped to the SD boot request helper'
+grep -q 'NOPASSWD: /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-nvme' \
+  "$target_root/etc/sudoers.d/orangepi4pro-boot-selector" \
+  || fail 'sudoers rule must be scoped to the NVMe boot request helper'
 
 bash -n "$target_root/usr/local/sbin/orangepi4pro-linux-boot-selector"
 python3 -m py_compile "$target_root/usr/local/bin/orangepi4pro-x11-boot-selector"

@@ -1,1 +1,2 @@
 orangepi ALL=(root) NOPASSWD: /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-sd
+orangepi ALL=(root) NOPASSWD: /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-nvme

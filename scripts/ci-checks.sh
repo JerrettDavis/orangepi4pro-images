@@ -34,7 +34,10 @@ grep -q 'Before=display-manager.service' \
   systemd/orangepi4pro-linux-boot-selector.service
 grep -q 'Exec=/usr/local/bin/orangepi4pro-x11-boot-selector' \
   configs/orangepi4pro-x11-boot-selector.desktop
-grep -q 'bootonce_target=sd' scripts/orangepi4pro-linux-boot-selector
+grep -q 'bootonce_target=%s' scripts/orangepi4pro-linux-boot-selector
+grep -q 'write_bootonce sd' scripts/orangepi4pro-linux-boot-selector
+grep -q 'write_bootonce nvme' scripts/orangepi4pro-linux-boot-selector
+grep -q -- '--boot-nvme' scripts/orangepi4pro-linux-boot-selector
 grep -q 'orangepiBootOnce.txt' configs/boot.cmd
 
 printf 'Checking boot-script safety guards...\n'

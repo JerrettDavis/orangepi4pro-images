@@ -64,8 +64,9 @@ Installed components:
   Starts the visible full-screen GTK/X11 prompt in the XFCE session.
 
 /etc/sudoers.d/orangepi4pro-boot-selector
-  Allows only the scoped SD one-shot helper:
+  Allows only the scoped one-shot helpers:
   /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-sd
+  /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-nvme
 ```
 
 If the SD root is mounted, install the same clear/selector service there so a
@@ -84,6 +85,9 @@ The X11 selector writes this boot-readable file when SD is selected:
 bootonce_target=sd
 bootonce_source=linux-selector
 ```
+
+When running from the SD root, the same selector writes
+`bootonce_target=nvme` so the next boot returns to NVMe Ubuntu.
 
 `boot.cmd` imports that file before any U-Boot visual/menu experiments and sets
 the known-good legacy image path directly:
