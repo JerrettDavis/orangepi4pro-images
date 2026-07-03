@@ -31,6 +31,10 @@ elif grep -q 'bootchooser=uboot-bootmenu-nosel' /proc/cmdline; then
   printf 'Current boot entered U-Boot bootmenu but returned without a selection.\n'
 elif grep -q 'bootchooser=legacy-bootm-fallback' /proc/cmdline; then
   printf 'Current boot used the updated legacy bootm fallback.\n'
+elif grep -q 'bootchooser=boot-script-default-nvme' /proc/cmdline; then
+  printf 'Current boot used the boot-script default NVMe path.\n'
+elif grep -q 'bootchooser=uboot-logo-preinit-ok' /proc/cmdline; then
+  printf 'Current boot ran the U-Boot logo preinit path before Linux.\n'
 else
   printf 'Current boot has no bootchooser marker; U-Boot likely used an older boot.scr.\n'
 fi
