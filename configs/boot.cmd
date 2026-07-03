@@ -169,6 +169,9 @@ if test "${selector_logo_preinit}" = "true"; then
 	setenv extraargs "${extraargs} ${selector_logo_diag}"
 	setenv extraargs "${extraargs} opi_logo_${selector_logo_hdmi}"
 	setenv extraargs "${extraargs} opi_logo_${selector_logo_drm}"
+	if test -n "${opi_logo_recover}"; then
+		setenv extraargs "${extraargs} opi_logo_recover=${opi_logo_recover}"
+	fi
 	sleep ${selector_logo_hold}
 fi
 

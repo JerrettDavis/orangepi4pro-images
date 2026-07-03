@@ -1070,6 +1070,32 @@ than through the custom AW_DRM framebuffer/pattern-test path.
 - Expected post-reboot evidence remains
   `bootchooser=uboot-logo-preinit-ok`; the useful diagnostic is whether
   `opi_logo_hdmi` moves away from `phy00,stat00,rst00,lock00` before Linux.
+- Reboot result: Linux reached NVMe and U-Boot diagnostics were retained, but
+  the bootloader display stayed black. The cmdline still showed
+  `phy00,stat00,rst00,lock00`, so the retry inside `_sunxi_drv_hdmi_enable()`
+  did not run in the successful logo path. The likely reason is that
+  `display_enable()` returned early because `state->is_enable` was already
+  true.
+
+2026-07-03 stale HDMI logo-path reinit diagnostic:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-diag-modeclock-force1024-hdmitvclk-topmc-logorecover.fex`
+- Package SHA-256:
+  `8e8926949c5453fd1590341a8489120a52bc2e52f3c35c9bf384994f8d928efd`
+- U-Boot item SHA-256:
+  `80f455d74201ac7209116b637851766532a4cfb516072894542c45bd1f38034a`
+- This package keeps the successful stock-DTB, forced 1024x600, `hdmi_tv`
+  fallback, TOP/MC parity, and stale low-level enable retry patches. It adds a
+  narrower recovery in `sunxi_show_logo()` before `display_logo()`: if HDMI-A
+  is marked initialized/enabled but the DW/SNPS PHY and MC lock registers are
+  unlocked, U-Boot calls `display_disable()`, then `display_init()`, then lets
+  the normal logo path draw and enable.
+- Expected post-reboot evidence remains
+  `bootchooser=uboot-logo-preinit-ok`. The new useful diagnostic is
+  `opi_logo_recover=stale-reinit-d0-i0-p00-l00` or a similar code in
+  `/proc/cmdline`, plus movement in `opi_logo_hdmi` away from
+  `phy00,stat00,rst00,lock00`.
 
 ## Validation
 
