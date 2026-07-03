@@ -24,18 +24,18 @@ expected_extlinux_timeout=${EXPECTED_EXTLINUX_TIMEOUT:-200}
 expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-true}
 expected_selector_prompt=${EXPECTED_SELECTOR_PROMPT:-true}
 expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-false}
-expected_selector_visual_test=${EXPECTED_SELECTOR_VISUAL_TEST:-fbtest}
-expected_selector_visual_hold=${EXPECTED_SELECTOR_VISUAL_HOLD:-10}
-expected_selector_logo_preinit=${EXPECTED_SELECTOR_LOGO_PREINIT:-true}
-expected_selector_logo_hold=${EXPECTED_SELECTOR_LOGO_HOLD:-5}
-expected_selector_diag_force_bootm=${EXPECTED_SELECTOR_DIAG_FORCE_BOOTM:-true}
+expected_selector_visual_test=${EXPECTED_SELECTOR_VISUAL_TEST:-none}
+expected_selector_visual_hold=${EXPECTED_SELECTOR_VISUAL_HOLD:-3}
+expected_selector_logo_preinit=${EXPECTED_SELECTOR_LOGO_PREINIT:-false}
+expected_selector_logo_hold=${EXPECTED_SELECTOR_LOGO_HOLD:-1}
+expected_selector_diag_force_bootm=${EXPECTED_SELECTOR_DIAG_FORCE_BOOTM:-false}
 expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
 expected_logo=${EXPECTED_LOGO:-enabled}
 expected_extlinux_first=${EXPECTED_EXTLINUX_FIRST:-true}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-false}
 expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-200}
 expected_bootmenu_default=${EXPECTED_BOOTMENU_DEFAULT:-nvme}
-expected_bootgui_selector=${EXPECTED_BOOTGUI_SELECTOR:-false}
+expected_bootgui_selector=${EXPECTED_BOOTGUI_SELECTOR:-true}
 expected_bootgui_selector_timeout=${EXPECTED_BOOTGUI_SELECTOR_TIMEOUT:-10}
 
 for file in \
