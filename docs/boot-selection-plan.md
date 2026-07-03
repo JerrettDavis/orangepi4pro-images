@@ -787,6 +787,24 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   init, HDMI clocking, `sunxi_hdmi_config()`, TOP PHY, or DesignWare core state
   is the remaining blocker.
 
+2026-07-03 DRM full-display reinit plus HDMI pattern retest:
+
+- Installed SD TOC1 package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-drm-reinit-hdmi-pattern-1024x600.fex`
+- Package SHA-256:
+  `34f52a23883a427d6471bdfc69654ef853a6f96a1f406a732acd64a35555852f`
+- U-Boot item SHA-256:
+  `bf4cbf09c7f910d4f3d9a8be3914606d7c5023a0bb6a63907c5cc96fb1f0fdf0`
+- Staged boot assets:
+  `scripts/stage-uboot-visual-test.sh --test hdmi20_pattern --hold 20 --sd-boot-dir /mnt/opisd-rw/boot`
+- Intent: run the full U-Boot DRM display disable/init/enable path before the
+  bounded HDMI20 red-pattern test, instead of only reinitializing the HDMI
+  connector.
+- Expected Linux evidence:
+  `bootchooser=uboot-visual-hdmi20-pattern-ok`,
+  `opi_drmre_ok,drmreinit=...`, `opi_pat_hdmipat=req1,...`, and non-masked
+  DesignWare HDMI register values in the HDMI diagnostic fields.
+
 ## Validation
 
 Safe dispatcher files:

@@ -46,3 +46,5 @@
   live `/boot`, `/boot/efi`, and active SD boot-source state.
 - Captured the U-Boot HDMI reinit stage diagnostics in the HDMI20 pattern test
   kernel command line as `opi_reinit_reinit=...`.
+- Added a pre-pattern `sunxi_drm reinit` step and captured its result as
+  `opi_drmre_...`.

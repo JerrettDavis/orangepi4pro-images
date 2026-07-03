@@ -286,6 +286,14 @@ if test "${selector_visual_test}" = "hdmi20_pattern"; then
 		setenv pre_hdmi20_hdmi "hdmi=diag-missing"
 	fi
 	sunxi_backlihgt on
+	if sunxi_drm reinit; then
+		setenv opi_drm_reinit_result "ok"
+	else
+		setenv opi_drm_reinit_result "fail"
+	fi
+	if test -z "${opi_drm_reinit_diag}"; then
+		setenv opi_drm_reinit_diag "drmreinit=unset"
+	fi
 	if sunxi_hdmi20 pattern 1; then
 		setenv extraargs bootchooser=uboot-visual-hdmi20-pattern-ok
 	else
@@ -307,7 +315,7 @@ if test "${selector_visual_test}" = "hdmi20_pattern"; then
 	else
 		setenv post_hdmi20_hdmi "hdmi=diag-missing"
 	fi
-	setenv extraargs "${extraargs} opi_pre_${pre_hdmi20_diag} opi_pre_${pre_hdmi20_hdmi} opi_pat_${opi_hdmi_pattern_diag} opi_reinit_${opi_hdmi_reinit_diag} opi_post_${post_hdmi20_diag} opi_post_${post_hdmi20_hdmi}"
+	setenv extraargs "${extraargs} opi_pre_${pre_hdmi20_diag} opi_pre_${pre_hdmi20_hdmi} opi_drmre_${opi_drm_reinit_result},${opi_drm_reinit_diag} opi_pat_${opi_hdmi_pattern_diag} opi_reinit_${opi_hdmi_reinit_diag} opi_post_${post_hdmi20_diag} opi_post_${post_hdmi20_hdmi}"
 	sleep ${selector_visual_hold}
 	sunxi_hdmi20 pattern 0
 fi
