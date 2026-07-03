@@ -473,6 +473,23 @@ Current staged test:
   `stdout/stderr=vidconsole,serial`, clears the screen, and then enters
   `sysboot -p`.
 
+2026-07-03 sixth attempt result and seventh attempt plan:
+
+- The forced-vidconsole path still booted NVMe through extlinux with
+  `bootchooser=extlinux-legacy-nvme`.
+- Next package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-sd-scriptfirst.fex`,
+  SHA-256
+  `77ef94aee8f8a6ec27d130822b70187fbf4316773d7ae5d59150e9027c654670`.
+- This is the closest stock-vendor candidate: it preserves the factory U-Boot
+  DTB and display/logo code, changing only the distro scan order so `boot.scr`
+  runs before extlinux. It still contains `sunxi_show_logo`,
+  `boot.bmp decompressed OK`, `NVMe detected ==> using embedded boot.bmp array`,
+  and `vidconsole`.
+- Keep the staged extlinux selector with `selector_console=true` for this test.
+  If the factory splash returns, continue from this package instead of the
+  HDMI-power DTB-patched package.
+
 ## Validation
 
 Safe dispatcher files:
