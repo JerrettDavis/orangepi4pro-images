@@ -940,6 +940,27 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   and forces the known-good legacy NVMe `bootm` path. Expected post-reboot
   evidence is `bootchooser=uboot-logo-preinit-ok` plus `opi_logo_hdmi=...` and
   `opi_logo_drm=...` in `/proc/cmdline`.
+- Reboot result: Linux reached `bootchooser=uboot-logo-preinit-ok`, but the
+  display still showed no bootloader image before the OS splash. U-Boot
+  reported `mode=1920x1080`, `clk=148500`, `fbw=1920`, `fbh=1080`, and
+  `hdmi24000000`, while Linux later switched to the visible 1024x600 path.
+
+2026-07-03 forced cyberdeck-mode diagnostic:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-diag-modeclock-force1024.fex`
+- Package SHA-256:
+  `be973352edaf182a456dc3618a91c17b12df4ba54ec4d0d8e8aa91aed8c48516`
+- U-Boot item SHA-256:
+  `f56647ab3a8e1fa464e6fcf8d5731ef76c4b2ca4b5bd838ee75cc93318c65419`
+- This package keeps the script-first boot path and passive diagnostics, but
+  forces U-Boot's HDMI mode selection to `1024x600@49 MHz` and programs
+  `clk_hdmi` from the selected mode when the TCON clock is stale. It preserves
+  the vendor monitor/SCP blobs and does not contain `sunxi_drm reinit`.
+- Expected post-reboot evidence is still
+  `bootchooser=uboot-logo-preinit-ok`; the important diagnostic change should
+  be `opi_logo_drm=...mode=1024x600,clk=49000...` and
+  `opi_logo_hdmi=...hdmi49000000,pix49000,tmds49000...`.
 
 ## Validation
 
