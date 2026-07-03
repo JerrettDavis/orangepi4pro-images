@@ -237,6 +237,37 @@ After reboot, the pass condition is:
 scripts/assert-bootchooser.sh uboot-bootmenu-nvme
 ```
 
+## U-Boot Visual Diagnostics
+
+The next visual diagnostic avoids `sunxi_show_bmp` and does not rely on menu
+input. It uses the vendor DRM test-pattern path:
+
+```bash
+sudo scripts/stage-uboot-visual-test.sh \
+  --test colorbar \
+  --hold 8 \
+  --sd-boot-dir /mnt/opisd-check/boot
+sudo EXPECTED_BOOTMENU_FIRST=false \
+  EXPECTED_SELECTOR_VISUAL_TEST=colorbar \
+  scripts/validate-boot-menu-assets.sh
+```
+
+After reboot, inspect the screen during the first 8 seconds and then assert the
+marker:
+
+```bash
+scripts/assert-bootchooser.sh uboot-visual-colorbar-ok
+```
+
+Interpretation:
+
+- Colorbar visible and marker is `uboot-visual-colorbar-ok`: U-Boot can drive
+  the panel; the remaining task is rendering a real selector on that path.
+- No colorbar but marker is `uboot-visual-colorbar-ok`: the command returned
+  success, but the visible route or backlight is still wrong.
+- Marker is `uboot-visual-colorbar-fail`: U-Boot's DRM display list or TCON
+  pattern path is not usable at that point in boot.
+
 ## Validation
 
 Safe dispatcher files:

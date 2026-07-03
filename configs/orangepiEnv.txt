@@ -13,4 +13,6 @@ bootmenu_default=nvme
 selector_console=false
 selector_prompt=false
 selector_bitmap=false
+selector_visual_test=none
+selector_visual_hold=8
 logo=enabled

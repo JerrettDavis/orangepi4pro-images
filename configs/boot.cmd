@@ -15,6 +15,8 @@ setenv earlycon "on"
 setenv bootmenu_first "false"
 setenv bootmenu_timeout "20"
 setenv bootmenu_default "nvme"
+setenv selector_visual_test "none"
+setenv selector_visual_hold "8"
 
 echo "Boot script loaded from ${devtype} ${devnum}"
 
@@ -33,6 +35,24 @@ fi
 
 if test "${selector_bitmap}" = "true"; then
 	echo "selector_bitmap=true ignored: sunxi_show_bmp is unsafe from boot.scr on this BSP"
+fi
+
+if test "${selector_visual_test}" = "colorbar"; then
+	echo "Running bounded U-Boot DRM colorbar visual test"
+	setenv selected_boot true
+	setenv extlinux_first false
+	setenv bootmenu_first false
+	setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
+	setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
+	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
+	setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
+	sunxi_backlihgt on
+	if sunxi_drm colorbar 1; then
+		setenv extraargs bootchooser=uboot-visual-colorbar-ok
+	else
+		setenv extraargs bootchooser=uboot-visual-colorbar-fail
+	fi
+	sleep ${selector_visual_hold}
 fi
 
 if test "${bootmenu_first}" = "true"; then

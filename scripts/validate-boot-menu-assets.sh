@@ -24,6 +24,8 @@ expected_extlinux_timeout=${EXPECTED_EXTLINUX_TIMEOUT:-30}
 expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-false}
 expected_selector_prompt=${EXPECTED_SELECTOR_PROMPT:-false}
 expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-false}
+expected_selector_visual_test=${EXPECTED_SELECTOR_VISUAL_TEST:-none}
+expected_selector_visual_hold=${EXPECTED_SELECTOR_VISUAL_HOLD:-8}
 expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
 expected_logo=${EXPECTED_LOGO:-enabled}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-true}
@@ -64,6 +66,10 @@ grep -q "^selector_prompt=${expected_selector_prompt}$" /boot/orangepiEnv.txt \
   || fail "selector_prompt should be ${expected_selector_prompt}"
 grep -q "^selector_bitmap=${expected_selector_bitmap}$" /boot/orangepiEnv.txt \
   || fail "selector_bitmap should be ${expected_selector_bitmap}"
+grep -q "^selector_visual_test=${expected_selector_visual_test}$" /boot/orangepiEnv.txt \
+  || fail "selector_visual_test should be ${expected_selector_visual_test}"
+grep -q "^selector_visual_hold=${expected_selector_visual_hold}$" /boot/orangepiEnv.txt \
+  || fail "selector_visual_hold should be ${expected_selector_visual_hold}"
 grep -q "^bootlogo=${expected_bootlogo}$" /boot/orangepiEnv.txt \
   || fail "bootlogo should be ${expected_bootlogo}"
 grep -q "^logo=${expected_logo}$" /boot/orangepiEnv.txt \
@@ -75,6 +81,8 @@ grep -q 'uboot-bootmenu-nvme' /boot/boot.cmd || fail 'boot.cmd does not contain 
 grep -q 'uboot-bootmenu-sd' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot SD selector marker'
 grep -q 'usb start' /boot/boot.cmd || fail 'boot.cmd does not start USB before bootmenu'
 grep -q 'bootmenu_default' /boot/boot.cmd || fail 'boot.cmd does not support deterministic bootmenu default tests'
+grep -q 'sunxi_drm colorbar' /boot/boot.cmd || fail 'boot.cmd does not support bounded colorbar visual test'
+grep -q 'uboot-visual-colorbar-ok' /boot/boot.cmd || fail 'boot.cmd lacks colorbar success marker'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
 grep -q 'booti' /boot/boot.cmd || fail 'boot.cmd does not contain direct booti probe'
 grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallback'
@@ -118,6 +126,8 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   "$repo_root/configs/orangepiEnv.txt" \
   | sed -E "s/^selector_prompt=.*/selector_prompt=${expected_selector_prompt}/" \
   | sed -E "s/^selector_bitmap=.*/selector_bitmap=${expected_selector_bitmap}/" \
+  | sed -E "s/^selector_visual_test=.*/selector_visual_test=${expected_selector_visual_test}/" \
+  | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
@@ -128,6 +138,8 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   /boot/orangepiEnv.txt \
   | sed -E "s/^selector_prompt=.*/selector_prompt=${expected_selector_prompt}/" \
   | sed -E "s/^selector_bitmap=.*/selector_bitmap=${expected_selector_bitmap}/" \
+  | sed -E "s/^selector_visual_test=.*/selector_visual_test=${expected_selector_visual_test}/" \
+  | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
