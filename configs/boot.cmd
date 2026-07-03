@@ -141,7 +141,6 @@ if test "${selector_diag_force_bootm}" = "true"; then
 	setenv extlinux_first false
 	setenv bootmenu_first false
 	setenv bootgui_selector false
-	setenv selector_visual_test none
 	setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
 	setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
 	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
