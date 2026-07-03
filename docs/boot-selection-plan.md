@@ -57,6 +57,12 @@ opi_pre_drm=...init=1,en=1,bl=1,mode=1024x600...
 opi_post_drm=...init=1,en=1,bl=1,mode=1024x600...
 ```
 
+For logo-path diagnostics, stage the boot script with `extlinux_first=false`
+and `selector_diag_force_bootm=true`. Extlinux `APPEND` lines replace the boot
+script's `extraargs`, so `uboot-logo-preinit-*` markers are only visible in
+`/proc/cmdline` when the test temporarily uses the legacy `bootm` path after
+running `sunxi_show_logo`.
+
 The boot script imports `orangepiBootOnce.txt` before extlinux or legacy
 fallbacks. Request files must be mirrored to both NVMe `/boot` and SD `/boot`
 because U-Boot may source `boot.scr` from either device:

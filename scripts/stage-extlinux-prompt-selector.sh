@@ -10,13 +10,15 @@ default_entry=ubuntu-nvme
 video_console=true
 logo_preinit=false
 logo_hold=5
+extlinux_first=true
+diag_force_bootm=false
 
 usage() {
   cat <<'USAGE'
 Stage the extlinux prompt selector on the live boot filesystems.
 
 Usage:
-  scripts/stage-extlinux-prompt-selector.sh [--timeout TENTHS] [--default ubuntu-nvme|ubuntu-sd] [--video-console true|false] [--logo-preinit true|false] [--logo-hold SECONDS] [--sd-boot-dir DIR]
+  scripts/stage-extlinux-prompt-selector.sh [--timeout TENTHS] [--default ubuntu-nvme|ubuntu-sd] [--video-console true|false] [--logo-preinit true|false] [--logo-hold SECONDS] [--extlinux-first true|false] [--diag-force-bootm true|false] [--sd-boot-dir DIR]
 
 This stages the repo's boot.cmd/extlinux assets and configures U-Boot to enter
 the prompted extlinux path before legacy bootm. It writes boot filesystem files
@@ -44,6 +46,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --logo-hold)
       logo_hold=${2:-}
+      shift
+      ;;
+    --extlinux-first)
+      extlinux_first=${2:-}
+      shift
+      ;;
+    --diag-force-bootm)
+      diag_force_bootm=${2:-}
       shift
       ;;
     --boot-dir)
@@ -109,6 +119,22 @@ case "$logo_hold" in
     ;;
 esac
 
+case "$extlinux_first" in
+  true|false) ;;
+  *)
+    printf 'ERROR: --extlinux-first must be true or false\n' >&2
+    exit 2
+    ;;
+esac
+
+case "$diag_force_bootm" in
+  true|false) ;;
+  *)
+    printf 'ERROR: --diag-force-bootm must be true or false\n' >&2
+    exit 2
+    ;;
+esac
+
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   printf 'ERROR: rerun with sudo so boot assets can be written\n' >&2
   exit 1
@@ -121,7 +147,7 @@ patch_env() {
   [ -e "$env_file" ] || return 0
   sed -i \
     -e "s/^grub_first=.*/grub_first=false/" \
-    -e "s/^extlinux_first=.*/extlinux_first=true/" \
+    -e "s/^extlinux_first=.*/extlinux_first=${extlinux_first}/" \
     -e "s/^direct_booti_first=.*/direct_booti_first=false/" \
     -e "s/^bootmenu_first=.*/bootmenu_first=false/" \
     -e "s/^bootmenu_default=.*/bootmenu_default=nvme/" \
@@ -132,7 +158,7 @@ patch_env() {
     -e "s/^selector_visual_hold=.*/selector_visual_hold=8/" \
     -e "s/^selector_logo_preinit=.*/selector_logo_preinit=${logo_preinit}/" \
     -e "s/^selector_logo_hold=.*/selector_logo_hold=${logo_hold}/" \
-    -e "s/^selector_diag_force_bootm=.*/selector_diag_force_bootm=false/" \
+    -e "s/^selector_diag_force_bootm=.*/selector_diag_force_bootm=${diag_force_bootm}/" \
     -e "s/^bootgui_selector=.*/bootgui_selector=false/" \
     -e "s/^bootgui_selector_timeout=.*/bootgui_selector_timeout=10/" \
     "$env_file"
@@ -159,5 +185,5 @@ if [ -n "$sd_boot_dir" ]; then
 fi
 
 sync
-printf 'Staged extlinux prompt selector: default=%s timeout=%s tenths video_console=%s logo_preinit=%s logo_hold=%s\n' \
-  "$default_entry" "$timeout" "$video_console" "$logo_preinit" "$logo_hold"
+printf 'Staged extlinux prompt selector: default=%s timeout=%s tenths video_console=%s logo_preinit=%s logo_hold=%s extlinux_first=%s diag_force_bootm=%s\n' \
+  "$default_entry" "$timeout" "$video_console" "$logo_preinit" "$logo_hold" "$extlinux_first" "$diag_force_bootm"
