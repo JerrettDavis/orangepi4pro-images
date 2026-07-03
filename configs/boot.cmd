@@ -17,6 +17,8 @@ setenv bootmenu_timeout "20"
 setenv bootmenu_default "nvme"
 setenv selector_visual_test "none"
 setenv selector_visual_hold "8"
+setenv selector_logo_preinit "false"
+setenv selector_logo_hold "3"
 
 echo "Boot script loaded from ${devtype} ${devnum}"
 
@@ -119,6 +121,17 @@ fi
 
 if test -n "${opi_bootselect_logo}"; then
 	setenv extraargs "${extraargs} opibootlogo=${opi_bootselect_logo}"
+fi
+
+if test "${selector_logo_preinit}" = "true"; then
+	echo "Pre-initializing U-Boot video with stock sunxi_show_logo"
+	if sunxi_show_logo; then
+		setenv selector_logo_diag "uboot-logo-preinit-ok"
+	else
+		setenv selector_logo_diag "uboot-logo-preinit-fail"
+	fi
+	setenv extraargs "${extraargs} ${selector_logo_diag}"
+	sleep ${selector_logo_hold}
 fi
 
 if test "${selector_console}" = "true"; then

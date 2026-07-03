@@ -19,20 +19,22 @@ printf 'Validating Orange Pi 4 Pro GRUB/extlinux boot-menu assets\n\n'
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 expected_extlinux_default=${EXPECTED_EXTLINUX_DEFAULT:-ubuntu-nvme}
-expected_extlinux_prompt=${EXPECTED_EXTLINUX_PROMPT:-0}
-expected_extlinux_timeout=${EXPECTED_EXTLINUX_TIMEOUT:-30}
-expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-false}
-expected_selector_prompt=${EXPECTED_SELECTOR_PROMPT:-false}
+expected_extlinux_prompt=${EXPECTED_EXTLINUX_PROMPT:-1}
+expected_extlinux_timeout=${EXPECTED_EXTLINUX_TIMEOUT:-200}
+expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-true}
+expected_selector_prompt=${EXPECTED_SELECTOR_PROMPT:-true}
 expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-false}
 expected_selector_visual_test=${EXPECTED_SELECTOR_VISUAL_TEST:-none}
 expected_selector_visual_hold=${EXPECTED_SELECTOR_VISUAL_HOLD:-8}
+expected_selector_logo_preinit=${EXPECTED_SELECTOR_LOGO_PREINIT:-true}
+expected_selector_logo_hold=${EXPECTED_SELECTOR_LOGO_HOLD:-5}
 expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
 expected_logo=${EXPECTED_LOGO:-enabled}
-expected_extlinux_first=${EXPECTED_EXTLINUX_FIRST:-false}
+expected_extlinux_first=${EXPECTED_EXTLINUX_FIRST:-true}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-false}
-expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-20}
+expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-200}
 expected_bootmenu_default=${EXPECTED_BOOTMENU_DEFAULT:-nvme}
-expected_bootgui_selector=${EXPECTED_BOOTGUI_SELECTOR:-true}
+expected_bootgui_selector=${EXPECTED_BOOTGUI_SELECTOR:-false}
 expected_bootgui_selector_timeout=${EXPECTED_BOOTGUI_SELECTOR_TIMEOUT:-10}
 
 for file in \
@@ -80,6 +82,10 @@ grep -q "^selector_visual_test=${expected_selector_visual_test}$" /boot/orangepi
   || fail "selector_visual_test should be ${expected_selector_visual_test}"
 grep -q "^selector_visual_hold=${expected_selector_visual_hold}$" /boot/orangepiEnv.txt \
   || fail "selector_visual_hold should be ${expected_selector_visual_hold}"
+grep -q "^selector_logo_preinit=${expected_selector_logo_preinit}$" /boot/orangepiEnv.txt \
+  || fail "selector_logo_preinit should be ${expected_selector_logo_preinit}"
+grep -q "^selector_logo_hold=${expected_selector_logo_hold}$" /boot/orangepiEnv.txt \
+  || fail "selector_logo_hold should be ${expected_selector_logo_hold}"
 grep -q "^bootlogo=${expected_bootlogo}$" /boot/orangepiEnv.txt \
   || fail "bootlogo should be ${expected_bootlogo}"
 grep -q "^logo=${expected_logo}$" /boot/orangepiEnv.txt \
@@ -94,6 +100,8 @@ grep -q 'bootmenu_default' /boot/boot.cmd || fail 'boot.cmd does not support det
 grep -q 'sunxi_drm colorbar' /boot/boot.cmd || fail 'boot.cmd does not support bounded colorbar visual test'
 grep -q 'sunxi_drm fbtest' /boot/boot.cmd || fail 'boot.cmd does not support bounded framebuffer visual test'
 grep -q 'sunxi_drm_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot DRM env diagnostics'
+grep -q 'sunxi_show_logo' /boot/boot.cmd || fail 'boot.cmd does not pre-initialize U-Boot video with stock logo command'
+grep -q 'uboot-logo-preinit-ok' /boot/boot.cmd || fail 'boot.cmd lacks logo preinit success marker'
 grep -q 'uboot-visual-colorbar-ok' /boot/boot.cmd || fail 'boot.cmd lacks colorbar success marker'
 grep -q 'uboot-visual-fbtest-ok' /boot/boot.cmd || fail 'boot.cmd lacks fbtest success marker'
 grep -q 'orangepiBootOnce.txt' /boot/boot.cmd || fail 'boot.cmd does not import Linux selector bootonce requests'
@@ -148,6 +156,8 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_bitmap=.*/selector_bitmap=${expected_selector_bitmap}/" \
   | sed -E "s/^selector_visual_test=.*/selector_visual_test=${expected_selector_visual_test}/" \
   | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
+  | sed -E "s/^selector_logo_preinit=.*/selector_logo_preinit=${expected_selector_logo_preinit}/" \
+  | sed -E "s/^selector_logo_hold=.*/selector_logo_hold=${expected_selector_logo_hold}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   | sed -E "s/^extlinux_first=.*/extlinux_first=${expected_extlinux_first}/" \
@@ -162,6 +172,8 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_bitmap=.*/selector_bitmap=${expected_selector_bitmap}/" \
   | sed -E "s/^selector_visual_test=.*/selector_visual_test=${expected_selector_visual_test}/" \
   | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
+  | sed -E "s/^selector_logo_preinit=.*/selector_logo_preinit=${expected_selector_logo_preinit}/" \
+  | sed -E "s/^selector_logo_hold=.*/selector_logo_hold=${expected_selector_logo_hold}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
   | sed -E "s/^logo=.*/logo=${expected_logo}/" \
   | sed -E "s/^extlinux_first=.*/extlinux_first=${expected_extlinux_first}/" \
