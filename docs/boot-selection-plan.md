@@ -385,6 +385,16 @@ Current staged test:
   `opi_pre_*`, `opi_fb_*`, and `opi_post_*` diagnostics in `/proc/cmdline`
   before changing display strategy again.
 
+2026-07-03 first attempt result:
+
+- The system booted NVMe with `bootchooser=boot-script-default-nvme`.
+- Root cause: the default NVMe branch in `boot.cmd` cleared
+  `selector_visual_test` before the `fbtest` block, so the framebuffer test did
+  not execute.
+- Fix: the default NVMe branch now leaves `selector_visual_test` intact, and
+  `scripts/validate-boot-menu-assets.sh` fails if that branch reintroduces
+  `setenv selector_visual_test none`.
+
 ## Validation
 
 Safe dispatcher files:

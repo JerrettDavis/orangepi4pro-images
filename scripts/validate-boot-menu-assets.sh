@@ -123,6 +123,12 @@ grep -q 'Forcing selector output to serial and video console' /boot/boot.cmd \
 grep -q 'sysboot -p' /boot/boot.cmd || fail 'boot.cmd does not contain prompted sysboot path'
 ! grep -q '^[[:space:]]*sunxi_show_bmp boot.bmp' /boot/boot.cmd \
   || fail 'boot.cmd must not call unsafe sunxi_show_bmp from boot.scr'
+! awk '
+  /Default boot target: NVMe Ubuntu/ { in_default = 1 }
+  /if test -n "\$\{opi_bootselect_diag\}"/ { in_default = 0 }
+  in_default && /setenv selector_visual_test none/ { found = 1 }
+  END { exit found ? 0 : 1 }
+' /boot/boot.cmd || fail 'default NVMe path must not clear staged selector_visual_test'
 
 grep -q 'Ubuntu NVMe - cyberdeck kernel' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe menu entry missing'
 grep -q 'Ubuntu SD - stock kernel' /boot/extlinux/extlinux.conf || fail 'extlinux SD menu entry missing'
