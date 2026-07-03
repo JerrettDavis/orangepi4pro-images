@@ -159,20 +159,7 @@ report() {
   printf '\n'
 
   printf 'Running live boot-menu asset validation...\n'
-  EXPECTED_BOOTGUI_SELECTOR=false \
-    EXPECTED_BOOTMENU_FIRST=false \
-    EXPECTED_BOOTMENU_TIMEOUT=200 \
-    EXPECTED_SELECTOR_VISUAL_TEST=fbtest \
-    EXPECTED_SELECTOR_VISUAL_HOLD=10 \
-    EXPECTED_SELECTOR_PROMPT=true \
-    EXPECTED_SELECTOR_CONSOLE=true \
-    EXPECTED_SELECTOR_LOGO_PREINIT=true \
-    EXPECTED_SELECTOR_LOGO_HOLD=5 \
-    EXPECTED_SELECTOR_DIAG_FORCE_BOOTM=true \
-    EXPECTED_EXTLINUX_FIRST=true \
-    EXPECTED_EXTLINUX_PROMPT=1 \
-    EXPECTED_EXTLINUX_TIMEOUT=200 \
-    "$images_repo/scripts/validate-boot-menu-assets.sh"
+  "$images_repo/scripts/validate-boot-menu-assets.sh"
   printf '\n'
 
   printf 'Running active boot-source validation...\n'
