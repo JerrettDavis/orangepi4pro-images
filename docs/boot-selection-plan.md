@@ -837,6 +837,20 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   match Linux's working 1024x600 mode-change path. The known-unsafe full DRM
   reinit diagnostic remains disabled.
 
+2026-07-03 HDMI frame-composer iteration candidate:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-fciter-1024x600.fex`
+- U-Boot build artifact SHA-256:
+  `002934b2dec68ac776a3fa1dd1c84ff15d13ab0ebe0753d76ffb01b1c5b7bd11`
+- Source patch:
+  `orangepi4pro-board-support/configs/u-boot/0019-sync-linux-hdmi-fc-iteration-and-diag.patch`
+- Intent: keep the script-first factory-logo preinit test, but add Linux's
+  missing HDMI20 frame-composer iteration write to U-Boot AVP config and read
+  DesignWare HDMI registers unconditionally for better post-boot diagnosis.
+- Safety: the previously unsafe full DRM reinit command remains disabled and
+  must not appear in the packaged U-Boot strings.
+
 ## Validation
 
 Safe dispatcher files:
