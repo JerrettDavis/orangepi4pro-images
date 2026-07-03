@@ -854,6 +854,10 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   DesignWare HDMI registers unconditionally for better post-boot diagnosis.
 - Safety: the previously unsafe full DRM reinit command remains disabled and
   must not appear in the packaged U-Boot strings.
+- Follow-up script safety: the `hdmi20_pattern` boot-script path now records
+  `drmreinit=disabled` and must not invoke `sunxi_drm reinit`; the pattern
+  test should exercise only the HDMI20 internal pattern command plus the
+  current U-Boot HDMI register diagnostics.
 
 ## Validation
 

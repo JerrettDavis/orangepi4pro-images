@@ -67,8 +67,10 @@ if [ -d "$sd_mount/boot" ]; then
   strings "$sd_mount/boot/boot.scr" | grep -q 'bootchooser=legacy-bootm-fallback' \
     || fail "SD boot.scr is the recovered direct bootm script, without selector fallback marker"
   if [ "$expected_selector_visual_test" = hdmi20_pattern ]; then
-    strings "$sd_mount/boot/boot.scr" | grep -q 'sunxi_drm reinit' \
-      || fail "SD boot.scr lacks the DRM reinit visual diagnostic"
+    ! strings "$sd_mount/boot/boot.scr" | grep -q 'sunxi_drm reinit' \
+      || fail "SD boot.scr still references the disabled DRM reinit diagnostic"
+    strings "$sd_mount/boot/boot.scr" | grep -q 'drmreinit=disabled' \
+      || fail "SD boot.scr lacks the disabled DRM reinit marker"
     strings "$sd_mount/boot/boot.scr" | grep -q 'opi_drmre_' \
       || fail "SD boot.scr lacks the DRM reinit bootarg diagnostic"
     strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-visual-hdmi20-pattern-ok' \
