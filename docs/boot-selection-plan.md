@@ -568,6 +568,35 @@ Current staged test:
   whether the top PHY returned to nonzero locked state or whether the remaining
   failure moved elsewhere.
 
+2026-07-03 AW_DRM versus legacy bootGUI finding:
+
+- The installed HDMI bus-clock package reached Linux with
+  `bootchooser=uboot-visual-fbtest-ok`. U-Boot reported HPD, a 1280x720 mode,
+  a 74.25 MHz HDMI clock, nonzero HDMI TOP registers, `toplock1`, and a
+  successful framebuffer paint into the active U-Boot DRM framebuffer. The
+  external display still remained black until the later Orange Pi OS loader.
+- The obvious legacy `bootGUI` canvas path is not usable for this A733 build.
+  In the vendor U-Boot tree, `CONFIG_BOOT_GUI` depends on `CONFIG_DISP2_SUNXI`;
+  the sun60iw2/A733 defconfig uses the newer AW_DRM display stack instead.
+  Enabling `CONFIG_DISP2_SUNXI` for this target fails to compile in
+  `drivers/video/sunxi/disp2` with "undefined platform" errors. Selector work
+  should stay on the AW_DRM/HDMI20 path unless the vendor adds sun60iw2 DISP2
+  platform support.
+- The next bootloader-only diagnostic is the HDMI20 controller pattern
+  generator:
+
+```bash
+sudo scripts/stage-uboot-visual-test.sh \
+  --test hdmi20_pattern \
+  --hold 20 \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+This bypasses the DE/TCON/framebuffer drawing path. If the pattern is visible,
+the remaining failure is in the AW_DRM plane/framebuffer rendering path. If the
+pattern is still invisible, U-Boot's HDMI link/output is not actually reaching
+the display even though the current diagnostics report success.
+
 ## Validation
 
 Safe dispatcher files:
