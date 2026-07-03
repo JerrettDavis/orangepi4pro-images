@@ -490,6 +490,18 @@ Current staged test:
   If the factory splash returns, continue from this package instead of the
   HDMI-power DTB-patched package.
 
+2026-07-03 seventh attempt result and eighth attempt plan:
+
+- The minimal stock script-first package still booted NVMe through extlinux
+  with `bootchooser=extlinux-legacy-nvme`.
+- Next staged script mode:
+  `scripts/stage-extlinux-prompt-selector.sh --timeout 200 --default ubuntu-nvme --video-console true --logo-preinit true --logo-hold 5`.
+- This keeps the closest-to-factory U-Boot package and explicitly runs the
+  stock `sunxi_show_logo` path before switching stdout/stderr to vidconsole and
+  entering prompted extlinux. The goal is to restore the same video
+  initialization path that produced the factory "boot loader initializing"
+  display before asking U-Boot to render selector text.
+
 ## Validation
 
 Safe dispatcher files:
