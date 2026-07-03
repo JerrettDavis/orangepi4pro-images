@@ -1049,6 +1049,27 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `bootchooser=uboot-logo-preinit-ok`; useful diagnostics are retained
   `tv49000000`, new `top20_` through `top40_` fields, and any movement of
   `stat`/`lock` toward Linux's locked HDMI PHY state.
+- Reboot result: Linux reached NVMe and U-Boot retained diagnostics. TOP PHY
+  registers now matched Linux's visible PLL words, including `top20_e8193000`
+  and `top40_00000001`. The bootloader display stayed black because the
+  DW/SNPS core still read `phy00,stat00,rst00,lock00,vid00,gcp00` before Linux
+  later disabled/re-enabled HDMI and reached SNPS PHY lock.
+
+2026-07-03 stale HDMI enable-state retry diagnostic:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-diag-modeclock-force1024-hdmitvclk-topmc-staleretry.fex`
+- Package SHA-256:
+  `d0d129a5718e0d8fb65f5c573ab793f67285988bf529a6361a6b763413e10658`
+- U-Boot item SHA-256:
+  `fe048ea27580f9248577f735380e40cbb31fd6893629285dbfa73b99581af1a5`
+- This package treats a claimed-enabled but unlocked HDMI PHY as stale in
+  `_sunxi_drv_hdmi_enable()`, clears it with `sunxi_hdmi_disconfig()`, then
+  continues through the normal `sunxi_hdmi_config()` path. It also stops
+  marking `drv_enable=1` when HDMI config fails.
+- Expected post-reboot evidence remains
+  `bootchooser=uboot-logo-preinit-ok`; the useful diagnostic is whether
+  `opi_logo_hdmi` moves away from `phy00,stat00,rst00,lock00` before Linux.
 
 ## Validation
 
