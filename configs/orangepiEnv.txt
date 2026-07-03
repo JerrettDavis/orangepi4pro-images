@@ -15,4 +15,6 @@ selector_prompt=false
 selector_bitmap=false
 selector_visual_test=none
 selector_visual_hold=8
+bootgui_selector=true
+bootgui_selector_timeout=10
 logo=enabled

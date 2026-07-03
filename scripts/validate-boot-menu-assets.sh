@@ -31,6 +31,8 @@ expected_logo=${EXPECTED_LOGO:-enabled}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-false}
 expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-20}
 expected_bootmenu_default=${EXPECTED_BOOTMENU_DEFAULT:-nvme}
+expected_bootgui_selector=${EXPECTED_BOOTGUI_SELECTOR:-true}
+expected_bootgui_selector_timeout=${EXPECTED_BOOTGUI_SELECTOR_TIMEOUT:-10}
 
 for file in \
   /boot/boot.cmd \
@@ -60,6 +62,10 @@ grep -q "^bootmenu_timeout=${expected_bootmenu_timeout}$" /boot/orangepiEnv.txt 
   || fail "bootmenu_timeout should be ${expected_bootmenu_timeout}"
 grep -q "^bootmenu_default=${expected_bootmenu_default}$" /boot/orangepiEnv.txt \
   || fail "bootmenu_default should be ${expected_bootmenu_default}"
+grep -q "^bootgui_selector=${expected_bootgui_selector}$" /boot/orangepiEnv.txt \
+  || fail "bootgui_selector should be ${expected_bootgui_selector}"
+grep -q "^bootgui_selector_timeout=${expected_bootgui_selector_timeout}$" /boot/orangepiEnv.txt \
+  || fail "bootgui_selector_timeout should be ${expected_bootgui_selector_timeout}"
 grep -q "^selector_console=${expected_selector_console}$" /boot/orangepiEnv.txt \
   || fail "selector_console should be ${expected_selector_console}"
 grep -q "^selector_prompt=${expected_selector_prompt}$" /boot/orangepiEnv.txt \
@@ -90,6 +96,9 @@ grep -q 'orangepiBootOnce.txt' /boot/boot.cmd || fail 'boot.cmd does not import 
 grep -q 'bootchooser=linux-selector-sd' /boot/boot.cmd || fail 'boot.cmd lacks Linux selector SD marker'
 grep -q 'bootchooser=linux-selector-nvme' /boot/boot.cmd || fail 'boot.cmd lacks Linux selector NVMe marker'
 grep -q 'bootchooser=boot-script-default-nvme' /boot/boot.cmd || fail 'boot.cmd lacks boot-script default NVMe marker'
+grep -q 'opi_bootselect' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI selector command'
+grep -q 'bootgui-selector-sd' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI SD marker'
+grep -q 'bootgui-selector-nvme' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI NVMe marker'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
 grep -q 'booti' /boot/boot.cmd || fail 'boot.cmd does not contain direct booti probe'
 grep -q 'bootm' /boot/boot.cmd || fail 'boot.cmd does not contain legacy fallback'
