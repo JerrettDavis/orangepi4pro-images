@@ -163,9 +163,7 @@ report() {
   printf '\n'
 
   printf 'Running active boot-source validation...\n'
-  EXPECTED_BOOTMENU_FIRST=false \
-    EXPECTED_SELECTOR_CONSOLE=true \
-    "$images_repo/scripts/validate-active-boot-source.sh" /mnt/opisd-ro
+  "$images_repo/scripts/validate-active-boot-source.sh" /mnt/opisd-ro
   printf '\n'
 
   grep -qw "bootchooser=${expected_bootchooser}" /proc/cmdline \
