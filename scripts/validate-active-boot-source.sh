@@ -5,6 +5,8 @@ sd_mount=${1:-/mnt/opisd-ro}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-any}
 expected_selector_console=${EXPECTED_SELECTOR_CONSOLE:-any}
 expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-any}
+expected_selector_visual_test=${EXPECTED_SELECTOR_VISUAL_TEST:-any}
+expected_selector_visual_hold=${EXPECTED_SELECTOR_VISUAL_HOLD:-any}
 
 fail() {
   printf 'ERROR: %s\n' "$*" >&2
@@ -50,8 +52,24 @@ if [ -d "$sd_mount/boot" ]; then
     grep -q "^selector_bitmap=${expected_selector_bitmap}$" "$sd_mount/boot/orangepiEnv.txt" \
       || fail "SD orangepiEnv.txt does not set selector_bitmap=${expected_selector_bitmap}"
   fi
+  if [ "$expected_selector_visual_test" != any ]; then
+    grep -q "^selector_visual_test=${expected_selector_visual_test}$" "$sd_mount/boot/orangepiEnv.txt" \
+      || fail "SD orangepiEnv.txt does not set selector_visual_test=${expected_selector_visual_test}"
+  fi
+  if [ "$expected_selector_visual_hold" != any ]; then
+    grep -q "^selector_visual_hold=${expected_selector_visual_hold}$" "$sd_mount/boot/orangepiEnv.txt" \
+      || fail "SD orangepiEnv.txt does not set selector_visual_hold=${expected_selector_visual_hold}"
+  fi
   strings "$sd_mount/boot/boot.scr" | grep -q 'bootchooser=legacy-bootm-fallback' \
-    || printf 'SD boot.scr is the recovered direct bootm script, without selector fallback marker.\n'
+    || fail "SD boot.scr is the recovered direct bootm script, without selector fallback marker"
+  if [ "$expected_selector_visual_test" = hdmi20_pattern ]; then
+    strings "$sd_mount/boot/boot.scr" | grep -q 'sunxi_drm reinit' \
+      || fail "SD boot.scr lacks the DRM reinit visual diagnostic"
+    strings "$sd_mount/boot/boot.scr" | grep -q 'opi_drmre_' \
+      || fail "SD boot.scr lacks the DRM reinit bootarg diagnostic"
+    strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-visual-hdmi20-pattern-ok' \
+      || fail "SD boot.scr lacks the HDMI20 visual-test marker"
+  fi
   if [ "$expected_bootmenu_first" = true ]; then
     strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nvme' \
       || fail "SD boot.scr lacks the U-Boot NVMe bootmenu marker"
