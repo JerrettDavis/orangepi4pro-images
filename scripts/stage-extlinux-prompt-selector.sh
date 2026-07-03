@@ -7,13 +7,14 @@ efi_dir=/boot/efi
 sd_boot_dir=
 timeout=200
 default_entry=ubuntu-nvme
+video_console=true
 
 usage() {
   cat <<'USAGE'
 Stage the extlinux prompt selector on the live boot filesystems.
 
 Usage:
-  scripts/stage-extlinux-prompt-selector.sh [--timeout TENTHS] [--default ubuntu-nvme|ubuntu-sd] [--sd-boot-dir DIR]
+  scripts/stage-extlinux-prompt-selector.sh [--timeout TENTHS] [--default ubuntu-nvme|ubuntu-sd] [--video-console true|false] [--sd-boot-dir DIR]
 
 This stages the repo's boot.cmd/extlinux assets and configures U-Boot to enter
 the prompted extlinux path before legacy bootm. It writes boot filesystem files
@@ -29,6 +30,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --default)
       default_entry=${2:-}
+      shift
+      ;;
+    --video-console)
+      video_console=${2:-}
       shift
       ;;
     --boot-dir)
@@ -71,6 +76,14 @@ case "$default_entry" in
     ;;
 esac
 
+case "$video_console" in
+  true|false) ;;
+  *)
+    printf 'ERROR: --video-console must be true or false\n' >&2
+    exit 2
+    ;;
+esac
+
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   printf 'ERROR: rerun with sudo so boot assets can be written\n' >&2
   exit 1
@@ -87,7 +100,7 @@ patch_env() {
     -e "s/^direct_booti_first=.*/direct_booti_first=false/" \
     -e "s/^bootmenu_first=.*/bootmenu_first=false/" \
     -e "s/^bootmenu_default=.*/bootmenu_default=nvme/" \
-    -e "s/^selector_console=.*/selector_console=false/" \
+    -e "s/^selector_console=.*/selector_console=${video_console}/" \
     -e "s/^selector_prompt=.*/selector_prompt=true/" \
     -e "s/^selector_bitmap=.*/selector_bitmap=false/" \
     -e "s/^selector_visual_test=.*/selector_visual_test=none/" \
@@ -121,4 +134,5 @@ if [ -n "$sd_boot_dir" ]; then
 fi
 
 sync
-printf 'Staged extlinux prompt selector: default=%s timeout=%s tenths\n' "$default_entry" "$timeout"
+printf 'Staged extlinux prompt selector: default=%s timeout=%s tenths video_console=%s\n' \
+  "$default_entry" "$timeout" "$video_console"

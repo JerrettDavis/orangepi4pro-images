@@ -460,6 +460,19 @@ Current staged test:
   `bootchooser=extlinux-legacy-nvme` if the prompted extlinux selector boots
   the default entry.
 
+2026-07-03 fifth attempt result and sixth attempt plan:
+
+- The system booted NVMe with `bootchooser=extlinux-legacy-nvme`, proving
+  U-Boot entered the extlinux dispatcher and selected the default NVMe entry.
+- Visual selector output is still missing, so the current fault is U-Boot video
+  console routing rather than storage detection or selector dispatch.
+- Next staged script mode:
+  `scripts/stage-extlinux-prompt-selector.sh --timeout 200 --default ubuntu-nvme --video-console true`.
+  This forces the existing `selector_console=true` branch before extlinux, which
+  runs `usb start`, sets `stdin=serial,usbkbd`, sets
+  `stdout/stderr=vidconsole,serial`, clears the screen, and then enters
+  `sysboot -p`.
+
 ## Validation
 
 Safe dispatcher files:
