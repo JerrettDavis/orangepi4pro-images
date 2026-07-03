@@ -6,9 +6,14 @@ Current status on 2026-07-03:
 - The active target is bootloader-stage selection only. The temporary X11/XFCE
   autostart prompt was removed from the active path because it appears after a
   full Linux boot.
-- The installed SD-card bootloader package is the script-first framebuffer-test
-  package. Readback from `/dev/mmcblk1` matches
-  `boot_package_sd-bootmenu-scriptfirst-selector-logo-drm-env-1024x600-fbtest.fex`.
+- The installed SD-card bootloader package is the stock vendor package with
+  only script-first scan order patched. Readback from `/dev/mmcblk1` at
+  `bs=8192 skip=2050` matches
+  `boot_package_vendor-sd-scriptfirst.fex`, SHA-256
+  `77ef94aee8f8a6ec27d130822b70187fbf4316773d7ae5d59150e9027c654670`.
+- The SD `boot0_sdcard.fex` region at `bs=8192 skip=1` matches the vendor
+  package. The missing bootloader display is not currently explained by a
+  corrupted boot0 or partial TOC1 write.
 - A validated menu-capable vendor U-Boot package was built from
   `v2018.05-sun60iw2` plus `CONFIG_CMD_BOOTMENU`, `CONFIG_USB_KEYBOARD`, and
   `CONFIG_DM_KEYBOARD`, then patched so `/boot/boot.scr` is scanned before
@@ -18,8 +23,14 @@ Current status on 2026-07-03:
 - Reboots with the selector-logo package prove that script-first U-Boot enters
   `bootmenu` and boots the NVMe entry, because Linux reports
   `bootchooser=uboot-bootmenu-nvme`.
-- The deck display still stays black during U-Boot and a blind Down+Enter test
-  did not select SD, so keyboard input and display visibility remain unproven.
+- The deck display still stays black during U-Boot. Blind Down+Enter tests have
+  either kept booting NVMe or selected SD without a visible prompt, so keyboard
+  input and display visibility remain unsuitable as a user-facing selector.
+- The next bootloader-display candidate is built by the board-support script
+  `scripts/prepare-vendor-sd-hdmi-power-package.sh`. It keeps stock vendor
+  U-Boot, fixes script-first scanning, adds U-Boot's expected
+  `uhdmi_power_count` property, and points HDMI power at phandles including a
+  Linux-matching `cldo2` regulator node.
 - The first reboot with the menu-capable package reached the NVMe desktop but
   showed a black screen before userspace, because the live boot files were
   still staged for the older extlinux visibility experiment.
