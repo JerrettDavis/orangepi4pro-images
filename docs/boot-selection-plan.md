@@ -502,6 +502,22 @@ Current staged test:
   initialization path that produced the factory "boot loader initializing"
   display before asking U-Boot to render selector text.
 
+2026-07-03 eighth attempt result and ninth attempt plan:
+
+- The system still booted NVMe through extlinux with
+  `bootchooser=extlinux-legacy-nvme`.
+- Because `sysboot` uses the fixed `APPEND` lines from `extlinux.conf`, the
+  `boot.cmd` logo-preinit marker cannot be observed in `/proc/cmdline`.
+- Next package:
+  `/usr/lib/linux-u-boot-current-orangepi4pro_1.0.6_arm64/boot_package.fex`,
+  SHA-256
+  `7a2661b080f5c5d8ba32566bc79f1ccfbfb8912a4a5c0c1a4856a9380542c807`.
+- This is the exact vendor package. It restores the original extlinux-first
+  scan order and the factory U-Boot DTB/display path while preserving the
+  prompted extlinux selector files on the boot filesystems. Use this to test
+  whether the factory "boot loader initializing" display returns when no
+  U-Boot binary patch is present.
+
 ## Validation
 
 Safe dispatcher files:
