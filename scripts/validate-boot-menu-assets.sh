@@ -139,6 +139,8 @@ grep -q 'dc683cb4-0847-4d2f-83f1-184d35749d4c' /boot/extlinux/extlinux.conf \
   || fail 'SD root UUID missing from boot menus'
 grep -q 'bootchooser=extlinux-legacy-nvme' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe marker missing'
 grep -q 'bootchooser=extlinux-legacy-sd' /boot/extlinux/extlinux.conf || fail 'extlinux SD marker missing'
+grep -q 'splash plymouth.ignore-serial-consoles' /boot/extlinux/extlinux.conf \
+  || fail 'extlinux default entries must preserve Plymouth splash arguments'
 grep -q 'bootchooser=legacy-bootm-fallback' /boot/boot.cmd || fail 'legacy fallback marker missing from boot.cmd'
 # shellcheck disable=SC2016
 grep -Fq 'sysboot ${devtype} ${devnum}:${distro_bootpart} any' /boot/boot.cmd \
