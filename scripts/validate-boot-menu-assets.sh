@@ -35,7 +35,7 @@ expected_extlinux_first=${EXPECTED_EXTLINUX_FIRST:-true}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-false}
 expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-200}
 expected_bootmenu_default=${EXPECTED_BOOTMENU_DEFAULT:-nvme}
-expected_bootgui_selector=${EXPECTED_BOOTGUI_SELECTOR:-true}
+expected_bootgui_selector=${EXPECTED_BOOTGUI_SELECTOR:-false}
 expected_bootgui_selector_timeout=${EXPECTED_BOOTGUI_SELECTOR_TIMEOUT:-10}
 
 for file in \

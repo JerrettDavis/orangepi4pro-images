@@ -18,6 +18,6 @@ selector_visual_hold=10
 selector_logo_preinit=false
 selector_logo_hold=1
 selector_diag_force_bootm=false
-bootgui_selector=true
+bootgui_selector=false
 bootgui_selector_timeout=10
 logo=enabled
