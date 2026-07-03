@@ -259,6 +259,11 @@ marker:
 scripts/assert-bootchooser.sh uboot-visual-colorbar-ok
 ```
 
+When using a U-Boot package built with
+`configs/u-boot/0002-add-sunxi-drm-env-diag.patch`, `/proc/cmdline` also
+contains `opi_pre_drm=...` and `opi_post_drm=...` markers with U-Boot's display
+route, connector type, mode, framebuffer dimensions, and backlight flag.
+
 Interpretation:
 
 - Colorbar visible and marker is `uboot-visual-colorbar-ok`: U-Boot can drive

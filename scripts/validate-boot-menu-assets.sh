@@ -82,6 +82,7 @@ grep -q 'uboot-bootmenu-sd' /boot/boot.cmd || fail 'boot.cmd does not contain U-
 grep -q 'usb start' /boot/boot.cmd || fail 'boot.cmd does not start USB before bootmenu'
 grep -q 'bootmenu_default' /boot/boot.cmd || fail 'boot.cmd does not support deterministic bootmenu default tests'
 grep -q 'sunxi_drm colorbar' /boot/boot.cmd || fail 'boot.cmd does not support bounded colorbar visual test'
+grep -q 'sunxi_drm_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot DRM env diagnostics'
 grep -q 'uboot-visual-colorbar-ok' /boot/boot.cmd || fail 'boot.cmd lacks colorbar success marker'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'
 grep -q 'booti' /boot/boot.cmd || fail 'boot.cmd does not contain direct booti probe'

@@ -46,12 +46,23 @@ if test "${selector_visual_test}" = "colorbar"; then
 	setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
 	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
 	setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
+	if sunxi_drm_env; then
+		setenv pre_colorbar_diag "${opi_drm_diag}"
+	else
+		setenv pre_colorbar_diag "drm_diag=missing"
+	fi
 	sunxi_backlihgt on
 	if sunxi_drm colorbar 1; then
 		setenv extraargs bootchooser=uboot-visual-colorbar-ok
 	else
 		setenv extraargs bootchooser=uboot-visual-colorbar-fail
 	fi
+	if sunxi_drm_env; then
+		setenv post_colorbar_diag "${opi_drm_diag}"
+	else
+		setenv post_colorbar_diag "drm_diag=missing"
+	fi
+	setenv extraargs "${extraargs} opi_pre_${pre_colorbar_diag} opi_post_${post_colorbar_diag}"
 	sleep ${selector_visual_hold}
 fi
 
