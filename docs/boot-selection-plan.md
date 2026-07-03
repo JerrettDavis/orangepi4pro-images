@@ -239,8 +239,8 @@ scripts/assert-bootchooser.sh uboot-bootmenu-nvme
 
 ## U-Boot Visual Diagnostics
 
-The next visual diagnostic avoids `sunxi_show_bmp` and does not rely on menu
-input. It uses the vendor DRM test-pattern path:
+The colorbar visual diagnostic avoids `sunxi_show_bmp` and does not rely on
+menu input. It uses the vendor DRM test-pattern path:
 
 ```bash
 sudo scripts/stage-uboot-visual-test.sh \
@@ -272,6 +272,31 @@ Interpretation:
   success, but the visible route or backlight is still wrong.
 - Marker is `uboot-visual-colorbar-fail`: U-Boot's DRM display list or TCON
   pattern path is not usable at that point in boot.
+
+The 2026-07-03 native-mode colorbar test returned
+`bootchooser=uboot-visual-colorbar-ok` and reported HDMI-A at `1024x600`,
+49 MHz, with a 1024x600 framebuffer, but the screen stayed black until Linux.
+The current visual diagnostic therefore bypasses the TCON pattern path and
+paints directly into U-Boot's active DRM framebuffer:
+
+```bash
+sudo scripts/stage-uboot-visual-test.sh \
+  --test fbtest \
+  --hold 8 \
+  --sd-boot-dir /mnt/opisd-check/boot
+sudo EXPECTED_BOOTMENU_FIRST=false \
+  EXPECTED_SELECTOR_VISUAL_TEST=fbtest \
+  scripts/validate-boot-menu-assets.sh
+```
+
+After reboot, inspect the screen during the first 8 seconds and then assert:
+
+```bash
+scripts/assert-bootchooser.sh uboot-visual-fbtest-ok
+```
+
+The paired board-support package must contain `sunxi_drm fbtest`. A successful
+run appends `opi_fb_fbtest=...` diagnostics to `/proc/cmdline`.
 
 ## Validation
 

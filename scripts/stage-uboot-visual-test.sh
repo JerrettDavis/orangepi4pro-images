@@ -13,12 +13,15 @@ usage() {
 Stage a bounded U-Boot visual diagnostic.
 
 Usage:
-  scripts/stage-uboot-visual-test.sh [--test colorbar|none] [--hold SECONDS] [--sd-boot-dir DIR]
+  scripts/stage-uboot-visual-test.sh [--test colorbar|fbtest|none] [--hold SECONDS] [--sd-boot-dir DIR]
 
 The colorbar test runs U-Boot's built-in `sunxi_drm colorbar 1`, waits for the
 configured hold time, marks the kernel command line with either
 `bootchooser=uboot-visual-colorbar-ok` or `bootchooser=uboot-visual-colorbar-fail`,
 then boots NVMe via the known legacy bootm path.
+
+The fbtest test runs the board-support `sunxi_drm fbtest` command, which paints
+directly into the active U-Boot DRM framebuffer.
 
 This writes boot files only. It does not write bootloader sectors, NVMe
 partition tables, SPI, or MTD.
@@ -61,9 +64,9 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$test_name" in
-  colorbar|none) ;;
+  colorbar|fbtest|none) ;;
   *)
-    printf 'ERROR: --test must be colorbar or none\n' >&2
+    printf 'ERROR: --test must be colorbar, fbtest, or none\n' >&2
     exit 2
     ;;
 esac
