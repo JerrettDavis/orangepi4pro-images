@@ -961,6 +961,28 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `bootchooser=uboot-logo-preinit-ok`; the important diagnostic change should
   be `opi_logo_drm=...mode=1024x600,clk=49000...` and
   `opi_logo_hdmi=...hdmi49000000,pix49000,tmds49000...`.
+- Reboot result: the mode portion succeeded and Linux booted from NVMe with
+  `opi_logo_drm=...mode=1024x600,clk=49000,fbw=1024,fbh=600...`. The display
+  still did not show a bootloader image because HDMI diagnostics still reported
+  `tcon0,hdmi24000000,pix49000,tmds49000`.
+
+2026-07-03 HDMI clock-binding diagnostic:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-diag-modeclock-force1024-hdmiclkdtb.fex`
+- Package SHA-256:
+  `78a8c9b079d96d33a396b1b1fc9f5bcf85c8fe80aee56e3777e20002bf3f5134`
+- U-Boot item SHA-256:
+  `65a9d1bec87a9d7e0dd41197ffc3f242f9437d342beae7d4f5eeccd1a2d9d5a6`
+- This package keeps the successful forced 1024x600 diagnostic U-Boot and
+  patches the embedded U-Boot DTB so `clk_hdmi` maps to the programmable
+  `hdmi_tv` clock and the original HDMI gate maps to `clk_bus_hdmi`. It also
+  applies the existing HDMI power/fast-output DTB corrections with
+  `force_route=false`.
+- Expected post-reboot evidence is still
+  `bootchooser=uboot-logo-preinit-ok`; the key diagnostic change should be
+  `opi_logo_hdmi=...hdmi49000000,pix49000,tmds49000...`, or a new error that
+  proves where HDMI clock programming still fails.
 
 ## Validation
 
