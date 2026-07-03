@@ -704,6 +704,26 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `bootchooser=uboot-visual-hdmi20-pattern-ok` and `opi_pre_hdmi=*top0_*`
   changing away from the previous `top0_00000017` reading.
 
+2026-07-03 HDMI pattern reconfiguration retest:
+
+- Installed SD TOC1 package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-pattern-reconfig-1024x600.fex`
+- Package SHA-256:
+  `5e1e7209d7fe8535c998c640593f280a6b8f94f7afc4115cb11218189687d92d`
+- U-Boot item SHA-256:
+  `56e9e8e882485333850f928920f0d79914e0fd36b8f5a7af8ff2099301bae972`
+- Staged boot assets:
+  `scripts/stage-uboot-visual-test.sh --test hdmi20_pattern --hold 20 --sd-boot-dir /mnt/opisd-rw/boot`
+- Intent: repeat the 20-second HDMI20 internal pattern test, but first force
+  the vendor HDMI driver through `_sunxi_drv_hdmi_enable()` because the last
+  captured U-Boot registers showed a powered top PHY with the DesignWare HDMI
+  core still idle.
+- Expected Linux evidence:
+  `bootchooser=uboot-visual-hdmi20-pattern-ok` and
+  `opi_pat_hdmipat=req1,reconfig0,...`. If HDMI is still not visible before
+  Linux, inspect whether the `phy`, `stat`, `rst`, `lock`, `vid`, and `gcp`
+  fields changed from zero.
+
 ## Validation
 
 Safe dispatcher files:
