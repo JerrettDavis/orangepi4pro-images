@@ -33,6 +33,9 @@ install_to_boot_dir() {
   install -m 0644 "$repo_root/configs/boot.cmd" "$target/boot.cmd"
   install -m 0644 "$repo_root/configs/orangepiEnv.txt" "$target/orangepiEnv.txt"
   install -m 0644 "$repo_root/configs/extlinux.conf" "$target/extlinux/extlinux.conf"
+  if [ -e "$target/boot.bmp" ]; then
+    cp -a "$target/boot.bmp" "$target/boot1.bmp"
+  fi
   mkimage -C none -A arm -T script -d "$target/boot.cmd" "$target/boot.scr"
 }
 
@@ -68,6 +71,8 @@ if [ -d "$efi_dir" ]; then
   cp -a "$boot_dir/boot.scr" "$efi_dir/boot.scr"
   cp -a "$boot_dir/orangepiEnv.txt" "$efi_dir/orangepiEnv.txt"
   cp -a "$boot_dir/extlinux/extlinux.conf" "$efi_dir/extlinux/extlinux.conf"
+  [ -e "$boot_dir/boot.bmp" ] && cp -a "$boot_dir/boot.bmp" "$efi_dir/boot.bmp"
+  [ -e "$boot_dir/boot1.bmp" ] && cp -a "$boot_dir/boot1.bmp" "$efi_dir/boot1.bmp"
 fi
 
 if [ -n "$sd_boot_dir" ]; then

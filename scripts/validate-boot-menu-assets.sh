@@ -40,6 +40,7 @@ for file in \
   /boot/orangepiEnv.txt \
   /boot/extlinux/extlinux.conf \
   /boot/boot.bmp \
+  /boot/boot1.bmp \
   /boot/uImage-5.15.147-sun60iw2-cyberdeck \
   /boot/uInitrd-5.15.147-sun60iw2-cyberdeck \
   /boot/uImage-5.15.147-sun60iw2 \
@@ -66,6 +67,7 @@ grep -q "^bootgui_selector=${expected_bootgui_selector}$" /boot/orangepiEnv.txt 
   || fail "bootgui_selector should be ${expected_bootgui_selector}"
 grep -q "^bootgui_selector_timeout=${expected_bootgui_selector_timeout}$" /boot/orangepiEnv.txt \
   || fail "bootgui_selector_timeout should be ${expected_bootgui_selector_timeout}"
+cmp -s /boot/boot.bmp /boot/boot1.bmp || fail '/boot/boot1.bmp must mirror /boot/boot.bmp for A733 U-Boot logo loading'
 grep -q "^selector_console=${expected_selector_console}$" /boot/orangepiEnv.txt \
   || fail "selector_console should be ${expected_selector_console}"
 grep -q "^selector_prompt=${expected_selector_prompt}$" /boot/orangepiEnv.txt \
@@ -182,11 +184,13 @@ hash_files=(
   /boot/extlinux/extlinux.conf
   /boot/boot.scr
   /boot/boot.bmp
+  /boot/boot1.bmp
 )
 for optional_file in \
   /boot/efi/extlinux/extlinux.conf \
   /boot/efi/boot.scr \
   /boot/efi/boot.bmp \
+  /boot/efi/boot1.bmp \
   /boot/grub/grub.cfg \
   /boot/EFI/BOOT/BOOTAA64.EFI \
   /boot/EFI/BOOT/grub.cfg \
