@@ -395,6 +395,20 @@ Current staged test:
   `scripts/validate-boot-menu-assets.sh` fails if that branch reintroduces
   `setenv selector_visual_test none`.
 
+2026-07-03 second attempt result:
+
+- The system booted NVMe with `bootchooser=uboot-visual-fbtest-ok`.
+- U-Boot reported HDMI-A initialized and enabled at `1024x600`, and
+  `opi_fb_fbtest=ok,w=1024,h=600,addr=b3dfd000,size=2457600`.
+- The next package is
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-fbtest-planecommit-hdmi-power.fex`,
+  SHA-256
+  `19f2f5fb2874f9c836963921cf63fa66be652948f2fdbdb87ccf938dd8696c85`.
+  It updates `sunxi_drm fbtest` to bind the painted framebuffer to the primary
+  plane and flush the CRTC before the 20 second hold.
+- Expected marker after reboot remains `bootchooser=uboot-visual-fbtest-ok`,
+  with `opi_fb_fbtest=...fbid=...,plane=...,en=...`.
+
 ## Validation
 
 Safe dispatcher files:
