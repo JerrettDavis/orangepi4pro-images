@@ -151,12 +151,20 @@ if test "${selector_logo_preinit}" = "true"; then
 	if sunxi_hdmi_env; then
 		setenv selector_logo_hdmi "${opi_hdmi_diag}"
 	else
-		setenv selector_logo_hdmi "hdmi=diag-missing"
+		if test -n "${opi_hdmi_diag}"; then
+			setenv selector_logo_hdmi "${opi_hdmi_diag}"
+		else
+			setenv selector_logo_hdmi "hdmi=diag-missing"
+		fi
 	fi
 	if sunxi_drm_env; then
 		setenv selector_logo_drm "${opi_drm_diag}"
 	else
-		setenv selector_logo_drm "drm=diag-missing"
+		if test -n "${opi_drm_diag}"; then
+			setenv selector_logo_drm "${opi_drm_diag}"
+		else
+			setenv selector_logo_drm "drm=diag-missing"
+		fi
 	fi
 	setenv extraargs "${extraargs} ${selector_logo_diag}"
 	setenv extraargs "${extraargs} opi_logo_${selector_logo_hdmi}"
