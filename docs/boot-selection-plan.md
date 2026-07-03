@@ -426,6 +426,19 @@ Current staged test:
   condition is a visible high-contrast framebuffer test during the 20 second
   U-Boot hold.
 
+2026-07-03 fourth attempt plan:
+
+- Keep the installed TCON-clock U-Boot package and switch only the staged boot
+  script to `selector_visual_test=hdmi20_pattern`.
+- This runs `sunxi_hdmi20 pattern 1`, the vendor DesignWare HDMI internal
+  pattern generator, then holds for 20 seconds before legacy NVMe boot.
+- Expected marker after reboot:
+  `bootchooser=uboot-visual-hdmi20-pattern-ok` or
+  `bootchooser=uboot-visual-hdmi20-pattern-fail`.
+- If the HDMI20 pattern is also invisible, the remaining fault is link
+  bring-up below framebuffer/DE/TCON plane rendering. If it is visible, move
+  back upward to TCON source selection and framebuffer scanout.
+
 ## Validation
 
 Safe dispatcher files:

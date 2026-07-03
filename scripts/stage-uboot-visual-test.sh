@@ -13,7 +13,7 @@ usage() {
 Stage a bounded U-Boot visual diagnostic.
 
 Usage:
-  scripts/stage-uboot-visual-test.sh [--test colorbar|fbtest|none] [--hold SECONDS] [--sd-boot-dir DIR]
+  scripts/stage-uboot-visual-test.sh [--test colorbar|fbtest|hdmi20_pattern|none] [--hold SECONDS] [--sd-boot-dir DIR]
 
 The colorbar test runs U-Boot's built-in `sunxi_drm colorbar 1`, waits for the
 configured hold time, marks the kernel command line with either
@@ -22,6 +22,10 @@ then boots NVMe via the known legacy bootm path.
 
 The fbtest test runs the board-support `sunxi_drm fbtest` command, which paints
 directly into the active U-Boot DRM framebuffer.
+
+The hdmi20_pattern test runs the vendor `sunxi_hdmi20 pattern 1` command. That
+uses the HDMI controller's internal pattern generator and helps isolate link
+bring-up from DE/TCON/framebuffer rendering.
 
 This writes boot files only. It does not write bootloader sectors, NVMe
 partition tables, SPI, or MTD.
@@ -64,9 +68,9 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$test_name" in
-  colorbar|fbtest|none) ;;
+  colorbar|fbtest|hdmi20_pattern|none) ;;
   *)
-    printf 'ERROR: --test must be colorbar, fbtest, or none\n' >&2
+    printf 'ERROR: --test must be colorbar, fbtest, hdmi20_pattern, or none\n' >&2
     exit 2
     ;;
 esac
