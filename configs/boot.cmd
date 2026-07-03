@@ -182,7 +182,18 @@ if test "${selector_console}" = "true"; then
 fi
 
 if test "${selector_bitmap}" = "true"; then
-	echo "selector_bitmap=true ignored: sunxi_show_bmp is unsafe from boot.scr on this BSP"
+	echo "Displaying selector bitmap with standard U-Boot bmp command"
+	if load ${devtype} ${devnum}:${distro_bootpart} ${load_addr} ${prefix}boot.bmp; then
+		if bmp display ${load_addr}; then
+			setenv selector_bitmap_diag "uboot-bmp-display-ok"
+		else
+			setenv selector_bitmap_diag "uboot-bmp-display-fail"
+		fi
+	else
+		setenv selector_bitmap_diag "uboot-bmp-load-fail"
+	fi
+	setenv extraargs "${extraargs} ${selector_bitmap_diag}"
+	sleep ${selector_visual_hold}
 fi
 
 if test "${selector_visual_test}" = "colorbar"; then

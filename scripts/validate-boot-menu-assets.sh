@@ -107,6 +107,9 @@ grep -q 'sunxi_drm_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot
 grep -q 'sunxi_hdmi_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot HDMI env diagnostics'
 grep -q 'sunxi_show_logo' /boot/boot.cmd || fail 'boot.cmd does not pre-initialize U-Boot video with stock logo command'
 grep -q 'uboot-logo-preinit-ok' /boot/boot.cmd || fail 'boot.cmd lacks logo preinit success marker'
+grep -q 'uboot-bmp-display-ok' /boot/boot.cmd || fail 'boot.cmd lacks standard U-Boot bmp display success marker'
+# shellcheck disable=SC2016
+grep -q 'bmp display ${load_addr}' /boot/boot.cmd || fail 'boot.cmd lacks standard U-Boot bmp display path'
 grep -q 'selector_diag_force_bootm' /boot/boot.cmd || fail 'boot.cmd lacks diagnostic bootm path after logo preinit'
 grep -q 'uboot-visual-colorbar-ok' /boot/boot.cmd || fail 'boot.cmd lacks colorbar success marker'
 grep -q 'uboot-visual-fbtest-ok' /boot/boot.cmd || fail 'boot.cmd lacks fbtest success marker'

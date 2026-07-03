@@ -875,6 +875,30 @@ than through the custom AW_DRM framebuffer/pattern-test path.
 - Safety: no full DRM reinit command; timeout is non-fatal and should still
   boot through the known NVMe legacy `bootm` path.
 
+2026-07-03 stock vendor extlinux result:
+
+- The exact stock vendor NVMe package
+  `/usr/lib/linux-u-boot-current-orangepi4pro_1.0.6_arm64/boot_package_a733_nvme.fex`,
+  SHA-256 `e626234a6eb9420ac29f515dd6acc543e7f0876e3dc086eec2fe221a50cc54f2`,
+  booted the prompted extlinux NVMe entry and reached Linux with
+  `bootchooser=extlinux-legacy-nvme`.
+- The screen still stayed black until the Orange Pi OS splash/desktop. This
+  proves the extlinux selector is logically reached, but stock U-Boot is not
+  presenting a visible video console before Linux initializes HDMI.
+
+2026-07-03 standard BMP-display selector test:
+
+- `configs/boot.cmd` now has a guarded `selector_bitmap=true` path that uses
+  standard U-Boot `bmp display ${load_addr}` instead of the unsafe BSP
+  `sunxi_show_bmp` command.
+- The next bounded test stages a plain white `800x480` `boot.bmp` on NVMe and
+  SD boot filesystems, sets `selector_bitmap=true`, holds for
+  `selector_visual_hold`, then enters prompted extlinux. If this path works,
+  the pre-Linux screen should go visibly white before the selector/default
+  boot continues. If it remains black/no-signal but Linux reaches
+  `uboot-bmp-display-ok`, the standard U-Boot video console is also writing to
+  an unscanned or disconnected framebuffer before Linux reinitializes HDMI.
+
 ## Validation
 
 Safe dispatcher files:
