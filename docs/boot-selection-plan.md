@@ -628,6 +628,38 @@ This restores `logo.bmp` to the filenames U-Boot actually loads, runs
 known-good legacy `bootm` path. Expected Linux evidence is
 `bootchooser=uboot-logo-preinit-ok` plus `opi_logo_*` HDMI diagnostics.
 
+2026-07-03 stock BootGUI reset-point test:
+
+- The factory Orange Pi "initializing boot loader" display is the behavior to
+  recover first. The next test should stop using the custom selector U-Boot
+  binary and reinstall the stock vendor SD U-Boot package with only the
+  script-first scan-order patch:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-sd-scriptfirst.fex`.
+- Expected SHA-256:
+  `77ef94aee8f8a6ec27d130822b70187fbf4316773d7ae5d59150e9027c654670`.
+- Preinstall validator:
+
+```bash
+/home/orangepi/orangepi4pro-board-support/scripts/validate-stock-bootgui-package.sh \
+  --package /var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-sd-scriptfirst.fex
+```
+
+- Stage boot assets for an actual selector attempt, not a userland fallback:
+
+```bash
+sudo scripts/stage-extlinux-prompt-selector.sh \
+  --timeout 200 \
+  --default ubuntu-nvme \
+  --video-console true \
+  --logo-preinit false \
+  --extlinux-first true
+```
+
+The expected visual result is the factory boot-loader splash first, followed by
+the U-Boot/extlinux selector window. If only the factory splash returns, the
+next patch should draw the selector through the same early display path rather
+than through the custom AW_DRM framebuffer/pattern-test path.
+
 ## Validation
 
 Safe dispatcher files:
