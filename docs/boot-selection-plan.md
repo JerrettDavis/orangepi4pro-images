@@ -660,6 +660,23 @@ the U-Boot/extlinux selector window. If only the factory splash returns, the
 next patch should draw the selector through the same early display path rather
 than through the custom AW_DRM framebuffer/pattern-test path.
 
+2026-07-03 HDMI rich-register diagnostic test:
+
+- Installed SD TOC1 package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-richdiag-1024x600.fex`
+- Package SHA-256:
+  `d765d346f939de1438843a195b291cc7b9816c757da70b51d654876f1f815ba8`
+- Staged boot assets:
+  `scripts/stage-uboot-visual-test.sh --test hdmi20_pattern --hold 20 --sd-boot-dir /mnt/opisd-rw/boot`
+- Intent: hold U-Boot for 20 seconds while the HDMI20 controller internal
+  pattern generator is enabled. This bypasses framebuffer drawing and records
+  richer HDMI transmitter registers into the next Linux command line.
+- Expected Linux evidence:
+  `bootchooser=uboot-visual-hdmi20-pattern-ok` and `opi_pre_*`, `opi_pat_*`,
+  and `opi_post_*` command-line fields. If the monitor still reports no signal,
+  inspect the recorded `phy`, `stat`, `rst`, `lock`, `vid`, and `gcp` register
+  bytes before making the next display patch.
+
 ## Validation
 
 Safe dispatcher files:
