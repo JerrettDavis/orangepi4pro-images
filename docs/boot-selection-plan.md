@@ -449,22 +449,27 @@ Current staged test:
 
 - The system booted NVMe with
   `bootchooser=uboot-visual-hdmi20-pattern-fail`.
-- The vendor `sunxi_hdmi20 pattern` command returns a non-zero status even on
-  its documented pattern branch, so that marker is not reliable hardware
-  evidence. The useful next step is to stop testing custom U-Boot display
-  commands and restore the stock vendor U-Boot display path.
+- Source inspection found that
+  `_sunxi_hdmi_sysfs_pattern_store()` always returned `1`, even after taking
+  its documented pattern branch. The `fail` marker is therefore not reliable
+  hardware evidence.
+- The next package fixes that return value and exports
+  `opi_pat_hdmipat=req...,tcon...,force...,r...,g...,b...` so Linux records
+  whether U-Boot actually set the DesignWare HDMI frame-composer force-video
+  registers before the 20 second hold.
 - Next package:
-  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-sd-scriptfirst-hdmi-power.fex`,
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-patternstatus-1024x600.fex`,
   SHA-256
-  `d4fe6a813c40766b9f00872b46ab3f1b72dfe70910bc1330b346605ffbf89bc7`.
-  This keeps the vendor binary that contains the factory `sunxi_show_logo` and
-  `boot.bmp decompressed OK` path, with only script-first scanning and HDMI
-  power DTB corrections.
-- Staged script mode:
-  `scripts/stage-extlinux-prompt-selector.sh --timeout 200 --default ubuntu-nvme`.
-  Expected marker after reboot is an extlinux marker such as
-  `bootchooser=extlinux-legacy-nvme` if the prompted extlinux selector boots
-  the default entry.
+  `2b79a35b9182a63a4304cb89aa1b1178fe214abe03050923b212a06e05a24abd`.
+  This returns to the 1024x600 clock that Linux uses successfully on this
+  display, keeps the script-first AW_DRM diagnostic U-Boot path, and carries
+  the HDMI power/clock DTB corrections.
+- Staged script mode remains:
+  `scripts/stage-uboot-visual-test.sh --test hdmi20_pattern --hold 20`.
+  Expected marker after reboot should become
+  `bootchooser=uboot-visual-hdmi20-pattern-ok` plus the `opi_pat_*`
+  diagnostics. If the screen is still black, use those diagnostics to decide
+  whether the remaining failure is before or after HDMI frame-composer output.
 
 2026-07-03 fifth attempt result and sixth attempt plan:
 
