@@ -168,10 +168,11 @@ fi
 if test "${selector_console}" = "true"; then
 	echo "Forcing selector output to serial and video console"
 	usb start
-	setenv stdout "vidconsole,serial"
-	setenv stderr "vidconsole,serial"
+	setenv stdout "serial,vidconsole"
+	setenv stderr "serial,vidconsole"
 	setenv stdin "serial,usbkbd"
 	cls
+	echo "Orange Pi 4 Pro boot selector video console active"
 fi
 
 if test "${selector_bitmap}" = "true"; then

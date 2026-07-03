@@ -518,6 +518,18 @@ Current staged test:
   whether the factory "boot loader initializing" display returns when no
   U-Boot binary patch is present.
 
+2026-07-03 ninth attempt result and tenth attempt plan:
+
+- Exact vendor U-Boot still booted the NVMe extlinux entry:
+  `bootchooser=extlinux-legacy-nvme`.
+- Exact vendor U-Boot scans extlinux before `boot.scr`, so the scripted
+  `selector_console=true` branch cannot run in that package.
+- Return to the minimal script-first package and update the selector console
+  branch to set `stdout/stderr=serial,vidconsole` instead of
+  `vidconsole,serial`, then clear and print an explicit marker before extlinux.
+  Serial stays as the guaranteed console while vidconsole is added for HDMI
+  rendering.
+
 ## Validation
 
 Safe dispatcher files:
