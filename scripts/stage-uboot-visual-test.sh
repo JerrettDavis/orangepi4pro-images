@@ -89,10 +89,21 @@ patch_env() {
   local env_file=$1
   [ -e "$env_file" ] || return 0
   sed -i \
+    -e "s/^grub_first=.*/grub_first=false/" \
+    -e "s/^extlinux_first=.*/extlinux_first=false/" \
+    -e "s/^direct_booti_first=.*/direct_booti_first=false/" \
     -e "s/^bootmenu_first=.*/bootmenu_first=false/" \
     -e "s/^bootmenu_default=.*/bootmenu_default=nvme/" \
+    -e "s/^selector_console=.*/selector_console=false/" \
+    -e "s/^selector_prompt=.*/selector_prompt=true/" \
+    -e "s/^selector_bitmap=.*/selector_bitmap=false/" \
     -e "s/^selector_visual_test=.*/selector_visual_test=${test_name}/" \
     -e "s/^selector_visual_hold=.*/selector_visual_hold=${hold}/" \
+    -e "s/^selector_logo_preinit=.*/selector_logo_preinit=false/" \
+    -e "s/^selector_logo_hold=.*/selector_logo_hold=3/" \
+    -e "s/^selector_diag_force_bootm=.*/selector_diag_force_bootm=false/" \
+    -e "s/^bootgui_selector=.*/bootgui_selector=false/" \
+    -e "s/^bootgui_selector_timeout=.*/bootgui_selector_timeout=10/" \
     "$env_file"
 }
 

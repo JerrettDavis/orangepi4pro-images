@@ -369,6 +369,22 @@ scripts/assert-bootchooser.sh uboot-visual-fbtest-ok
 The paired board-support package must contain `sunxi_drm fbtest`. A successful
 run appends `opi_fb_fbtest=...` diagnostics to `/proc/cmdline`.
 
+Current staged test:
+
+- U-Boot package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-diagnostic-fbtest-hdmi-power.fex`
+- Package SHA-256:
+  `fcfac8e4e89b6b4c5237bc7649064f3a9bf0d3d85a4b64a5eddd47e3b3ec8d81`
+- Boot env:
+  `selector_visual_test=fbtest`, `selector_visual_hold=20`,
+  `selector_logo_preinit=false`, `selector_diag_force_bootm=false`.
+- Expected marker after reboot:
+  `bootchooser=uboot-visual-fbtest-ok` or
+  `bootchooser=uboot-visual-fbtest-fail`.
+- If the screen remains black but the marker is `ok`, inspect the attached
+  `opi_pre_*`, `opi_fb_*`, and `opi_post_*` diagnostics in `/proc/cmdline`
+  before changing display strategy again.
+
 ## Validation
 
 Safe dispatcher files:
