@@ -3,8 +3,8 @@
 Current status on 2026-07-03:
 
 - The machine boots NVMe Ubuntu through extlinux.
-- The practical visible selector is now moving to early Linux on tty1, before
-  LightDM. U-Boot remains the boot target router through a plain text
+- The practical visible selector now runs as an X11/XFCE autostart prompt.
+  U-Boot remains the boot target router through a plain text
   `orangepiBootOnce.txt` file.
 - The SD-card bootloader package is currently the recovered extlinux-first
   package. It scans `/boot/extlinux/extlinux.conf` before `/boot/boot.scr`.
@@ -33,7 +33,7 @@ Current status on 2026-07-03:
 - `TIMEOUT 0` is unsafe on this BSP. It has already wedged at the Orange Pi
   bootloader loading graphic.
 
-## Early Linux Selector
+## Linux/X11 Selector
 
 U-Boot framebuffer diagnostics now prove the script path and framebuffer writes
 run before Linux:
@@ -45,12 +45,27 @@ opi_pre_drm=...init=1,en=1,bl=1,mode=1024x600...
 opi_post_drm=...init=1,en=1,bl=1,mode=1024x600...
 ```
 
-The panel still stays black until Linux userspace, so the visible selector is a
-systemd service on `/dev/tty1`:
+The panel still stays black until Linux userspace, and a tty1 `whiptail` prompt
+also remains invisible even though systemd starts it. The visible selector is
+therefore launched after X starts:
 
 ```bash
 sudo scripts/install-linux-boot-selector.sh
 sudo scripts/validate-linux-boot-selector.sh /
+```
+
+Installed components:
+
+```text
+/etc/systemd/system/orangepi4pro-linux-boot-selector.service
+  Clears stale one-shot boot files before LightDM.
+
+/etc/xdg/autostart/orangepi4pro-x11-boot-selector.desktop
+  Starts the visible X11 prompt in the XFCE session.
+
+/etc/sudoers.d/orangepi4pro-boot-selector
+  Allows only the scoped SD one-shot helper:
+  /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-sd
 ```
 
 If the SD root is mounted, install the same clear/selector service there so a
@@ -62,7 +77,7 @@ sudo scripts/install-linux-boot-selector.sh --target-root /mnt/opisd-check
 sudo scripts/validate-linux-boot-selector.sh /mnt/opisd-check
 ```
 
-The selector writes this boot-readable file when SD is selected:
+The X11 selector writes this boot-readable file when SD is selected:
 
 ```text
 /boot/orangepiBootOnce.txt
@@ -78,8 +93,8 @@ bootchooser=linux-selector-sd
 bootchooser=linux-selector-nvme
 ```
 
-The Linux service removes stale `orangepiBootOnce.txt` files at startup before
-showing the menu, which prevents repeat SD boots after a successful one-shot
+The Linux cleanup service removes stale `orangepiBootOnce.txt` files at startup
+before LightDM, which prevents repeat SD boots after a successful one-shot
 selection.
 
 ## Safe Baseline

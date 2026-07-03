@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Orange Pi 4 Pro Boot Selector
+Exec=/usr/local/bin/orangepi4pro-x11-boot-selector
+Terminal=false
+X-GNOME-Autostart-enabled=true
+OnlyShowIn=XFCE;GNOME;LXDE;MATE;

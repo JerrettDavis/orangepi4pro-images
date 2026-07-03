@@ -26,9 +26,9 @@ about the target path and preconditions.
 - Kernel: `5.15.147-sun60iw2-cyberdeck`
 - Boot flow: vendor U-Boot tries GRUB EFI, then extlinux, then legacy `bootm`
   fallback
-- Confirmed visible selector target: early Linux tty selector before LightDM.
-  U-Boot visual diagnostics execute but are not visible on the deck panel
-  before Linux initializes display output.
+- Confirmed visible selector target: X11 selector at XFCE session start.
+  U-Boot visual diagnostics and tty prompts execute but are not visible on the
+  deck panel before X initializes display output.
 - While the SD card is inserted, vendor U-Boot still loads the active
   `boot.scr` from SD, then mounts the NVMe root via `rootdev`.
 
@@ -40,13 +40,17 @@ source:
 sudo scripts/install-extlinux-selector.sh /boot /boot/efi /mnt/opisd-ro/boot
 ```
 
-Install the visible Linux selector into the current root, and into the mounted
-SD root if the SD card is present:
+Install the Linux selector into the current root, and into the mounted SD root
+if the SD card is present:
 
 ```bash
 sudo scripts/install-linux-boot-selector.sh
 sudo scripts/install-linux-boot-selector.sh --target-root /mnt/opisd-ro
 ```
+
+The systemd unit clears stale one-shot boot files before LightDM. The visible
+prompt is launched by `/etc/xdg/autostart/orangepi4pro-x11-boot-selector.desktop`
+after XFCE starts.
 
 ## Validation
 

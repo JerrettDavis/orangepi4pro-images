@@ -138,9 +138,12 @@ case "${1:-}" in
     clear_bootonce_files
     exit 0
     ;;
+  --boot-sd)
+    write_sd_bootonce
+    systemctl reboot
+    ;;
   --validate)
     command -v whiptail >/dev/null 2>&1 || command -v dialog >/dev/null 2>&1
-    [ -c /dev/tty1 ]
     exit 0
     ;;
 esac

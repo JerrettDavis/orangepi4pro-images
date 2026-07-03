@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+config_file=${BOOT_SELECTOR_CONFIG:-/etc/orangepi4pro-boot-selector.conf}
+timeout_seconds=30
+
+if [ -r "$config_file" ]; then
+  # shellcheck source=/dev/null
+  . "$config_file"
+fi
+
+enabled=${X11_SELECTOR_ENABLED:-true}
+timeout_seconds=${X11_SELECTOR_TIMEOUT:-$timeout_seconds}
+
+if [ "$enabled" != true ]; then
+  exit 0
+fi
+
+if [ -z "${DISPLAY:-}" ]; then
+  export DISPLAY=:0
+fi
+
+if ! command -v xmessage >/dev/null 2>&1; then
+  exit 0
+fi
+
+message='Orange Pi 4 Pro Boot Selector
+
+Choose a boot target.
+
+Continue Ubuntu keeps this NVMe session.
+Boot SD Ubuntu writes a one-shot boot request and reboots.
+
+The default action runs automatically when the timer expires.'
+
+set +e
+xmessage \
+  -center \
+  -geometry 900x360 \
+  -timeout "$timeout_seconds" \
+  -default "Continue Ubuntu" \
+  -buttons "Continue Ubuntu:0,Boot SD Ubuntu:10" \
+  "$message"
+status=$?
+set -e
+
+case "$status" in
+  10)
+    if ! sudo -n /usr/local/sbin/orangepi4pro-linux-boot-selector --boot-sd; then
+      xmessage -center -timeout 12 \
+        "Unable to request SD boot. Check /etc/sudoers.d/orangepi4pro-boot-selector."
+    fi
+    ;;
+  *)
+    exit 0
+    ;;
+esac

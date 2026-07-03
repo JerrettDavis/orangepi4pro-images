@@ -27,10 +27,13 @@ rm -f /tmp/orangepi4pro-bootstrap-ubuntu.out /tmp/orangepi4pro-bootstrap-kali.ou
 
 printf 'Checking Linux boot selector templates...\n'
 bash -n scripts/orangepi4pro-linux-boot-selector \
+  scripts/orangepi4pro-x11-boot-selector \
   scripts/install-linux-boot-selector.sh \
   scripts/validate-linux-boot-selector.sh
-grep -q 'Before=display-manager.service getty@tty1.service' \
+grep -q 'Before=display-manager.service' \
   systemd/orangepi4pro-linux-boot-selector.service
+grep -q 'Exec=/usr/local/bin/orangepi4pro-x11-boot-selector' \
+  configs/orangepi4pro-x11-boot-selector.desktop
 grep -q 'bootonce_target=sd' scripts/orangepi4pro-linux-boot-selector
 grep -q 'orangepiBootOnce.txt' configs/boot.cmd
 
