@@ -113,6 +113,10 @@ if test "${selected_boot}" != "true"; then
 	setenv extraargs bootchooser=boot-script-default-nvme
 fi
 
+if test -n "${opi_bootselect_diag}"; then
+	setenv extraargs "${extraargs} ${opi_bootselect_diag}"
+fi
+
 if test "${selector_console}" = "true"; then
 	echo "Forcing selector output to serial and video console"
 	setenv stdout "vidconsole,serial"
