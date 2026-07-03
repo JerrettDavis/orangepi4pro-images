@@ -439,6 +439,27 @@ Current staged test:
   bring-up below framebuffer/DE/TCON plane rendering. If it is visible, move
   back upward to TCON source selection and framebuffer scanout.
 
+2026-07-03 fourth attempt result and fifth attempt plan:
+
+- The system booted NVMe with
+  `bootchooser=uboot-visual-hdmi20-pattern-fail`.
+- The vendor `sunxi_hdmi20 pattern` command returns a non-zero status even on
+  its documented pattern branch, so that marker is not reliable hardware
+  evidence. The useful next step is to stop testing custom U-Boot display
+  commands and restore the stock vendor U-Boot display path.
+- Next package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-sd-scriptfirst-hdmi-power.fex`,
+  SHA-256
+  `d4fe6a813c40766b9f00872b46ab3f1b72dfe70910bc1330b346605ffbf89bc7`.
+  This keeps the vendor binary that contains the factory `sunxi_show_logo` and
+  `boot.bmp decompressed OK` path, with only script-first scanning and HDMI
+  power DTB corrections.
+- Staged script mode:
+  `scripts/stage-extlinux-prompt-selector.sh --timeout 200 --default ubuntu-nvme`.
+  Expected marker after reboot is an extlinux marker such as
+  `bootchooser=extlinux-legacy-nvme` if the prompted extlinux selector boots
+  the default entry.
+
 ## Validation
 
 Safe dispatcher files:
