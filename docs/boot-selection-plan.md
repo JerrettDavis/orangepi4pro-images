@@ -536,6 +536,23 @@ Current staged test:
   Serial stays as the guaranteed console while vidconsole is added for HDMI
   rendering.
 
+2026-07-03 HDMI clock-route diagnostic plan:
+
+- Previous U-Boot diagnostics reached Linux with
+  `bootchooser=uboot-visual-fbtest-ok` and reported valid HDMI route state,
+  framebuffer setup, HPD, selected 1280x720 mode, and top PHY lock, but both
+  exported HDMI/TCON clock readings remained `24000000`.
+- The next package is
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-clockroute-720p.fex`.
+  It keeps the same bounded `fbtest` visual path but changes the packed U-Boot
+  DTB so `clk_hdmi` points at the programmable `hdmi_tv` clock and the old gate
+  is exposed as `clk_bus_hdmi`. The U-Boot HDMI driver also falls back to the
+  selected mode clock when the TCON clock reads as 0 or stale 24 MHz.
+- Expected post-reboot evidence if this fixes pre-OS HDMI signaling:
+  `opi_post_hdmi` should report `hdmi74250000` for the 720p test, and the user
+  should see the high-contrast bootloader framebuffer test before the Orange Pi
+  OS loader.
+
 ## Validation
 
 Safe dispatcher files:
