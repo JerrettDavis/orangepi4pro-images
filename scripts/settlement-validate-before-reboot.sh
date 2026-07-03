@@ -123,6 +123,7 @@ check_repo() {
 
 readback_package() {
   local package_size
+  local package_sha
   local verify_blocks
   local verify_path
 
@@ -130,6 +131,12 @@ readback_package() {
   [ -b "$device" ] || fail "not a block device: $device"
   package_size=$(stat -c '%s' "$package")
   [ "$package_size" -gt 0 ] || fail "package is empty: $package"
+  package_sha=$(sha256sum "$package" | awk '{print $1}')
+  case "$package_sha" in
+    34f52a23883a427d6471bdfc69654ef853a6f96a1f406a732acd64a35555852f)
+      fail "refusing known-unsafe boot package in settlement gate: $package_sha"
+      ;;
+  esac
   verify_blocks=$(((package_size + block_size - 1) / block_size))
   verify_path=$(mktemp)
   dd if="$device" of="$verify_path" bs="$block_size" skip="$seek_blocks" count="$verify_blocks" status=none

@@ -804,6 +804,16 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `bootchooser=uboot-visual-hdmi20-pattern-ok`,
   `opi_drmre_ok,drmreinit=...`, `opi_pat_hdmipat=req1,...`, and non-masked
   DesignWare HDMI register values in the HDMI diagnostic fields.
+- Actual result: unsafe. This package failed to complete a normal boot and
+  required external SD recovery from another machine.
+- Blocked package SHA-256:
+  `34f52a23883a427d6471bdfc69654ef853a6f96a1f406a732acd64a35555852f`
+- Current recovered baseline:
+  `/usr/lib/linux-u-boot-current-orangepi4pro_1.0.6_arm64/boot_package_a733_nvme.fex`
+  with SHA-256
+  `e626234a6eb9420ac29f515dd6acc543e7f0876e3dc086eec2fe221a50cc54f2`,
+  byte-matched in the SD bootloader slot and booting NVMe with
+  `bootchooser=extlinux-legacy-nvme`.
 
 ## Validation
 
