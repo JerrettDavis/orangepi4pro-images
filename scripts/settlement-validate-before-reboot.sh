@@ -5,6 +5,7 @@ images_repo=/home/orangepi/orangepi4pro-images
 board_repo=/home/orangepi/orangepi4pro-board-support
 package=/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-sd-scriptfirst-hdmi-phandles.fex
 device=/dev/mmcblk1
+sd_mount=/mnt/opisd-ro
 expected_bootchooser=extlinux-legacy-nvme
 seek_blocks=2050
 block_size=8192
@@ -23,6 +24,7 @@ Options:
   --board-repo DIR           board-support repo path
   --package FILE             expected installed SD TOC1 package
   --device DEV               SD card block device, default /dev/mmcblk1
+  --sd-mount DIR             mounted SD root for active-source checks
   --expected-bootchooser ID  expected /proc/cmdline bootchooser marker
   --write-log                also write a timestamped report under /var/cache
   -h, --help                 show this help
@@ -61,6 +63,10 @@ while [ "$#" -gt 0 ]; do
       device=${2:-}
       shift
       ;;
+    --sd-mount)
+      sd_mount=${2:-}
+      shift
+      ;;
     --expected-bootchooser)
       expected_bootchooser=${2:-}
       shift
@@ -85,6 +91,7 @@ done
 [ -n "$board_repo" ] || fail '--board-repo cannot be empty'
 [ -n "$package" ] || fail '--package cannot be empty'
 [ -n "$device" ] || fail '--device cannot be empty'
+[ -n "$sd_mount" ] || fail '--sd-mount cannot be empty'
 [ -n "$expected_bootchooser" ] || fail '--expected-bootchooser cannot be empty'
 
 export HOME=${HOME:-/root}
@@ -152,6 +159,7 @@ report() {
   printf 'board_repo=%s\n' "$board_repo"
   printf 'package=%s\n' "$package"
   printf 'device=%s\n' "$device"
+  printf 'sd_mount=%s\n' "$sd_mount"
   printf 'expected_bootchooser=%s\n' "$expected_bootchooser"
   printf '\n'
 
@@ -170,14 +178,14 @@ report() {
   printf '\n'
 
   printf 'Running active boot-source validation...\n'
-  "$images_repo/scripts/validate-active-boot-source.sh" /mnt/opisd-ro
+  "$images_repo/scripts/validate-active-boot-source.sh" "$sd_mount"
   printf '\n'
 
   grep -qw "bootchooser=${expected_bootchooser}" /proc/cmdline \
     || fail "running kernel does not have bootchooser=${expected_bootchooser}"
   printf 'Running cmdline has bootchooser=%s.\n' "$expected_bootchooser"
   printf '\nMounted filesystems:\n'
-  findmnt / /boot /boot/efi /mnt/opisd-ro /mnt/opisd-check -o TARGET,SOURCE,FSTYPE,OPTIONS --noheadings 2>/dev/null || true
+  findmnt / /boot /boot/efi "$sd_mount" /mnt/opisd-check -o TARGET,SOURCE,FSTYPE,OPTIONS --noheadings 2>/dev/null || true
   printf '\nSETTLEMENT VALIDATION PASSED. Reboot is allowed by this gate.\n'
 }
 
