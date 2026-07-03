@@ -1005,6 +1005,27 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `bootchooser=uboot-logo-preinit-ok`; the useful outcomes are either retained
   diagnostics with `hdmi49000000`, or retained diagnostics with `hdmi24000000`
   proving the clock binding alone is not enough.
+- Reboot result: Linux reached the NVMe root, but U-Boot reported
+  `opi_logo_hdmi=drm-missing` and `opi_logo_drm=missing`. That means even the
+  clock-only embedded-DTB rewrite prevents U-Boot from finding an initialized
+  DRM display list at boot-script time. The next candidate returns to the stock
+  embedded DTB and moves the HDMI TV clock change into U-Boot code.
+
+2026-07-03 HDMI TV clock fallback diagnostic:
+
+- Candidate package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-diag-modeclock-force1024-hdmitvclk.fex`
+- Package SHA-256:
+  `000821770992c9124c51dddc360fb6dcd45f9bbe7f6c88bc72e07fdc953fa532`
+- U-Boot item SHA-256:
+  `30173d1158694386a13d44a60f5a6dfca551ecc4640726a9fd0b8f8b6e0ce2e8`
+- This package preserves the stock embedded U-Boot DTB and vendor monitor/SCP
+  blobs. It keeps forced `1024x600@49 MHz` mode selection, and adds a
+  code-side fallback that enables/programs the named `hdmi_tv` clock if the
+  HDMI clock handle still reads as `0` or `24 MHz`.
+- Expected post-reboot evidence remains
+  `bootchooser=uboot-logo-preinit-ok`; the important diagnostic is whether
+  `opi_logo_hdmi` remains present and gains a `tv49000000`-style value.
 
 ## Validation
 
