@@ -100,7 +100,7 @@ if test "${bootonce_target}" = "nvme"; then
 	setenv extraargs bootchooser=${bootchooser}
 fi
 
-if test "${selected_boot}" != "true"; then
+if test "${selected_boot}" != "true" && test "${extlinux_first}" != "true" && test "${grub_first}" != "true" && test "${direct_booti_first}" != "true"; then
 	echo "Default boot target: NVMe Ubuntu"
 	setenv selected_boot true
 	setenv extlinux_first false

@@ -92,5 +92,20 @@ if [ -n "$sd_boot_dir" ]; then
   patch_env "$sd_boot_dir/orangepiEnv.txt"
 fi
 
+patch_extlinux() {
+  local conf_file=$1
+  [ -e "$conf_file" ] || return 0
+  sed -i \
+    -e 's/^PROMPT .*/PROMPT 1/' \
+    -e "s/^TIMEOUT .*/TIMEOUT ${timeout}/" \
+    "$conf_file"
+}
+
+patch_extlinux "$boot_dir/extlinux/extlinux.conf"
+patch_extlinux "$efi_dir/extlinux/extlinux.conf"
+if [ -n "$sd_boot_dir" ]; then
+  patch_extlinux "$sd_boot_dir/extlinux/extlinux.conf"
+fi
+
 sync
 printf 'Staged vendor sysboot prompt test: timeout=%s\n' "$timeout"
