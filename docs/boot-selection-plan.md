@@ -677,6 +677,21 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   inspect the recorded `phy`, `stat`, `rst`, `lock`, `vid`, and `gcp` register
   bytes before making the next display patch.
 
+2026-07-03 top-PHY PDDQ visual retest:
+
+- Installed SD TOC1 package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-toppddq-1024x600.fex`
+- Package SHA-256:
+  `d16c515ab57b1f2747d3706973633eed2b7a8ea47c1f3f90fbf398e0b0f28f37`
+- Staged boot assets:
+  `scripts/stage-uboot-visual-test.sh --test hdmi20_pattern --hold 20 --sd-boot-dir /mnt/opisd-rw/boot`
+- Intent: repeat the same 20-second HDMI20 internal pattern test after clearing
+  the sun60i top-PHY `phy_pddq` bit during U-Boot top-PHY power-on.
+- Expected Linux evidence:
+  `bootchooser=uboot-visual-hdmi20-pattern-ok` and `opi_pre_hdmi=*top0_*`
+  with bit 1 clear, ideally changing the prior `top0_00000017` reading to
+  `top0_00000015`.
+
 ## Validation
 
 Safe dispatcher files:
