@@ -553,6 +553,21 @@ Current staged test:
   should see the high-contrast bootloader framebuffer test before the Orange Pi
   OS loader.
 
+2026-07-03 HDMI bus-clock diagnostic plan:
+
+- The clock-route package proved the HDMI TV clock can be programmed:
+  `opi_post_hdmi` reported `hdmi74250000`. The display still showed no
+  bootloader visual, and diagnostics reported `toplock0` plus zeroed top PHY
+  registers.
+- The next package is
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-busclock-720p.fex`.
+  It keeps the clock-route DTB binding and adds a U-Boot source patch to enable
+  the parsed `clk_bus_hdmi` gate before the HDMI clocks are used.
+- Expected post-reboot evidence: the high-contrast bootloader framebuffer test
+  should be visible. If it is still not visible, `opi_post_hdmi` should show
+  whether the top PHY returned to nonzero locked state or whether the remaining
+  failure moved elsewhere.
+
 ## Validation
 
 Safe dispatcher files:
