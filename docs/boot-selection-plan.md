@@ -724,6 +724,32 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   Linux, inspect whether the `phy`, `stat`, `rst`, `lock`, `vid`, and `gcp`
   fields changed from zero.
 
+2026-07-03 stock-SD factory display plus prompted selector retest:
+
+- Installed SD TOC1 package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-sd-scriptfirst.fex`
+- Package SHA-256:
+  `77ef94aee8f8a6ec27d130822b70187fbf4316773d7ae5d59150e9027c654670`
+- U-Boot item SHA-256:
+  `94e5aa1cdebde42ce773f8d476fe78891cc61ad7e9e839d2554d738a549d55f5`
+- Source stock SD package:
+  `/usr/lib/linux-u-boot-current-orangepi4pro_1.0.6_arm64/boot_package.fex`
+- Source stock SD package SHA-256:
+  `7a2661b080f5c5d8ba32566bc79f1ccfbfb8912a4a5c0c1a4856a9380542c807`
+- Source references checked:
+  `orangepi-xunlong/u-boot-orangepi` branch `v2020.04` commit
+  `c97dbbcad55f5a1e40c28b1a9874b2e0b9f163c9`; CarterPerez NVMe research repo
+  branch `main` commit `fe4c31ec0115d3f2493905be07426f36f666aab5`.
+- Staged boot assets:
+  `scripts/stage-extlinux-prompt-selector.sh --timeout 200 --default ubuntu-nvme --video-console true --logo-preinit true --logo-hold 8 --extlinux-first true --diag-force-bootm false --sd-boot-dir /mnt/opisd-rw/boot`
+- Intent: restore the factory display path first. The package uses the stock SD
+  U-Boot logo/display code and only patches distro scan order so `boot.scr`
+  runs. The script calls stock `sunxi_show_logo`, holds for 8 seconds, routes
+  output to `serial,vidconsole`, and enters prompted extlinux.
+- Expected result: the Orange Pi boot-loader splash or another stock-logo
+  display should be visible before the selector. If no key is pressed, the
+  extlinux default should boot NVMe with `bootchooser=extlinux-legacy-nvme`.
+
 ## Validation
 
 Safe dispatcher files:
