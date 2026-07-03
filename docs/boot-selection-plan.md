@@ -922,6 +922,24 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `bootchooser=uboot-logo-preinit-ok|fail`.
 - This test intentionally writes only boot filesystem assets. It does not
   install a new U-Boot package or touch NVMe/SD bootloader sectors.
+- Reboot result: Linux reached `bootchooser=uboot-logo-preinit-ok`, proving
+  the stock `sunxi_show_logo` path returned success. The display still had no
+  pre-OS image, and the stock package lacked `sunxi_hdmi_env`, so the recorded
+  HDMI diagnostic was only `opi_logo_hdmi=diag-missing`.
+
+2026-07-03 passive HDMI/DRM diagnostic package:
+
+- The next candidate is
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-scriptfirst-passive-diag.fex`,
+  SHA-256 `71cb5564f5d7249bece9c35a449bb199a9b6836dcb3f8dd2b946bea61b6b8ceb`.
+- It is built from Orange Pi U-Boot `v2018.05-sun60iw2`
+  `b791be842935b27268ae3d00e943a9075495f30a` with only script-first scan order
+  and passive `sunxi_drm_env`/`sunxi_hdmi_env` commands. It does not contain
+  `sunxi_drm reinit`.
+- The staged boot script still runs `sunxi_show_logo`, holds for 10 seconds,
+  and forces the known-good legacy NVMe `bootm` path. Expected post-reboot
+  evidence is `bootchooser=uboot-logo-preinit-ok` plus `opi_logo_hdmi=...` and
+  `opi_logo_drm=...` in `/proc/cmdline`.
 
 ## Validation
 

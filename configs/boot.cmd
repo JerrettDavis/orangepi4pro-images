@@ -153,8 +153,14 @@ if test "${selector_logo_preinit}" = "true"; then
 	else
 		setenv selector_logo_hdmi "hdmi=diag-missing"
 	fi
+	if sunxi_drm_env; then
+		setenv selector_logo_drm "${opi_drm_diag}"
+	else
+		setenv selector_logo_drm "drm=diag-missing"
+	fi
 	setenv extraargs "${extraargs} ${selector_logo_diag}"
 	setenv extraargs "${extraargs} opi_logo_${selector_logo_hdmi}"
+	setenv extraargs "${extraargs} opi_logo_${selector_logo_drm}"
 	sleep ${selector_logo_hold}
 fi
 
