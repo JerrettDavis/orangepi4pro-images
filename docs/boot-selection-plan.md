@@ -2154,3 +2154,34 @@ It defaults to dry-run validation. With `--yes` and
 `ORANGEPI4PRO_ALLOW_BOOTLOADER_WRITE=1`, it restores the vendor NVMe TOC1
 package to the SD bootloader slot and stages extlinux-first boot assets with
 `selector_visual_test=none`.
+
+## Reviewed Next Bootloader Test
+
+The next selectable-boot test should use only the validated vendor NVMe
+script-first package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-nvme-scriptfirst-validated.fex
+sha256=d798104ccd705e542842fac409b1e2694c6ca19fcfac75fc30036a4535a7d318
+```
+
+This package preserves the vendor U-Boot item and changes only the distro scan
+order from extlinux-first to script-first. Board-support validation proves it
+contains AW DRM `sunxi_show_logo`, fastlogo strings, exactly one script-first
+scan order, and none of the known unsafe display reinit/recycle paths.
+
+Use the reviewed staging wrapper first in dry-run mode:
+
+```bash
+scripts/stage-reviewed-vendor-prompt-test.sh --timeout 80
+```
+
+Actual staging requires both `--yes` and:
+
+```bash
+ORANGEPI4PRO_STAGE_REVIEWED_BOOTLOADER_TEST=1
+```
+
+Do not reboot after staging unless both repos are committed/pushed and
+`settlement-validate-before-reboot.sh` passes against the reviewed script-first
+package and the expected prompt-test environment.
