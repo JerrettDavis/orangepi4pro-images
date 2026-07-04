@@ -1828,3 +1828,35 @@ The staged command was:
 Expected evidence after reboot is a 20-second U-Boot colorbar before Linux,
 followed by NVMe Ubuntu with `bootchooser=uboot-visual-colorbar-ok` or
 `bootchooser=uboot-visual-colorbar-fail`.
+
+Actual result: the U-Boot branch ran and returned success, but the HDMI display
+still stayed black before Linux. `/proc/cmdline` contained
+`bootchooser=uboot-visual-colorbar-ok`.
+
+2026-07-04 stock SD factory U-Boot package test:
+
+The previous tests used the vendor NVMe package
+`boot_package_a733_nvme.fex`. The original visible factory splash may have
+come from the standard SD package, so the next test installs
+`boot_package.fex` with only the length-preserving script-first scan-order
+patch. The staged boot files still run `sunxi_drm colorbar 1` for 20 seconds
+and then boot NVMe through legacy `bootm`.
+
+The installed package is:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-sd-scriptfirst-stockvisual.fex
+sha256=77ef94aee8f8a6ec27d130822b70187fbf4316773d7ae5d59150e9027c654670
+u-boot item sha256=94e5aa1cdebde42ce773f8d476fe78891cc61ad7e9e839d2554d738a549d55f5
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T172937Z.bin
+sha256=49406a05fef3291f0e2320460e4a937ee50f098c916e987795e4cef51f4c07f1
+```
+
+Expected evidence after reboot is a visible factory splash or 20-second
+colorbar before Linux, followed by NVMe Ubuntu with
+`bootchooser=uboot-visual-colorbar-ok`.
