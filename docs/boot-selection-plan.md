@@ -51,6 +51,12 @@ Current status on 2026-07-04:
   bounded hypothesis is a small guarded Allwinner boot-resource area in the
   zeroed reserved SDMMC logical window before the Linux partition, created by
   board-support `scripts/stage-sd-boot-resource.sh`.
+- Result: installing the guarded `boot-resource` area did not make the
+  bootloader splash visible. It did preserve the normal extlinux NVMe boot and
+  Ubuntu/Plymouth splash. The next step is not another logo filename or
+  resource-partition permutation; it is a source-side U-Boot diagnostic that
+  records whether `load_bmp_logo()` and `display_logo()` succeeded before
+  extlinux replaces the boot script's temporary environment.
 - The active target is bootloader-stage selection only. The temporary X11/XFCE
   autostart prompt was removed from the active path because it appears after a
   full Linux boot.
