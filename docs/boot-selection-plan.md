@@ -1939,3 +1939,64 @@ early delay and/or the 20-second colorbar hold, followed by NVMe Ubuntu with
 `bootchooser=uboot-visual-colorbar-ok`. This package includes passive
 `sunxi_drm_env` and `sunxi_hdmi_env`, so `/proc/cmdline` should include real
 `opi_pre_*` / `opi_post_*` diagnostics instead of `diag-missing`.
+
+Actual result: failed visually. The system reached NVMe Ubuntu with
+`bootchooser=uboot-visual-colorbar-ok`, but nothing was visible before the
+desktop. The new diagnostics are useful:
+
+```text
+opi_pre_drm=...mode=1920x1080,clk=148500,fbw=1920,fbh=1080...
+opi_pre_hdmi=...tcon0,hdmi24000000,pix148500,tmds148500,...phy00,stat00,lock00...
+```
+
+That shows U-Boot selected its 1080p fallback and left the HDMI clock/link
+state stale for this panel.
+
+2026-07-04 early delay plus HDMI clock/native-mode test:
+
+The first file-only attempt to patch the embedded DTB/default mode failed
+safely before install: the patched DTB grew from 42974 to 43260 bytes and would
+overlap non-terminal U-Boot item data. The installed candidate is therefore a
+source-built U-Boot package that keeps the early display-init delay and passive
+diagnostics, uses the Linux-proven 1024x600 default mode, programs the HDMI TV
+clock from the selected mode when the TCON clock is stale, enables the HDMI bus
+clock, and records expanded top-PHY diagnostics.
+
+Build command:
+
+```bash
+scripts/build-vendor-uboot.sh --early-display-clockdiag --clean
+python3 scripts/sunxi-toc1-package.py repack \
+  --template /usr/lib/linux-u-boot-current-orangepi4pro_1.0.6_arm64/boot_package.fex \
+  --replace u-boot=.build/u-boot/artifacts/early-display-clockdiag/u-boot-sun60iw2p1.bin \
+  --output /var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-clockdiag.fex
+```
+
+Installed package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-clockdiag.fex
+sha256=925b6d123098b4d434a3c850cd69128a45390117039408a5b93d8f546abd4cce
+u-boot item sha256=1b4cb498733e59fd5a512ad7f9f32b46956f49667f5bc8228b5f6fdbcb8365df
+```
+
+Source:
+
+```text
+https://github.com/orangepi-xunlong/u-boot-orangepi.git
+branch=v2018.05-sun60iw2
+commit=b791be842935b27268ae3d00e943a9075495f30a
+mode=scripts/build-vendor-uboot.sh --early-display-clockdiag
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T175522Z.bin
+sha256=988181e9e64a7bb3f30b5ad55b26e29995d14f47a07863abeb7cec5071df7998
+```
+
+Expected evidence after reboot: visible bootloader-stage output before Linux,
+or at minimum diagnostics moving from `mode=1920x1080`/`hdmi24000000` toward
+`mode=1024x600` and an HDMI clock near `49000000`, with expanded
+`top20_`/`top24_`/`top28_`/`top2c_`/`top30_`/`top40_` top-PHY fields.
