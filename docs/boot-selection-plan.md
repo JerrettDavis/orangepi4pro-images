@@ -1451,3 +1451,24 @@ controller moved from `lock70` toward Linux's visible `lock79`. The SD TOC1
 installer backed up the previous slot to
 `/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T032623Z.bin`
 and verified the new slot by readback.
+
+Result: Linux reached NVMe with
+`bootchooser=uboot-visual-hdmi20-pattern-ok`. The top-PHY PLL fields now
+matched the Linux values (`top20_e8193000`, `top24_00000080`,
+`top40_00000001`), but the HDMI core still reported
+`phy2e,stat03,rst00,lock70,vid58,gcp01`. The next test is the TCON-format
+package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-tconfmt-1024x600.fex
+sha256=1476e41aeae6bfeff49128146bfc5515beb03e3e2d83fad4c41bdf8d60ed6dec
+u-boot item sha256=21b1fe5b5d03709d840b024d0d15ec96fe99a7e469c96189ed660a01b178fa5c
+```
+
+This package carries
+`configs/u-boot/0024-pass-hdmi-format-to-tcon-reinit.patch`, adding
+`fmt`/`sw` diagnostics to `opi_reinit_reinit` and passing the HDMI format into
+TCON init. It does not contain `sunxi_drm reinit` or `full hdmi reinit`. The
+SD TOC1 installer backed up the previous slot to
+`/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T032919Z.bin`
+and verified the new slot by readback.
