@@ -1594,3 +1594,49 @@ external WSL recovery. After recovery it booted NVMe with
 U-Boot visual diagnostics in `/proc/cmdline`. The package SHA
 `feacc7a99a48a1f6a64318b8372042f0b24df36bc5bae1f35f4bcc36581e6438` is now
 blocked by the SD installer and settlement gate.
+
+2026-07-04 delayed factory-logo bootloader test:
+
+The next bootloader-stage test returns to the vendor embedded-logo path and
+adds only a 5-second delay inside AW_DRM `sunxi_show_logo()`. This is based on
+the observed gap between early U-Boot display bring-up and Linux's later
+successful HDMI configuration.
+
+The staged boot assets are:
+
+```bash
+scripts/stage-extlinux-prompt-selector.sh \
+  --timeout 200 \
+  --default ubuntu-nvme \
+  --video-console false \
+  --selector-bitmap false \
+  --logo-preinit true \
+  --logo-command sunxi_show_logo \
+  --logo-hold 20 \
+  --extlinux-first true \
+  --diag-force-bootm false \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+The SD TOC1 package for the next reboot is:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_nvme-scriptfirst-sunxi-show-logo-delay.fex
+sha256=65eaba1bff9c98324213d0a6c4849f2dccf74de2b115e4edb724ed63a29e6012
+u-boot item sha256=e10c6eab23b27993cfbdd65c85afac1bc16d4e5570ed4ed57f43ddb3bec84f55
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T164212Z.bin
+sha256=513388dd8c9ee53412ea2742427550c97c1a929144c8a681afd4da63cdded2be
+```
+
+Readback validation confirmed the installed SD TOC1 slot byte-matches package
+SHA `65eaba1bff9c98324213d0a6c4849f2dccf74de2b115e4edb724ed63a29e6012`.
+
+Expected evidence after reboot is a visible vendor bootloader logo during the
+20-second hold, followed by NVMe Ubuntu with `bootchooser=uboot-logo-preinit-ok`
+or `bootchooser=extlinux-legacy-nvme` depending on whether the script path
+exports the marker before extlinux takes over.
