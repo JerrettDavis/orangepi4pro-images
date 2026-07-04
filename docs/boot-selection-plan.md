@@ -2097,3 +2097,41 @@ sha256=265d0bc19b06201252c8a1d74933dbcd82593b7fbe63e3b227a5261d725b8738
 Expected evidence after reboot: visible bootloader-stage output before Linux,
 or diagnostics showing `phy`, `stat`, `lock`, `vid`, or `gcp` moved away from
 zero after the stale flag reset.
+
+## 2026-07-04 HDMI Recycle Test
+
+The next staged bootloader-only diagnostic is `selector_visual_test=hdmi_recycle`
+with a 20 second hold. This is still not the final selector; it is intended to
+prove whether U-Boot can force the HDMI display through the same kind of
+disable/init/enable cycle that Linux later performs before the OS splash is
+visible.
+
+Installed package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-recycle.fex
+sha256=6aa7b8590cf7d2b7b259aa08326a43d342c7ce6b0d233bc3e4faf5cbb3e46cd1
+u-boot-item-sha256=d94e2a883918c5c23e387e81e4e5721f7446a9a75dc41ddbd66a5bafb8f7192d
+backup=/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T182428Z.bin
+backup-sha256=f1bb9ce56b1a2f975443f717b45907366c60730e3de6e9e238cff3c89c29e959
+```
+
+Staged boot assets on both NVMe `/boot` and SD `/boot`:
+
+```text
+extlinux_first=false
+bootmenu_first=false
+selector_visual_test=hdmi_recycle
+selector_visual_hold=20
+selector_logo_preinit=false
+selector_diag_force_bootm=false
+```
+
+Expected post-reboot marker is either
+`bootchooser=uboot-visual-hdmi-recycle-ok` or
+`bootchooser=uboot-visual-hdmi-recycle-fail`, with `opi_recycle_recycle=...`
+and pre/post HDMI diagnostics on `/proc/cmdline`.
+
+The pre-reboot settlement gate now also verifies SD `/boot/boot.cmd` and
+`/boot/boot.scr` match the NVMe boot copies, because U-Boot reads the SD copy
+even though Linux later mounts NVMe at `/boot`.

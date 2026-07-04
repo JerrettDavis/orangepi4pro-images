@@ -49,6 +49,10 @@ elif grep -q 'bootchooser=uboot-visual-fbtest-ok' /proc/cmdline; then
   printf 'Current boot ran the U-Boot framebuffer visual test successfully.\n'
 elif grep -q 'bootchooser=uboot-visual-fbtest-fail' /proc/cmdline; then
   printf 'Current boot ran the U-Boot framebuffer visual test and the command failed.\n'
+elif grep -q 'bootchooser=uboot-visual-hdmi-recycle-ok' /proc/cmdline; then
+  printf 'Current boot ran the U-Boot HDMI display recycle visual test successfully.\n'
+elif grep -q 'bootchooser=uboot-visual-hdmi-recycle-fail' /proc/cmdline; then
+  printf 'Current boot ran the U-Boot HDMI display recycle visual test and the command failed.\n'
 elif grep -q 'bootchooser=uboot-visual-hdmi20-pattern-ok' /proc/cmdline; then
   printf 'Current boot ran the U-Boot HDMI20 pattern visual test successfully.\n'
 elif grep -q 'bootchooser=uboot-visual-hdmi20-pattern-fail' /proc/cmdline; then
@@ -93,6 +97,14 @@ if [ -d "$sd_mount/boot" ]; then
       || fail "SD boot.scr lacks the DRM reinit bootarg diagnostic"
     script_has_string "$sd_mount/boot/boot.scr" 'uboot-visual-hdmi20-pattern-ok' \
       || fail "SD boot.scr lacks the HDMI20 visual-test marker"
+  fi
+  if [ "$expected_selector_visual_test" = hdmi_recycle ]; then
+    script_has_string "$sd_mount/boot/boot.scr" 'sunxi_drm hdmi_recycle' \
+      || fail "SD boot.scr lacks the HDMI recycle visual-test command"
+    script_has_string "$sd_mount/boot/boot.scr" 'uboot-visual-hdmi-recycle-ok' \
+      || fail "SD boot.scr lacks the HDMI recycle visual-test marker"
+    script_has_string "$sd_mount/boot/boot.scr" 'opi_recycle_' \
+      || fail "SD boot.scr lacks the HDMI recycle bootarg diagnostic"
   fi
   if [ "$expected_bootmenu_first" = true ]; then
     script_has_string "$sd_mount/boot/boot.scr" 'uboot-bootmenu-nvme' \

@@ -150,12 +150,50 @@ readback_package() {
       fail "refusing known-unsafe boot package in settlement gate: $package_sha"
       ;;
   esac
+  for unsafe_string in \
+    'sunxi_drm_reinit_active' \
+    '_sunxi_hdmi_reinit_active_display' \
+    'stale HDMI before logo' \
+    'HDMI still unlocked after logo enable' \
+    'dw_phy_wait_rxsense' \
+    'PHY_STAT0_RX_SENSE_ALL_MASK' \
+    'force visible reinit' \
+    'hdmi drv stale enable state' \
+    'post-skip-locked'; do
+    if strings -a "$package" | grep -Fq "$unsafe_string"; then
+      fail "refusing package containing known-unsafe string: $unsafe_string"
+    fi
+  done
   verify_blocks=$(((package_size + block_size - 1) / block_size))
   verify_path=$(mktemp)
   dd if="$device" of="$verify_path" bs="$block_size" skip="$seek_blocks" count="$verify_blocks" status=none
   cmp -n "$package_size" "$package" "$verify_path"
   rm -f "$verify_path"
   printf 'SD bootloader slot byte-matches expected package.\n'
+}
+
+check_sd_boot_assets() {
+  local expected_visual=${EXPECTED_SELECTOR_VISUAL_TEST:-any}
+  local expected_hold=${EXPECTED_SELECTOR_VISUAL_HOLD:-any}
+
+  [ -d "$sd_mount/boot" ] || fail "SD boot directory missing: $sd_mount/boot"
+  [ -f "$sd_mount/boot/boot.cmd" ] || fail "SD boot.cmd missing"
+  [ -f "$sd_mount/boot/boot.scr" ] || fail "SD boot.scr missing"
+  [ -f "$sd_mount/boot/orangepiEnv.txt" ] || fail "SD orangepiEnv.txt missing"
+
+  cmp -s /boot/boot.cmd "$sd_mount/boot/boot.cmd" \
+    || fail "SD /boot/boot.cmd differs from NVMe /boot/boot.cmd"
+  cmp -s /boot/boot.scr "$sd_mount/boot/boot.scr" \
+    || fail "SD /boot/boot.scr differs from NVMe /boot/boot.scr"
+
+  if [ "$expected_visual" != any ]; then
+    grep -q "^selector_visual_test=${expected_visual}$" "$sd_mount/boot/orangepiEnv.txt" \
+      || fail "SD orangepiEnv.txt does not set selector_visual_test=${expected_visual}"
+  fi
+  if [ "$expected_hold" != any ]; then
+    grep -q "^selector_visual_hold=${expected_hold}$" "$sd_mount/boot/orangepiEnv.txt" \
+      || fail "SD orangepiEnv.txt does not set selector_visual_hold=${expected_hold}"
+  fi
 }
 
 report() {
@@ -185,6 +223,10 @@ report() {
 
   printf 'Running live boot-menu asset validation...\n'
   "$images_repo/scripts/validate-boot-menu-assets.sh"
+  printf '\n'
+
+  printf 'Running SD boot asset parity validation...\n'
+  check_sd_boot_assets
   printf '\n'
 
   printf 'Running active boot-source validation...\n'
