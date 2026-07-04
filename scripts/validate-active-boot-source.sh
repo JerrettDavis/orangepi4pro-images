@@ -13,6 +13,12 @@ fail() {
   exit 1
 }
 
+script_has_string() {
+  local file=$1
+  local pattern=$2
+  grep -a -q -- "$pattern" "$file"
+}
+
 printf 'Validating active Orange Pi boot source markers\n\n'
 
 printf 'Kernel command line:\n'
@@ -76,27 +82,27 @@ if [ -d "$sd_mount/boot" ]; then
     grep -q "^selector_visual_hold=${expected_selector_visual_hold}$" "$sd_mount/boot/orangepiEnv.txt" \
       || fail "SD orangepiEnv.txt does not set selector_visual_hold=${expected_selector_visual_hold}"
   fi
-  strings "$sd_mount/boot/boot.scr" | grep -q 'bootchooser=legacy-bootm-fallback' \
+  script_has_string "$sd_mount/boot/boot.scr" 'bootchooser=legacy-bootm-fallback' \
     || fail "SD boot.scr is the recovered direct bootm script, without selector fallback marker"
   if [ "$expected_selector_visual_test" = hdmi20_pattern ]; then
-    ! strings "$sd_mount/boot/boot.scr" | grep -q 'sunxi_drm reinit' \
+    ! script_has_string "$sd_mount/boot/boot.scr" 'sunxi_drm reinit' \
       || fail "SD boot.scr still references the disabled DRM reinit diagnostic"
-    strings "$sd_mount/boot/boot.scr" | grep -q 'drmreinit=disabled' \
+    script_has_string "$sd_mount/boot/boot.scr" 'drmreinit=disabled' \
       || fail "SD boot.scr lacks the disabled DRM reinit marker"
-    strings "$sd_mount/boot/boot.scr" | grep -q 'opi_drmre_' \
+    script_has_string "$sd_mount/boot/boot.scr" 'opi_drmre_' \
       || fail "SD boot.scr lacks the DRM reinit bootarg diagnostic"
-    strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-visual-hdmi20-pattern-ok' \
+    script_has_string "$sd_mount/boot/boot.scr" 'uboot-visual-hdmi20-pattern-ok' \
       || fail "SD boot.scr lacks the HDMI20 visual-test marker"
   fi
   if [ "$expected_bootmenu_first" = true ]; then
-    strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nvme' \
+    script_has_string "$sd_mount/boot/boot.scr" 'uboot-bootmenu-nvme' \
       || fail "SD boot.scr lacks the U-Boot NVMe bootmenu marker"
-    strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-nosel' \
+    script_has_string "$sd_mount/boot/boot.scr" 'uboot-bootmenu-nosel' \
       || fail "SD boot.scr lacks the U-Boot bootmenu no-selection marker"
-    strings "$sd_mount/boot/boot.scr" | grep -q 'uboot-bootmenu-sd' \
+    script_has_string "$sd_mount/boot/boot.scr" 'uboot-bootmenu-sd' \
       || fail "SD boot.scr lacks the U-Boot SD bootmenu marker"
     # shellcheck disable=SC2016
-    strings "$sd_mount/boot/boot.scr" | grep -Eq 'sysboot( -p)? [$][{]devtype[}] [$][{]devnum[}]:[$][{]distro_bootpart[}] any' \
+    grep -a -Eq 'sysboot( -p)? [$][{]devtype[}] [$][{]devnum[}]:[$][{]distro_bootpart[}] any' "$sd_mount/boot/boot.scr" \
       || fail "SD boot.scr lacks the partition-qualified sysboot probe"
   fi
   test -e "$sd_mount/boot/extlinux/extlinux.conf" \
