@@ -611,10 +611,12 @@ the display even though the current diagnostics report success.
   still showed no pre-OS image.
 - The SD `boot0_sdcard.fex` region byte-matches the vendor file, so the
   missing factory splash is not explained by boot0 corruption.
-- The current A733 U-Boot logo loader searches `/boot/boot1.bmp` and
-  `/boot/boot.bmp`. The Orange Pi factory-style asset still exists as
-  `/boot/logo.bmp` and `/boot/efi/logo.bmp`, but `boot.bmp` and `boot1.bmp`
-  had been replaced with the generated 320x240 selector/test bitmap.
+- The current A733 U-Boot logo path hard-codes `bootlogo.bmp` in
+  `drivers/video/sunxi/logo_display/cmd_sunxi_bmp.c::do_sunxi_logo()`, while
+  the BootGUI/fast-logo code also contains `boot.bmp`/`boot1.bmp` fallback
+  strings. The Orange Pi factory-style asset still exists as `/boot/logo.bmp`
+  and `/boot/efi/logo.bmp`, but `bootlogo.bmp` was absent and `boot.bmp` /
+  `boot1.bmp` had been replaced during selector tests.
 - Stage the next test with:
 
 ```bash
@@ -623,10 +625,25 @@ sudo scripts/stage-factory-logo-preinit-test.sh \
   --sd-boot-dir /mnt/opisd-rw/boot
 ```
 
-This restores `logo.bmp` to the filenames U-Boot actually loads, runs
-`sunxi_show_logo`, holds for 20 seconds, and then boots NVMe through the
-known-good legacy `bootm` path. Expected Linux evidence is
+This restores `logo.bmp` to the filenames U-Boot actually loads
+(`bootlogo.bmp`, `boot.bmp`, and `boot1.bmp`), runs `sunxi_show_logo`, holds
+for 20 seconds, and then boots NVMe through the known-good legacy `bootm` path.
+Expected Linux evidence is
 `bootchooser=uboot-logo-preinit-ok` plus `opi_logo_*` HDMI diagnostics.
+
+2026-07-04 recovered-stock bootloader state:
+
+- After external recovery, the installed SD bootloader slot byte-matches the
+  vendor NVMe package:
+  `/usr/lib/linux-u-boot-current-orangepi4pro_1.0.6_arm64/boot_package_a733_nvme.fex`
+  (`sha256=e626234a6eb9420ac29f515dd6acc543e7f0876e3dc086eec2fe221a50cc54f2`).
+- `/dev/mtdblock0` reads as erased (`0xff` header), so the currently observed
+  boot path is the SD raw bootloader slot, not SPI/MTD.
+- The vendor NVMe package scans extlinux before boot scripts and reaches the
+  NVMe entry with `bootchooser=extlinux-legacy-nvme`; therefore the immediate
+  visual recovery test should not install another custom bootloader package.
+  Restore `bootlogo.bmp` aliases first, keep extlinux as the selectable path,
+  and only return to script-first U-Boot after the stock splash is visible.
 
 2026-07-03 stock BootGUI reset-point test:
 
