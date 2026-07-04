@@ -18,6 +18,7 @@ setenv bootmenu_default "nvme"
 setenv selector_visual_test "none"
 setenv selector_visual_hold "8"
 setenv selector_logo_preinit "false"
+setenv selector_logo_command "sunxi_show_logo"
 setenv selector_logo_hold "3"
 setenv selector_diag_force_bootm "false"
 
@@ -142,11 +143,19 @@ if test -n "${opi_bootselect_post_drm}"; then
 fi
 
 if test "${selector_logo_preinit}" = "true"; then
-	echo "Pre-initializing U-Boot video with stock sunxi_show_logo"
-	if sunxi_show_logo; then
-		setenv selector_logo_diag "uboot-logo-preinit-ok"
+	echo "Pre-initializing U-Boot video with ${selector_logo_command}"
+	if test "${selector_logo_command}" = "logo"; then
+		if logo; then
+			setenv selector_logo_diag "uboot-bootgui-logo-ok"
+		else
+			setenv selector_logo_diag "uboot-bootgui-logo-fail"
+		fi
 	else
-		setenv selector_logo_diag "uboot-logo-preinit-fail"
+		if sunxi_show_logo; then
+			setenv selector_logo_diag "uboot-logo-preinit-ok"
+		else
+			setenv selector_logo_diag "uboot-logo-preinit-fail"
+		fi
 	fi
 	if sunxi_hdmi_env; then
 		setenv selector_logo_hdmi "${opi_hdmi_diag}"

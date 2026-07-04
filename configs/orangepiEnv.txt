@@ -16,6 +16,7 @@ selector_bitmap=false
 selector_visual_test=none
 selector_visual_hold=3
 selector_logo_preinit=true
+selector_logo_command=sunxi_show_logo
 selector_logo_hold=15
 selector_diag_force_bootm=false
 bootgui_selector=false

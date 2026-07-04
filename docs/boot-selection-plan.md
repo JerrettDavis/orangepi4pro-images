@@ -1267,3 +1267,28 @@ scripts/validate-u-boot-selector-capabilities.sh
 ```
 
 Expected result today: the capability check fails on USB keyboard support.
+
+## 2026-07-04 BootGUI Logo Command Test
+
+The next reboot test keeps the installed SD TOC1 package unchanged:
+`boot_package_vendor-sd-scriptfirst.fex`
+(`77ef94aee8f8a6ec27d130822b70187fbf4316773d7ae5d59150e9027c654670`).
+Only boot filesystem files are staged.
+
+Rationale: the previous preinit tests exercised AW_DRM `sunxi_show_logo`.
+Vendor source also exposes a separate BootGUI `logo` command that calls
+`sunxi_bmp_display("bootlogo.bmp")`, which is a closer match to the factory
+splash path.
+
+Stage command:
+
+```bash
+sudo scripts/stage-bootgui-logo-test.sh \
+  --hold 20 \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+Expected Linux evidence after reboot is either
+`bootchooser=uboot-bootgui-logo-ok` or
+`bootchooser=uboot-bootgui-logo-fail`. The desired visual result is a visible
+bootloader image during the 20-second hold before the NVMe Ubuntu boot.

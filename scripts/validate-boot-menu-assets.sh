@@ -27,6 +27,7 @@ expected_selector_bitmap=${EXPECTED_SELECTOR_BITMAP:-false}
 expected_selector_visual_test=${EXPECTED_SELECTOR_VISUAL_TEST:-none}
 expected_selector_visual_hold=${EXPECTED_SELECTOR_VISUAL_HOLD:-3}
 expected_selector_logo_preinit=${EXPECTED_SELECTOR_LOGO_PREINIT:-true}
+expected_selector_logo_command=${EXPECTED_SELECTOR_LOGO_COMMAND:-sunxi_show_logo}
 expected_selector_logo_hold=${EXPECTED_SELECTOR_LOGO_HOLD:-15}
 expected_selector_diag_force_bootm=${EXPECTED_SELECTOR_DIAG_FORCE_BOOTM:-false}
 expected_bootlogo=${EXPECTED_BOOTLOGO:-true}
@@ -87,6 +88,8 @@ grep -q "^selector_visual_hold=${expected_selector_visual_hold}$" /boot/orangepi
   || fail "selector_visual_hold should be ${expected_selector_visual_hold}"
 grep -q "^selector_logo_preinit=${expected_selector_logo_preinit}$" /boot/orangepiEnv.txt \
   || fail "selector_logo_preinit should be ${expected_selector_logo_preinit}"
+grep -q "^selector_logo_command=${expected_selector_logo_command}$" /boot/orangepiEnv.txt \
+  || fail "selector_logo_command should be ${expected_selector_logo_command}"
 grep -q "^selector_logo_hold=${expected_selector_logo_hold}$" /boot/orangepiEnv.txt \
   || fail "selector_logo_hold should be ${expected_selector_logo_hold}"
 grep -q "^selector_diag_force_bootm=${expected_selector_diag_force_bootm}$" /boot/orangepiEnv.txt \
@@ -108,6 +111,7 @@ grep -q 'sunxi_hdmi20 pattern 1' /boot/boot.cmd || fail 'boot.cmd does not suppo
 grep -q 'sunxi_drm_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot DRM env diagnostics'
 grep -q 'sunxi_hdmi_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot HDMI env diagnostics'
 grep -q 'sunxi_show_logo' /boot/boot.cmd || fail 'boot.cmd does not pre-initialize U-Boot video with stock logo command'
+grep -q 'uboot-bootgui-logo-ok' /boot/boot.cmd || fail 'boot.cmd lacks BootGUI logo success marker'
 grep -q 'uboot-logo-preinit-ok' /boot/boot.cmd || fail 'boot.cmd lacks logo preinit success marker'
 grep -q 'uboot-bmp-display-ok' /boot/boot.cmd || fail 'boot.cmd lacks standard U-Boot bmp display success marker'
 # shellcheck disable=SC2016
@@ -179,6 +183,7 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_visual_test=.*/selector_visual_test=${expected_selector_visual_test}/" \
   | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
   | sed -E "s/^selector_logo_preinit=.*/selector_logo_preinit=${expected_selector_logo_preinit}/" \
+  | sed -E "s/^selector_logo_command=.*/selector_logo_command=${expected_selector_logo_command}/" \
   | sed -E "s/^selector_logo_hold=.*/selector_logo_hold=${expected_selector_logo_hold}/" \
   | sed -E "s/^selector_diag_force_bootm=.*/selector_diag_force_bootm=${expected_selector_diag_force_bootm}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
@@ -196,6 +201,7 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^selector_visual_test=.*/selector_visual_test=${expected_selector_visual_test}/" \
   | sed -E "s/^selector_visual_hold=.*/selector_visual_hold=${expected_selector_visual_hold}/" \
   | sed -E "s/^selector_logo_preinit=.*/selector_logo_preinit=${expected_selector_logo_preinit}/" \
+  | sed -E "s/^selector_logo_command=.*/selector_logo_command=${expected_selector_logo_command}/" \
   | sed -E "s/^selector_logo_hold=.*/selector_logo_hold=${expected_selector_logo_hold}/" \
   | sed -E "s/^selector_diag_force_bootm=.*/selector_diag_force_bootm=${expected_selector_diag_force_bootm}/" \
   | sed -E "s/^bootlogo=.*/bootlogo=${expected_bootlogo}/" \
