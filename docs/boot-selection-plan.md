@@ -1292,3 +1292,21 @@ Expected Linux evidence after reboot is either
 `bootchooser=uboot-bootgui-logo-ok` or
 `bootchooser=uboot-bootgui-logo-fail`. The desired visual result is a visible
 bootloader image during the 20-second hold before the NVMe Ubuntu boot.
+
+Result: after both the synthetic `boot-resource` layout and the restored
+reserved-window layout, Linux reached NVMe with
+`bootchooser=uboot-bootgui-logo-fail` and no pre-OS bootloader image was
+visible. The `logo` command path is not the active fix path.
+
+The next staged test returns to the HDMI20 isolation path:
+
+```bash
+sudo scripts/stage-uboot-visual-test.sh \
+  --test hdmi20_pattern \
+  --hold 20 \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+Expected evidence after reboot is
+`bootchooser=uboot-visual-hdmi20-pattern-ok` or
+`bootchooser=uboot-visual-hdmi20-pattern-fail`.
