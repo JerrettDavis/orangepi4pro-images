@@ -1640,3 +1640,53 @@ Expected evidence after reboot is a visible vendor bootloader logo during the
 15-second hold, followed by NVMe Ubuntu with `bootchooser=uboot-logo-preinit-ok`
 or `bootchooser=extlinux-legacy-nvme` depending on whether the script path
 exports the marker before extlinux takes over.
+
+Actual result: failed visually. The system booted NVMe Ubuntu, but the screen
+stayed black/no-signal until Linux/desktop. `/proc/cmdline` reported
+`bootchooser=extlinux-legacy-nvme`; that extlinux path does not preserve the
+U-Boot logo diagnostics.
+
+2026-07-04 delayed factory-logo diagnostic boot:
+
+The next test keeps the delayed vendor embedded-logo path but adds passive
+U-Boot DRM/HDMI env diagnostics and forces the marker-preserving bootm path for
+one reboot. This is still bootloader-stage work; it is not a userland selector.
+
+The staged boot assets are:
+
+```bash
+scripts/stage-extlinux-prompt-selector.sh \
+  --timeout 200 \
+  --default ubuntu-nvme \
+  --video-console false \
+  --selector-bitmap false \
+  --logo-preinit true \
+  --logo-command sunxi_show_logo \
+  --logo-hold 15 \
+  --extlinux-first true \
+  --diag-force-bootm true \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+The SD TOC1 package for the next reboot is:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_nvme-scriptfirst-logo-delay-diag.fex
+sha256=17c107db643f858b289e600abed5ad9aee3edd0949f1a2a7fb381bebd07caf2a
+u-boot item sha256=b6d35454586a5bb634fd9a899d567837b106493be04d7273e73b9f51beb39466
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T165041Z.bin
+sha256=f0ba7e5ca7c0d40acd12b1986ffcf00e0041cf1b0f9c7c78639e5e3a523f5de9
+```
+
+Readback validation confirmed the installed SD TOC1 slot byte-matches package
+SHA `17c107db643f858b289e600abed5ad9aee3edd0949f1a2a7fb381bebd07caf2a`.
+
+Expected evidence after reboot is either visible bootloader output or, if the
+screen remains black, a marker-preserved command line containing
+`bootchooser=uboot-logo-preinit-ok`, `opi_logo_hdmi=...`, and
+`opi_logo_drm=...`.
