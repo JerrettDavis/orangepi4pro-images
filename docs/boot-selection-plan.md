@@ -1860,3 +1860,31 @@ sha256=49406a05fef3291f0e2320460e4a937ee50f098c916e987795e4cef51f4c07f1
 Expected evidence after reboot is a visible factory splash or 20-second
 colorbar before Linux, followed by NVMe Ubuntu with
 `bootchooser=uboot-visual-colorbar-ok`.
+
+Actual result: U-Boot again executed `sunxi_drm colorbar 1` and returned
+success, but HDMI stayed black before Linux. `/proc/cmdline` contained
+`bootchooser=uboot-visual-colorbar-ok`.
+
+2026-07-04 stock SD U-Boot vidconsole plus colorbar test:
+
+The next test keeps the stock SD factory script-first U-Boot package installed
+and forces U-Boot video console output before colorbar. The staged boot script
+sets `stdout=serial,vidconsole`, `stderr=serial,vidconsole`,
+`stdin=serial,usbkbd`, runs `cls`, prints a console-active line, runs
+`sunxi_drm colorbar 1`, holds for 20 seconds, then boots NVMe via legacy
+`bootm`.
+
+Staged environment on NVMe, EFI, and SD boot files:
+
+```text
+selector_console=true
+selector_visual_test=colorbar
+selector_visual_hold=20
+extlinux_first=false
+selector_logo_preinit=false
+selector_diag_force_bootm=false
+```
+
+Expected evidence after reboot is visible U-Boot console text and/or the
+20-second colorbar before Linux, followed by NVMe Ubuntu with
+`bootchooser=uboot-visual-colorbar-ok`.
