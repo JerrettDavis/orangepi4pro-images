@@ -1363,3 +1363,26 @@ previous slot to
 `/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T031045Z.bin`
 and verified the new slot by readback. The same `hdmi20_pattern` 20-second
 hold remains staged.
+
+Result: Linux reached NVMe with
+`bootchooser=uboot-visual-hdmi20-pattern-ok`. The useful new marker is
+`opi_pat_hdmipat=req1,tcon0,force01,rff,g00,b00`; U-Boot reports that the
+HDMI20 frame composer accepted the forced red pattern at the Linux-working
+`1024x600`/49 MHz timing. If the screen still stayed black before Linux, the
+next test is the bounded pattern reconfigure package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-pattern-reconfig-1024x600.fex
+sha256=5e1e7209d7fe8535c998c640593f280a6b8f94f7afc4115cb11218189687d92d
+u-boot item sha256=56e9e8e882485333850f928920f0d79914e0fd36b8f5a7af8ff2099301bae972
+```
+
+Safety/capability strings before install: contains `boot.scr`,
+`sunxi_hdmi20`, `sunxi_drm_env`, `sunxi_hdmi_env`,
+`opi_hdmi_pattern_diag`, `opi_hdmi_pattern_reconfig`, `opi_hdmi_diag`, and
+`1024x600`; does not contain `sunxi_drm reinit` or `full hdmi reinit`.
+The SD TOC1 installer backed up the previous slot to
+`/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T031632Z.bin`
+and verified the new slot by readback.
+Expected evidence after reboot is
+`opi_pat_hdmipat=req1,reconfig0,...`.
