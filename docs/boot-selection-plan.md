@@ -2185,3 +2185,39 @@ ORANGEPI4PRO_STAGE_REVIEWED_BOOTLOADER_TEST=1
 Do not reboot after staging unless both repos are committed/pushed and
 `settlement-validate-before-reboot.sh` passes against the reviewed script-first
 package and the expected prompt-test environment.
+
+## 2026-07-04 HDMI Second-Pass Colorbar Test
+
+The previous reviewed prompt test reached NVMe Ubuntu with
+`bootchooser=extlinux-legacy-nvme`, but no U-Boot bootloader visuals appeared.
+The OS splash remained visible, which keeps the failure isolated to U-Boot HDMI
+bring-up rather than Linux display operation.
+
+The next bootloader-only test uses the source-built HDMI second-pass package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass.fex
+sha256=496b9527adaa044d1bb4cbf3d9ccb5cde1353e4a5d1734e9934630cbf45f4eaf
+u-boot-item-sha256=a90c3c06324e7872e9cfceaf1605f75b29bd12588de8418fcdd33c54cfb47565
+```
+
+Board-support validation passed with the `script-first` profile. The package
+does not contain the blocked HDMI recycle command or known unsafe package
+hashes. The test stages only boot files plus the SD TOC1 package slot; it does
+not modify NVMe partition tables, SPI, MTD, boot0, or firmware.
+
+Staged boot assets for the reboot test should be:
+
+```text
+extlinux_first=false
+bootmenu_first=false
+selector_visual_test=colorbar
+selector_visual_hold=20
+selector_logo_preinit=false
+selector_diag_force_bootm=false
+```
+
+Expected evidence after reboot is a visible 20-second U-Boot colorbar before
+Linux, then NVMe Ubuntu with `bootchooser=uboot-visual-colorbar-ok`. If HDMI is
+still black before Linux, `/proc/cmdline` should preserve pre/post U-Boot DRM
+and HDMI diagnostics for the second-pass path.
