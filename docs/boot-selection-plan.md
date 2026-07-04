@@ -1762,3 +1762,45 @@ Expected evidence after reboot is the factory bootloader splash returning
 before the OS loader. This is not yet the final selector; it is the display
 recovery step needed before adding selection interaction on top of the stock
 display path.
+
+Actual result: failed visually. The board booted NVMe Ubuntu and preserved
+`bootchooser=uboot-logo-preinit-ok`, but because this was stock U-Boot the
+custom HDMI/DRM diagnostics were unavailable (`diag-missing`).
+
+2026-07-04 SD boot-resource restore:
+
+The stock-U-Boot test proved that the TOC1 U-Boot item alone is not enough to
+recover the factory splash. The reserved SD boot-resource area at sectors
+40960-65536 was read back as all zeroes. Boot0 still matches stock, and the
+stock U-Boot package is installed, so the next test restores the Allwinner
+boot-resource MBR/FAT area and its logo files.
+
+The restore command was:
+
+```bash
+ORANGEPI4PRO_ALLOW_BOOT_RESOURCE_WRITE=1 \
+  /home/orangepi/orangepi4pro-board-support/scripts/stage-sd-boot-resource.sh \
+  --device /dev/mmcblk1 \
+  --source-logo /boot/logo.bmp \
+  --yes
+```
+
+The restore backed up the previous reserved range to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-boot-resource-before-20260704T172145Z.bin
+sha256=cfadd44a103cbd6d5726fa07b27d7aad2f67ed3930ff96901c486a5beaf7e723
+```
+
+Readback validation now passes:
+
+```text
+softw411 boot-resource MBR validation passed
+SD boot-resource validation passed
+mbr sha256=cc62563f96ec00f80c3bfd5464271fca18eaa174c7ad7dd7d4498e97f3c11620
+fat sha256=74d3006381d0b20b68c963774d3e1584d3d45fb32d03e2e294b5a7e28efe2b07
+logo sha256=96739ee09e816d9428becc0b2150a141929bab997f7dccbe82b4af2c5427c0d5
+```
+
+Settlement validation now includes this boot-resource check. Expected evidence
+after reboot is the factory bootloader splash returning before the OS loader.

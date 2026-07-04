@@ -179,6 +179,10 @@ report() {
   readback_package
   printf '\n'
 
+  printf 'Running SD boot-resource validation...\n'
+  "$board_repo/scripts/validate-sd-boot-resource.sh" --device "$device" --source-logo /boot/logo.bmp
+  printf '\n'
+
   printf 'Running live boot-menu asset validation...\n'
   "$images_repo/scripts/validate-boot-menu-assets.sh"
   printf '\n'
