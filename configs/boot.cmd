@@ -311,7 +311,12 @@ if test "${selector_visual_test}" = "fbtest"; then
 	else
 		setenv post_fbtest_hdmi "hdmi=diag-missing"
 	fi
-	setenv extraargs "${extraargs} opi_pre_${pre_fbtest_diag} opi_pre_${pre_fbtest_hdmi} opi_fb_${opi_fbtest_diag} opi_post_${post_fbtest_diag} opi_post_${post_fbtest_hdmi}"
+	if sunxi_de_env; then
+		setenv post_fbtest_de "${opi_de_diag}"
+	else
+		setenv post_fbtest_de "de=diag-missing"
+	fi
+	setenv extraargs "${extraargs} opi_pre_${pre_fbtest_diag} opi_pre_${pre_fbtest_hdmi} opi_fb_${opi_fbtest_diag} opi_post_${post_fbtest_diag} opi_post_${post_fbtest_hdmi} opi_post_${post_fbtest_de}"
 	sleep ${selector_visual_hold}
 fi
 
@@ -358,7 +363,12 @@ if test "${selector_visual_test}" = "hdmi20_pattern"; then
 	else
 		setenv post_hdmi20_hdmi "hdmi=diag-missing"
 	fi
-	setenv extraargs "${extraargs} opi_pre_${pre_hdmi20_diag} opi_pre_${pre_hdmi20_hdmi} opi_drmre_${opi_drm_reinit_result},${opi_drm_reinit_diag} opi_pat_${opi_hdmi_pattern_diag} opi_reinit_${opi_hdmi_reinit_diag} opi_post_${post_hdmi20_diag} opi_post_${post_hdmi20_hdmi}"
+	if sunxi_de_env; then
+		setenv post_hdmi20_de "${opi_de_diag}"
+	else
+		setenv post_hdmi20_de "de=diag-missing"
+	fi
+	setenv extraargs "${extraargs} opi_pre_${pre_hdmi20_diag} opi_pre_${pre_hdmi20_hdmi} opi_drmre_${opi_drm_reinit_result},${opi_drm_reinit_diag} opi_pat_${opi_hdmi_pattern_diag} opi_reinit_${opi_hdmi_reinit_diag} opi_post_${post_hdmi20_diag} opi_post_${post_hdmi20_hdmi} opi_post_${post_hdmi20_de}"
 	sleep ${selector_visual_hold}
 	sunxi_hdmi20 pattern 0
 fi

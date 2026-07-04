@@ -1472,3 +1472,40 @@ TCON init. It does not contain `sunxi_drm reinit` or `full hdmi reinit`. The
 SD TOC1 installer backed up the previous slot to
 `/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T032919Z.bin`
 and verified the new slot by readback.
+
+2026-07-04 raw DE/TCON diagnostic stage:
+
+The current staged visual test remains:
+
+```bash
+scripts/stage-uboot-visual-test.sh \
+  --test hdmi20_pattern \
+  --hold 20 \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+The generated boot script now calls `sunxi_de_env` after the HDMI pattern test
+and appends only the post-test DE/TCON snapshot as `opi_post_de=...`. This
+keeps the kernel command line bounded while capturing the first data that can
+distinguish an HDMI-link success from a DE/TCON scanout failure.
+
+The installed SD TOC1 package for the next reboot is:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-de-diag-hdmi-pattern-1024x600.fex
+sha256=969e19b6a3e231f7e65b686bbc5dfa07b6e7d37df6decefdf88f214cc9bf535b
+u-boot item sha256=38ae59c77939ac73c06983b3e467aa3ee978b0ed05c0e211e077a5fe07f985a2
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T040742Z.bin
+sha256=0e9404b729eb5114b6058dca6a093c3d2861bc5b2e8077285b3dc52162895b54
+```
+
+Expected evidence after reboot is
+`bootchooser=uboot-visual-hdmi20-pattern-ok` plus `opi_post_de=...`. If the
+screen is still black before Linux, compare those U-Boot DE/TCON register
+groups against the Linux DRM/TCON state that becomes visible after the kernel
+mode set.
