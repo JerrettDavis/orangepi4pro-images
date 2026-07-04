@@ -1509,3 +1509,41 @@ Expected evidence after reboot is
 screen is still black before Linux, compare those U-Boot DE/TCON register
 groups against the Linux DRM/TCON state that becomes visible after the kernel
 mode set.
+
+Result: Linux reached NVMe and recorded `opi_post_de=...`, but the initial raw
+diagnostic sampled TCON4 only. The packaged U-Boot DTB routes HDMI through
+`tcon3@5730000`; `tcon4@5731000` is the EDP path. Linux live register reads
+after the visible mode set showed active TCON3 values at `0x05730000` offsets
+`0x000`, `0x004`, `0x088`, `0x08c`, `0x090`, `0x098`, `0x09c`, `0x0a0`,
+`0x0a4`, `0x0a8`, and `0x0fc`.
+
+2026-07-04 corrected TCON3 diagnostic stage:
+
+The boot assets remain staged as:
+
+```bash
+scripts/stage-uboot-visual-test.sh \
+  --test hdmi20_pattern \
+  --hold 20 \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+The installed SD TOC1 package for the next reboot is:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-tcon3diag-hdmi-pattern-1024x600.fex
+sha256=0381eff0a7a65ee407856b6ec9a10e4a0c82c8a4c3aa64f4f008b4b26024293f
+u-boot item sha256=92334f2f929e1c8867902081c64a0335cd984be3c1189899c8500d8541a4ebb7
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T041753Z.bin
+sha256=7188d42ff484a2c9ee7d9318ccae78bdb266c19438358c3a1cb710315c9e6a4a
+```
+
+Expected evidence after reboot is
+`bootchooser=uboot-visual-hdmi20-pattern-ok` plus `opi_post_de=...t3=...`.
+This is still a bootloader-stage test; no userland selector fallback is part of
+the target path.
