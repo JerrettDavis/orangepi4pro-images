@@ -1726,3 +1726,39 @@ sha256=17c2cb8ba2ffcdca5ecca9b15741afa0091ebc5673dc35a9eb67b77e3dbe77ec
 
 Readback validation confirmed the installed SD TOC1 slot byte-matches package
 SHA `eae2651699fa2c14556124f68dbc33f9d9c8dd298f0ee41574582f7a531e713e`.
+
+Actual result: failed visually. The board booted NVMe Ubuntu and preserved the
+U-Boot diagnostic marker, but HDMI diagnostics were unchanged: U-Boot reported
+HDMI-A initialized/enabled at 1920x1080 while the low-level HDMI status stayed
+idle/unlocked.
+
+2026-07-04 stock vendor U-Boot visual recovery test:
+
+The next test stops using locally rebuilt U-Boot for display. It returns to the
+stock Orange Pi NVMe U-Boot item, which is the only payload known to have shown
+the factory "initializing boot loader" splash on this hardware. The only U-Boot
+payload change is the length-preserving scan-order replacement from
+extlinux-first to script-first.
+
+The installed SD TOC1 package is:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-nvme-scriptfirst-stockvisual.fex
+sha256=d798104ccd705e542842fac409b1e2694c6ca19fcfac75fc30036a4535a7d318
+u-boot item sha256=77836181cc87b84559b11579eeb8388f216c51b8127951e2692a92101be6ace0
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T171807Z.bin
+sha256=03bec02a59c88366e22d6350a9b01979049acd5f722c859877e881f27b6719f6
+```
+
+Settlement validation confirmed the installed SD TOC1 slot byte-matches package
+SHA `d798104ccd705e542842fac409b1e2694c6ca19fcfac75fc30036a4535a7d318`.
+
+Expected evidence after reboot is the factory bootloader splash returning
+before the OS loader. This is not yet the final selector; it is the display
+recovery step needed before adding selection interaction on top of the stock
+display path.
