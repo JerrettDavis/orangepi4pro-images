@@ -1547,3 +1547,43 @@ Expected evidence after reboot is
 `bootchooser=uboot-visual-hdmi20-pattern-ok` plus `opi_post_de=...t3=...`.
 This is still a bootloader-stage test; no userland selector fallback is part of
 the target path.
+
+2026-07-04 RX-sense stale-HDMI bootmenu package:
+
+Live Linux-visible register reads showed that visible HDMI output has
+`PHY_STAT0=0xf3`, `MC_LOCKONCLOCK=0x79`, and `FC_PACKET_TX_EN=0x1f`. The last
+U-Boot package reached Linux with `stat03` and `lock70`; U-Boot considered that
+locked, but the RX-sense bits were absent. The current test tightens the
+stale-HDMI checks so U-Boot does not skip reconfiguration unless all RX-sense
+bits are also present.
+
+The staged visual test remains:
+
+```bash
+scripts/stage-uboot-visual-test.sh \
+  --test hdmi20_pattern \
+  --hold 20 \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+The installed SD TOC1 package for the next reboot is:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-rxsense-stale-retry-hdmi-pattern-1024x600.fex
+sha256=feacc7a99a48a1f6a64318b8372042f0b24df36bc5bae1f35f4bcc36581e6438
+u-boot item sha256=dc8fabad16732d543f76b584e211b02e741eb4f0cdbbff4db9887a35517e3975
+build artifact sha256=9e289fab52d09d76f967b2e664765500f33ebc1d06003982b9eff920858550d4
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T043036Z.bin
+sha256=d8dcda3f1f422f972d57cd761bcd3c179c42ef5c218e629179a7c2d161dfb2ef
+```
+
+Expected evidence after reboot is still
+`bootchooser=uboot-visual-hdmi20-pattern-ok`. The useful new evidence is whether
+`opi_pre_hdmi`/`opi_post_hdmi` advance from `stat03` toward `statf3`, or whether
+`opi_logo_recover` reports a stale retry path. The visual target remains a
+bootloader-stage image before Linux starts.
