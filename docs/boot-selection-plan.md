@@ -22,6 +22,22 @@ Current status on 2026-07-04:
   still defaults to the NVMe root UUID, so this should preserve the NVMe boot
   while testing whether the factory SD package restores the visible
   "initializing boot loader" path.
+- Result: restoring the stock vendor SD package
+  (`boot_package.fex`, SHA-256
+  `7a2661b080f5c5d8ba32566bc79f1ccfbfb8912a4a5c0c1a4856a9380542c807`)
+  preserved reliable NVMe boot and restored the Ubuntu/Plymouth OS splash, but
+  still did not show a bootloader splash. Because stock SD U-Boot scans
+  extlinux before `boot.scr`, that test did not execute the staged
+  `sunxi_show_logo` hold.
+- Next test: install the stock SD U-Boot package with only the same-length
+  script-first scan-order patch:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_vendor-sd-scriptfirst.fex`,
+  SHA-256
+  `77ef94aee8f8a6ec27d130822b70187fbf4316773d7ae5d59150e9027c654670`.
+  Live boot files are staged for `selector_logo_preinit=true`,
+  `selector_logo_hold=20`, `selector_diag_force_bootm=true`, and
+  `extlinux_first=false`, so this package should run the factory
+  `sunxi_show_logo` path for a visible 20-second hold before booting NVMe.
 - The active target is bootloader-stage selection only. The temporary X11/XFCE
   autostart prompt was removed from the active path because it appears after a
   full Linux boot.
