@@ -2054,3 +2054,46 @@ Expected evidence after reboot: visible bootloader-stage output before Linux.
 If the screen is still black, `/proc/cmdline` should show whether TOP PHY moved
 toward the Linux value (`top20_e8193000`) and whether PHY/status/lock moved
 away from zero.
+
+Actual result: failed visually, but U-Boot now reports `top20_e8193000`, which
+matches the Linux-visible TOP PHY PLL value. HDMI still reports
+`phy00,stat00,lock00`. The next target is the stale software enable flag:
+diagnostics show `out1` even though the transmitter is not locked.
+
+2026-07-04 early display stale-enable flag test:
+
+The next installed package adds one narrow patch on top of the Linux-sequence
+candidate. If `_sunxi_drv_hdmi_enable()` sees `drv_enable` already set but TX
+PHY lock and HDMI MC pixel/TMDS clocks are not actually locked, it clears only
+that stale software flag and lets the normal HDMI enable path run. It does not
+call `display_disable()`, logo-stage reinit, RX-sense waits, or the older
+stale-enable retry path.
+
+Build command:
+
+```bash
+scripts/build-vendor-uboot.sh --early-display-enablefix --clean
+python3 scripts/sunxi-toc1-package.py repack \
+  --template /usr/lib/linux-u-boot-current-orangepi4pro_1.0.6_arm64/boot_package.fex \
+  --replace u-boot=.build/u-boot/artifacts/early-display-enablefix/u-boot-sun60iw2p1.bin \
+  --output /var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-enablefix.fex
+```
+
+Installed package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-enablefix.fex
+sha256=0395dc594c53ed3ffb082f505cf08b40e965824abe9da37fdae117e434d6d476
+u-boot item sha256=8e5dfcd8be7fd54ac3e83a2f9c02315c55f13dbebece7e34b6bca2778c2130cc
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T181011Z.bin
+sha256=265d0bc19b06201252c8a1d74933dbcd82593b7fbe63e3b227a5261d725b8738
+```
+
+Expected evidence after reboot: visible bootloader-stage output before Linux,
+or diagnostics showing `phy`, `stat`, `lock`, `vid`, or `gcp` moved away from
+zero after the stale flag reset.
