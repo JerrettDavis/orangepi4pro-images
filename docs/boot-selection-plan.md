@@ -1804,3 +1804,27 @@ logo sha256=96739ee09e816d9428becc0b2150a141929bab997f7dccbe82b4af2c5427c0d5
 
 Settlement validation now includes this boot-resource check. Expected evidence
 after reboot is the factory bootloader splash returning before the OS loader.
+
+Actual result: failed visually. The restored boot-resource area survived and
+validates after reboot, but the HDMI display still stayed black before Linux.
+
+2026-07-04 stock U-Boot colorbar visual test:
+
+Stock U-Boot has no `bootmenu`, so the final selector cannot come from its
+built-in text menu. It does include `sunxi_drm colorbar`, which is the next
+bounded bootloader-stage visual test. The staged boot files now skip extlinux,
+run `sunxi_drm colorbar 1`, hold for 20 seconds, and boot NVMe via legacy
+`bootm`.
+
+The staged command was:
+
+```bash
+/home/orangepi/orangepi4pro-images/scripts/stage-uboot-visual-test.sh \
+  --test colorbar \
+  --hold 20 \
+  --sd-boot-dir /mnt/opisd-rw/boot
+```
+
+Expected evidence after reboot is a 20-second U-Boot colorbar before Linux,
+followed by NVMe Ubuntu with `bootchooser=uboot-visual-colorbar-ok` or
+`bootchooser=uboot-visual-colorbar-fail`.
