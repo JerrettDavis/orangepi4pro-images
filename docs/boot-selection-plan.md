@@ -1431,3 +1431,23 @@ HDMI20 diagnostic commands plus `rxsense`, and does not contain
 previous slot to
 `/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T032239Z.bin`
 and verified the new slot by readback.
+
+Result: Linux reached NVMe with
+`bootchooser=uboot-visual-hdmi20-pattern-ok`, but `PHY_STAT0` did not move
+toward the later Linux-visible RX-sense state. HDMI diagnostics stayed at
+`phy2e,stat03,rst00,lock70,vid58,gcp01`. The next forward test is the
+MC-clock package, which adds top-PHY PLL diagnostics/autocal and the Linux-like
+main-controller clock sequencing:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-mcclk-1024x600.fex
+sha256=4d15d7c88b17aa1114aa99175ad489a4d3a36142430736fda2a4b113cb1e1844
+u-boot item sha256=4febc8f1543f071fd12d63949e3ca7a79f7b030c7668c212029221c17cce46c1
+```
+
+Expected evidence: `opi_pre_hdmi`/`opi_post_hdmi` should include
+`top20_...top40_...`, and `MC_LOCKONCLOCK` should show whether the main
+controller moved from `lock70` toward Linux's visible `lock79`. The SD TOC1
+installer backed up the previous slot to
+`/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T032623Z.bin`
+and verified the new slot by readback.
