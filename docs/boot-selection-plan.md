@@ -38,6 +38,19 @@ Current status on 2026-07-04:
   `selector_logo_hold=20`, `selector_diag_force_bootm=true`, and
   `extlinux_first=false`, so this package should run the factory
   `sunxi_show_logo` path for a visible 20-second hold before booting NVMe.
+- Result: Linux reported `bootchooser=uboot-logo-preinit-ok`, proving
+  script-first U-Boot ran `/boot/boot.scr`, but there was still no visible
+  bootloader splash. The diagnostic legacy `bootm` handoff also removed the
+  Ubuntu/Plymouth OS splash. Restore `selector_diag_force_bootm=false` and
+  `extlinux_first=true` for future visual tests unless a marker-preserving
+  legacy path is explicitly needed.
+- Source review showed the stock logo command does not load logo files from
+  the extlinux `/boot` directory. It loads from named Allwinner partitions
+  `bootloader` and `boot-resource`. The current SD card is a single DOS Linux
+  partition, so there is no named `boot-resource` for that lookup. The next
+  bounded hypothesis is a small guarded Allwinner boot-resource area in the
+  zeroed reserved SDMMC logical window before the Linux partition, created by
+  board-support `scripts/stage-sd-boot-resource.sh`.
 - The active target is bootloader-stage selection only. The temporary X11/XFCE
   autostart prompt was removed from the active path because it appears after a
   full Linux boot.
