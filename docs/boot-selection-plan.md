@@ -1888,3 +1888,54 @@ selector_diag_force_bootm=false
 Expected evidence after reboot is visible U-Boot console text and/or the
 20-second colorbar before Linux, followed by NVMe Ubuntu with
 `bootchooser=uboot-visual-colorbar-ok`.
+
+Actual result: failed visually. The system reached NVMe Ubuntu, but the screen
+remained black until the OS loader/desktop.
+
+2026-07-04 early display-init delay test:
+
+The next installed package moves the wait earlier than `boot.scr`: it delays
+for 8 seconds immediately before vendor U-Boot calls `initr_sunxi_display()`.
+This tests whether the HDMI panel/bridge is not ready when AW DRM first
+captures display state.
+
+Installed package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-delay.fex
+sha256=4fd435271d169f0d03e604551e98dd669b23ce570983914289e55152e9e6983a
+u-boot item sha256=b1a7955133f03bd3676477292983c2f3d3c37d92278969d8f4b1efa4c9707665
+```
+
+Source:
+
+```text
+https://github.com/orangepi-xunlong/u-boot-orangepi.git
+branch=v2018.05-sun60iw2
+commit=b791be842935b27268ae3d00e943a9075495f30a
+patch=configs/u-boot/0034-delay-before-sunxi-display-init.patch
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T174624Z.bin
+sha256=e57b167478c264215ff81e52fd66fd75701f392a9c016b7408f12f174f879f0e
+```
+
+The staged boot files are unchanged from the last visual test:
+
+```text
+selector_console=true
+selector_visual_test=colorbar
+selector_visual_hold=20
+extlinux_first=false
+selector_logo_preinit=false
+selector_diag_force_bootm=false
+```
+
+Expected evidence after reboot is visible pre-Linux U-Boot output during the
+early delay and/or the 20-second colorbar hold, followed by NVMe Ubuntu with
+`bootchooser=uboot-visual-colorbar-ok`. This package includes passive
+`sunxi_drm_env` and `sunxi_hdmi_env`, so `/proc/cmdline` should include real
+`opi_pre_*` / `opi_post_*` diagnostics instead of `diag-missing`.
