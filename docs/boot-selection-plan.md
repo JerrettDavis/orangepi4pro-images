@@ -1386,3 +1386,26 @@ The SD TOC1 installer backed up the previous slot to
 and verified the new slot by readback.
 Expected evidence after reboot is
 `opi_pat_hdmipat=req1,reconfig0,...`.
+
+Result: Linux reached NVMe with
+`bootchooser=uboot-visual-hdmi20-pattern-ok` and
+`opi_pat_hdmipat=req1,reconfig0,tcon0,force01,rff,g00,b00`. The bounded HDMI
+reconfigure returned success, but direct DesignWare HDMI core diagnostics were
+still zero in `opi_pre_hdmi` and `opi_post_hdmi`:
+`phy00,stat00,rst00,lock00,vid00,gcp00`. If the screen remained black before
+Linux, the next test is the frame-composer iteration package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-fciter-1024x600.fex
+sha256=a6ff4344d16002f4274a30fee0c4ed861fb6e4e1cedd9251a810ab38e69a2db0
+u-boot item sha256=531c73cf5f7ace30e2dfba95e52a0beaa3beccf830984f92d5a259649967e556
+```
+
+This package carries
+`configs/u-boot/0019-sync-linux-hdmi-fc-iteration-and-diag.patch`, which adds
+Linux's missing frame-composer iteration write and reads the DesignWare
+registers without the stale `sw_init` guard. It does not contain
+`sunxi_drm reinit` or `full hdmi reinit`. The SD TOC1 installer backed up the
+previous slot to
+`/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T031946Z.bin`
+and verified the new slot by readback.
