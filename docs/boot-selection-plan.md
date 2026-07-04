@@ -1587,3 +1587,10 @@ Expected evidence after reboot is still
 `opi_pre_hdmi`/`opi_post_hdmi` advance from `stat03` toward `statf3`, or whether
 `opi_logo_recover` reports a stale retry path. The visual target remains a
 bootloader-stage image before Linux starts.
+
+Actual result: unsafe. The board did not complete a normal boot and required
+external WSL recovery. After recovery it booted NVMe with
+`bootchooser=extlinux-legacy-nvme`, so the RX-sense package did not leave useful
+U-Boot visual diagnostics in `/proc/cmdline`. The package SHA
+`feacc7a99a48a1f6a64318b8372042f0b24df36bc5bae1f35f4bcc36581e6438` is now
+blocked by the SD installer and settlement gate.
