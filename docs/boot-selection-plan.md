@@ -1337,3 +1337,29 @@ backed up the previous slot to
 `/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T030311Z.bin`
 and verified the readback byte-for-byte after writing. The same
 `hdmi20_pattern` 20-second hold remains staged for the next boot.
+
+Result: Linux reached NVMe with
+`bootchooser=uboot-visual-hdmi20-pattern-fail`, but the package populated real
+pre/post diagnostics instead of `missing` values:
+`opi_pre_drm=...mode=1280x720,clk=74250...`,
+`opi_pre_hdmi=fast1,hpd1,clk1,out1,drm1,mode1,...hdmi74250000,...toplock1...`,
+and matching `opi_post_*` values. The remaining diagnostic gap is
+`opi_pat_hdmipat=unset`, because this older bus-clock candidate does not export
+the HDMI pattern status. No visible bootloader selector appeared before Linux.
+
+The next reboot installs the pattern-status 1024x600 package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-patternstatus-1024x600.fex
+sha256=2b79a35b9182a63a4304cb89aa1b1178fe214abe03050923b212a06e05a24abd
+u-boot item sha256=63d7076c480805e6dbead46548ef1191c616337743ca9798c0f15afa29c57302
+```
+
+Safety/capability strings before install: contains `boot.scr`,
+`sunxi_hdmi20`, `sunxi_drm_env`, `sunxi_hdmi_env`,
+`opi_hdmi_pattern_diag`, `opi_hdmi_diag`, and `1024x600`; does not contain
+`sunxi_drm reinit` or `full hdmi reinit`. The SD TOC1 installer backed up the
+previous slot to
+`/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T031045Z.bin`
+and verified the new slot by readback. The same `hdmi20_pattern` 20-second
+hold remains staged.
