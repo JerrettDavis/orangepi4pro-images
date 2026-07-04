@@ -35,6 +35,18 @@ elif grep -q 'bootchooser=boot-script-default-nvme' /proc/cmdline; then
   printf 'Current boot used the boot-script default NVMe path.\n'
 elif grep -q 'bootchooser=uboot-logo-preinit-ok' /proc/cmdline; then
   printf 'Current boot ran the U-Boot logo preinit path before Linux.\n'
+elif grep -q 'bootchooser=uboot-visual-colorbar-ok' /proc/cmdline; then
+  printf 'Current boot ran the U-Boot DRM colorbar visual test successfully.\n'
+elif grep -q 'bootchooser=uboot-visual-colorbar-fail' /proc/cmdline; then
+  printf 'Current boot ran the U-Boot DRM colorbar visual test and the command failed.\n'
+elif grep -q 'bootchooser=uboot-visual-fbtest-ok' /proc/cmdline; then
+  printf 'Current boot ran the U-Boot framebuffer visual test successfully.\n'
+elif grep -q 'bootchooser=uboot-visual-fbtest-fail' /proc/cmdline; then
+  printf 'Current boot ran the U-Boot framebuffer visual test and the command failed.\n'
+elif grep -q 'bootchooser=uboot-visual-hdmi20-pattern-ok' /proc/cmdline; then
+  printf 'Current boot ran the U-Boot HDMI20 pattern visual test successfully.\n'
+elif grep -q 'bootchooser=uboot-visual-hdmi20-pattern-fail' /proc/cmdline; then
+  printf 'Current boot ran the U-Boot HDMI20 pattern visual test and the command failed.\n'
 else
   printf 'Current boot has no bootchooser marker; U-Boot likely used an older boot.scr.\n'
 fi
