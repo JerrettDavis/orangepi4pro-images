@@ -1612,7 +1612,7 @@ scripts/stage-extlinux-prompt-selector.sh \
   --selector-bitmap false \
   --logo-preinit true \
   --logo-command sunxi_show_logo \
-  --logo-hold 20 \
+  --logo-hold 15 \
   --extlinux-first true \
   --diag-force-bootm false \
   --sd-boot-dir /mnt/opisd-rw/boot
@@ -1637,6 +1637,6 @@ Readback validation confirmed the installed SD TOC1 slot byte-matches package
 SHA `65eaba1bff9c98324213d0a6c4849f2dccf74de2b115e4edb724ed63a29e6012`.
 
 Expected evidence after reboot is a visible vendor bootloader logo during the
-20-second hold, followed by NVMe Ubuntu with `bootchooser=uboot-logo-preinit-ok`
+15-second hold, followed by NVMe Ubuntu with `bootchooser=uboot-logo-preinit-ok`
 or `bootchooser=extlinux-legacy-nvme` depending on whether the script path
 exports the marker before extlinux takes over.
