@@ -1690,3 +1690,39 @@ Expected evidence after reboot is either visible bootloader output or, if the
 screen remains black, a marker-preserved command line containing
 `bootchooser=uboot-logo-preinit-ok`, `opi_logo_hdmi=...`, and
 `opi_logo_drm=...`.
+
+Actual result: failed visually but captured diagnostics. The boot reached NVMe
+Ubuntu and `/proc/cmdline` preserved the U-Boot markers. U-Boot reported HDMI-A
+initialized and enabled at 1920x1080, but HDMI low-level status was still idle:
+`hdmi24000000`, `phy00`, `stat00`, `rst00`, and `lock00`.
+
+2026-07-04 fixed U-Boot spare-header diagnostic boot:
+
+The previous package exposed a build-system defect: the vendor
+`scripts/sunxi_ubootools` binary is x86-64-only and does not run on the ARM
+board, so rebuilt U-Boot binaries had zeroed spare-header `length` and
+`uboot_length` fields. The new board-support helper
+`scripts/fix-sunxi-uboot-header.py` pads, fills, and verifies those fields after
+build.
+
+The next SD TOC1 package for reboot testing is:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_nvme-logo-delay-diag-fixed-header.fex
+sha256=eae2651699fa2c14556124f68dbc33f9d9c8dd298f0ee41574582f7a531e713e
+u-boot item sha256=592231881302f90524aa9c36bdb134335283fc3b266b42f97f787b3cdde0bce5
+```
+
+This package keeps the same passive delayed-logo diagnostics as the previous
+test. The only intended behavioral difference is valid U-Boot spare-header
+metadata.
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T171105Z.bin
+sha256=17c2cb8ba2ffcdca5ecca9b15741afa0091ebc5673dc35a9eb67b77e3dbe77ec
+```
+
+Readback validation confirmed the installed SD TOC1 slot byte-matches package
+SHA `eae2651699fa2c14556124f68dbc33f9d9c8dd298f0ee41574582f7a531e713e`.
