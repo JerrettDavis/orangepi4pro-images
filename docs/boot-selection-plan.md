@@ -2000,3 +2000,57 @@ Expected evidence after reboot: visible bootloader-stage output before Linux,
 or at minimum diagnostics moving from `mode=1920x1080`/`hdmi24000000` toward
 `mode=1024x600` and an HDMI clock near `49000000`, with expanded
 `top20_`/`top24_`/`top28_`/`top2c_`/`top30_`/`top40_` top-PHY fields.
+
+Actual result: failed visually, but narrowed the failure. U-Boot now reports
+`mode=1024x600,clk=49000,fbw=1024,fbh=600` and
+`tv49000000,pix49000,tmds49000`, so the mode/default-clock path is corrected.
+The actual HDMI controller clock still reports `hdmi24000000`, and
+PHY/status/lock registers are still zero.
+
+2026-07-04 early display Linux-sequence test:
+
+The next installed package keeps the native mode/default-clock fixes and adds
+the Linux-like portions that happen when the kernel finally makes HDMI visible:
+TCON HDMI clock reset/rate sequencing, TOP PHY auto-calculation, HDMI MC clock
+enable order, and normal TCON format handoff. It intentionally still excludes
+the known-risky full DRM reinit, forced post-logo HDMI reinit, stale-enable
+retry, and RX-sense wait patches.
+
+Build command:
+
+```bash
+scripts/build-vendor-uboot.sh --early-display-linuxseq --clean
+python3 scripts/sunxi-toc1-package.py repack \
+  --template /usr/lib/linux-u-boot-current-orangepi4pro_1.0.6_arm64/boot_package.fex \
+  --replace u-boot=.build/u-boot/artifacts/early-display-linuxseq/u-boot-sun60iw2p1.bin \
+  --output /var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-linuxseq.fex
+```
+
+Installed package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-linuxseq.fex
+sha256=ddcea8f1b115e049737929fe71595e7abd6d662066efe6c577815b397a0eb740
+u-boot item sha256=1ad14e45fdfff7fadf88b40e3f68742cdd03c1f58cb320b904bd9fc7cc0dc5ee
+```
+
+Source:
+
+```text
+https://github.com/orangepi-xunlong/u-boot-orangepi.git
+branch=v2018.05-sun60iw2
+commit=b791be842935b27268ae3d00e943a9075495f30a
+mode=scripts/build-vendor-uboot.sh --early-display-linuxseq
+```
+
+The installer backed up the previous SD TOC1 slot to:
+
+```text
+/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T180343Z.bin
+sha256=69965b9f8a61604700de727df000f51f7dda0d465d3c075b8c4f0e1a59e0e9ee
+```
+
+Expected evidence after reboot: visible bootloader-stage output before Linux.
+If the screen is still black, `/proc/cmdline` should show whether TOP PHY moved
+toward the Linux value (`top20_e8193000`) and whether PHY/status/lock moved
+away from zero.
