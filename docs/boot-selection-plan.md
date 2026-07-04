@@ -1310,3 +1310,30 @@ sudo scripts/stage-uboot-visual-test.sh \
 Expected evidence after reboot is
 `bootchooser=uboot-visual-hdmi20-pattern-ok` or
 `bootchooser=uboot-visual-hdmi20-pattern-fail`.
+
+Result with the stock script-first package
+`boot_package_vendor-sd-scriptfirst.fex`
+(`77ef94aee8f8a6ec27d130822b70187fbf4316773d7ae5d59150e9027c654670`):
+Linux reached NVMe with
+`bootchooser=uboot-visual-hdmi20-pattern-fail`. The diagnostic environment
+showed `opi_pre_drm_diag=missing`, `opi_pre_hdmi=diag-missing`,
+`opi_pat_hdmipat=unset`, `opi_post_drm_diag=missing`, and
+`opi_post_hdmi=diag-missing`. That package preserves factory script-first
+behavior but does not contain the `sunxi_hdmi20`, `sunxi_drm_env`, or
+`sunxi_hdmi_env` commands needed for this isolation test.
+
+The next reboot installs the previously safe diagnostic-capable package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-busclock-720p.fex
+sha256=0a7a82b76e83cbb612c145c8f9414bb7dc7b4a5ce0c533c9cf002c4880337182
+u-boot item sha256=50c3195cd076c8c8c3fedd596ecfc4fe034a505e7e50e8647b0a1acb426b622a
+```
+
+Safety/capability strings before install: contains `boot.scr`,
+`sunxi_hdmi20`, `sunxi_drm_env`, `sunxi_hdmi_env`, `opi_hdmi_diag`, and
+`opi_drm_diag`; does not contain `sunxi_drm reinit`. The SD TOC1 installer
+backed up the previous slot to
+`/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T030311Z.bin`
+and verified the readback byte-for-byte after writing. The same
+`hdmi20_pattern` 20-second hold remains staged for the next boot.
