@@ -149,6 +149,9 @@ readback_package() {
     feacc7a99a48a1f6a64318b8372042f0b24df36bc5bae1f35f4bcc36581e6438)
       fail "refusing known-unsafe boot package in settlement gate: $package_sha"
       ;;
+    6aa7b8590cf7d2b7b259aa08326a43d342c7ce6b0d233bc3e4faf5cbb3e46cd1)
+      fail "refusing known-unsafe boot package in settlement gate: $package_sha"
+      ;;
   esac
   for unsafe_string in \
     'sunxi_drm_reinit_active' \
@@ -159,7 +162,9 @@ readback_package() {
     'PHY_STAT0_RX_SENSE_ALL_MASK' \
     'force visible reinit' \
     'hdmi drv stale enable state' \
-    'post-skip-locked'; do
+    'post-skip-locked' \
+    'sunxi_drm_hdmi_recycle' \
+    'sunxi_drm hdmi_recycle'; do
     if strings -a "$package" | grep -Fq "$unsafe_string"; then
       fail "refusing package containing known-unsafe string: $unsafe_string"
     fi
@@ -185,6 +190,10 @@ check_sd_boot_assets() {
     || fail "SD /boot/boot.cmd differs from NVMe /boot/boot.cmd"
   cmp -s /boot/boot.scr "$sd_mount/boot/boot.scr" \
     || fail "SD /boot/boot.scr differs from NVMe /boot/boot.scr"
+  ! grep -a -q 'sunxi_drm hdmi_recycle' /boot/boot.scr \
+    || fail "NVMe boot.scr contains unsafe HDMI recycle command"
+  ! grep -a -q 'sunxi_drm hdmi_recycle' "$sd_mount/boot/boot.scr" \
+    || fail "SD boot.scr contains unsafe HDMI recycle command"
 
   if [ "$expected_visual" != any ]; then
     grep -q "^selector_visual_test=${expected_visual}$" "$sd_mount/boot/orangepiEnv.txt" \

@@ -107,7 +107,6 @@ grep -q 'usb start' /boot/boot.cmd || fail 'boot.cmd does not start USB before b
 grep -q 'bootmenu_default' /boot/boot.cmd || fail 'boot.cmd does not support deterministic bootmenu default tests'
 grep -q 'sunxi_drm colorbar' /boot/boot.cmd || fail 'boot.cmd does not support bounded colorbar visual test'
 grep -q 'sunxi_drm fbtest' /boot/boot.cmd || fail 'boot.cmd does not support bounded framebuffer visual test'
-grep -q 'sunxi_drm hdmi_recycle' /boot/boot.cmd || fail 'boot.cmd does not support bounded HDMI display recycle visual test'
 grep -q 'sunxi_hdmi20 pattern 1' /boot/boot.cmd || fail 'boot.cmd does not support bounded HDMI20 pattern visual test'
 grep -q 'sunxi_drm_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot DRM env diagnostics'
 grep -q 'sunxi_hdmi_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot HDMI env diagnostics'
@@ -122,8 +121,9 @@ grep -q 'Forcing diagnostic legacy bootm after bitmap display test' /boot/boot.c
 grep -q 'selector_diag_force_bootm' /boot/boot.cmd || fail 'boot.cmd lacks diagnostic bootm path after logo preinit'
 grep -q 'uboot-visual-colorbar-ok' /boot/boot.cmd || fail 'boot.cmd lacks colorbar success marker'
 grep -q 'uboot-visual-fbtest-ok' /boot/boot.cmd || fail 'boot.cmd lacks fbtest success marker'
-grep -q 'uboot-visual-hdmi-recycle-ok' /boot/boot.cmd || fail 'boot.cmd lacks HDMI recycle success marker'
 grep -q 'uboot-visual-hdmi20-pattern-ok' /boot/boot.cmd || fail 'boot.cmd lacks HDMI20 pattern success marker'
+! grep -q 'sunxi_drm hdmi_recycle' /boot/boot.cmd \
+  || fail 'boot.cmd must not contain unsafe HDMI recycle command'
 grep -q 'orangepiBootOnce.txt' /boot/boot.cmd || fail 'boot.cmd does not import Linux selector bootonce requests'
 grep -q 'bootchooser=linux-selector-sd' /boot/boot.cmd || fail 'boot.cmd lacks Linux selector SD marker'
 grep -q 'bootchooser=linux-selector-nvme' /boot/boot.cmd || fail 'boot.cmd lacks Linux selector NVMe marker'

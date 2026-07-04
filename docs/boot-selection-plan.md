@@ -2135,3 +2135,11 @@ and pre/post HDMI diagnostics on `/proc/cmdline`.
 The pre-reboot settlement gate now also verifies SD `/boot/boot.cmd` and
 `/boot/boot.scr` match the NVMe boot copies, because U-Boot reads the SD copy
 even though Linux later mounts NVMe at `/boot`.
+
+Reboot result: unsafe. The HDMI recycle package bricked startup and required
+external WSL recovery. The recovered SD TOC1 slot now matches the vendor NVMe
+package `boot_package_a733_nvme.fex`
+(`e626234a6eb9420ac29f515dd6acc543e7f0876e3dc086eec2fe221a50cc54f2`).
+Package `6aa7b8590cf7d2b7b259aa08326a43d342c7ce6b0d233bc3e4faf5cbb3e46cd1`
+and boot scripts containing `sunxi_drm hdmi_recycle` are now blocked by the
+installer and settlement gate.

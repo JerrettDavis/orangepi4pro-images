@@ -320,48 +320,6 @@ if test "${selector_visual_test}" = "fbtest"; then
 	sleep ${selector_visual_hold}
 fi
 
-if test "${selector_visual_test}" = "hdmi_recycle"; then
-	echo "Running bounded U-Boot HDMI display recycle visual test"
-	setenv selected_boot true
-	setenv extlinux_first false
-	setenv bootmenu_first false
-	setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
-	setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
-	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
-	setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
-	if sunxi_drm_env; then
-		setenv pre_recycle_diag "${opi_drm_diag}"
-	else
-		setenv pre_recycle_diag "drm_diag=missing"
-	fi
-	if sunxi_hdmi_env; then
-		setenv pre_recycle_hdmi "${opi_hdmi_diag}"
-	else
-		setenv pre_recycle_hdmi "hdmi=diag-missing"
-	fi
-	sunxi_backlihgt on
-	if sunxi_drm hdmi_recycle; then
-		setenv extraargs bootchooser=uboot-visual-hdmi-recycle-ok
-	else
-		setenv extraargs bootchooser=uboot-visual-hdmi-recycle-fail
-	fi
-	if test -z "${opi_recycle_diag}"; then
-		setenv opi_recycle_diag "recycle=unset"
-	fi
-	if sunxi_drm_env; then
-		setenv post_recycle_diag "${opi_drm_diag}"
-	else
-		setenv post_recycle_diag "drm_diag=missing"
-	fi
-	if sunxi_hdmi_env; then
-		setenv post_recycle_hdmi "${opi_hdmi_diag}"
-	else
-		setenv post_recycle_hdmi "hdmi=diag-missing"
-	fi
-	setenv extraargs "${extraargs} opi_pre_${pre_recycle_diag} opi_pre_${pre_recycle_hdmi} opi_recycle_${opi_recycle_diag} opi_post_${post_recycle_diag} opi_post_${post_recycle_hdmi}"
-	sleep ${selector_visual_hold}
-fi
-
 if test "${selector_visual_test}" = "hdmi20_pattern"; then
 	echo "Running bounded U-Boot HDMI20 internal pattern visual test"
 	setenv selected_boot true

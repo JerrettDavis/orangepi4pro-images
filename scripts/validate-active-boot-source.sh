@@ -98,14 +98,8 @@ if [ -d "$sd_mount/boot" ]; then
     script_has_string "$sd_mount/boot/boot.scr" 'uboot-visual-hdmi20-pattern-ok' \
       || fail "SD boot.scr lacks the HDMI20 visual-test marker"
   fi
-  if [ "$expected_selector_visual_test" = hdmi_recycle ]; then
-    script_has_string "$sd_mount/boot/boot.scr" 'sunxi_drm hdmi_recycle' \
-      || fail "SD boot.scr lacks the HDMI recycle visual-test command"
-    script_has_string "$sd_mount/boot/boot.scr" 'uboot-visual-hdmi-recycle-ok' \
-      || fail "SD boot.scr lacks the HDMI recycle visual-test marker"
-    script_has_string "$sd_mount/boot/boot.scr" 'opi_recycle_' \
-      || fail "SD boot.scr lacks the HDMI recycle bootarg diagnostic"
-  fi
+  ! script_has_string "$sd_mount/boot/boot.scr" 'sunxi_drm hdmi_recycle' \
+    || fail "SD boot.scr contains unsafe HDMI recycle command"
   if [ "$expected_bootmenu_first" = true ]; then
     script_has_string "$sd_mount/boot/boot.scr" 'uboot-bootmenu-nvme' \
       || fail "SD boot.scr lacks the U-Boot NVMe bootmenu marker"
