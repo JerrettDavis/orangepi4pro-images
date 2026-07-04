@@ -1409,3 +1409,25 @@ registers without the stale `sw_init` guard. It does not contain
 previous slot to
 `/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T031946Z.bin`
 and verified the new slot by readback.
+
+Result: Linux reached NVMe with
+`bootchooser=uboot-visual-hdmi20-pattern-ok`. The FC-iteration package changed
+the direct HDMI core diagnostics from all-zero to
+`phy2e,stat03,rst00,lock70,vid58,gcp01` and recorded
+`opi_reinit_reinit=...core2e0300705801`. The remaining likely gap is RX-sense:
+U-Boot still reports `stat03`, while later Linux HDMI visibility has shown
+upper RX-sense lane bits. The next test is the bounded RX-sense wait package:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_a733-custom-bootmenu-hdmi-rxsense-1024x600.fex
+sha256=59fe28f8c629ff194e413cc7dd2878c6a6aec7103744a0422a4a1c537576d3ff
+u-boot item sha256=1f0cd3409f43a11909f3b18f199554258c69b434332bbd8bf61e6fa05c07498b
+```
+
+This package carries
+`configs/u-boot/0020-wait-for-snps-phy-rxsense.patch`. It contains the same
+HDMI20 diagnostic commands plus `rxsense`, and does not contain
+`sunxi_drm reinit` or `full hdmi reinit`. The SD TOC1 installer backed up the
+previous slot to
+`/var/cache/orangepi4pro-images/bootloader-backups/mmcblk1-bootloader-before-20260704T032239Z.bin`
+and verified the new slot by readback.
