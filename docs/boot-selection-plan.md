@@ -2143,3 +2143,14 @@ package `boot_package_a733_nvme.fex`
 Package `6aa7b8590cf7d2b7b259aa08326a43d342c7ce6b0d233bc3e4faf5cbb3e46cd1`
 and boot scripts containing `sunxi_drm hdmi_recycle` are now blocked by the
 installer and settlement gate.
+
+The recovery baseline is now codified in:
+
+```bash
+scripts/restore-safe-boot-baseline.sh
+```
+
+It defaults to dry-run validation. With `--yes` and
+`ORANGEPI4PRO_ALLOW_BOOTLOADER_WRITE=1`, it restores the vendor NVMe TOC1
+package to the SD bootloader slot and stages extlinux-first boot assets with
+`selector_visual_test=none`.
