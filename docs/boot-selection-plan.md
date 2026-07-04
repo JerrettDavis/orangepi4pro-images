@@ -1,8 +1,27 @@
 # Boot Selection Plan
 
-Current status on 2026-07-03:
+Current status on 2026-07-04:
 
 - The machine boots NVMe Ubuntu through extlinux.
+- The active SD bootloader package is the vendor NVMe package:
+  `/usr/lib/linux-u-boot-current-orangepi4pro_1.0.6_arm64/boot_package_a733_nvme.fex`,
+  SHA-256
+  `e626234a6eb9420ac29f515dd6acc543e7f0876e3dc086eec2fe221a50cc54f2`.
+- The vendor NVMe package plus mirrored `bootlogo.bmp`, `boot.bmp`, and
+  `boot1.bmp` still produced no visible bootloader splash or selector on the
+  cyberdeck display. The reboot did reach NVMe through
+  `bootchooser=extlinux-legacy-nvme`.
+- The desktop startup error after that reboot was an apport report for
+  `/usr/sbin/lightdm` from shutdown time (`/var/crash/_usr_sbin_lightdm.0.crash`);
+  LightDM then restarted and autologin succeeded. Treat it as separate from
+  bootloader-display progress unless it repeats with a new crash timestamp.
+- The next bounded recovery-oriented test is to restore the stock vendor SD
+  package, because Orange Pi's `platform_install.sh` writes
+  `boot_package.fex` to SD media while the externally recovered slot currently
+  contains `boot_package_a733_nvme.fex`. The SD `/boot/extlinux/extlinux.conf`
+  still defaults to the NVMe root UUID, so this should preserve the NVMe boot
+  while testing whether the factory SD package restores the visible
+  "initializing boot loader" path.
 - The active target is bootloader-stage selection only. The temporary X11/XFCE
   autostart prompt was removed from the active path because it appears after a
   full Linux boot.

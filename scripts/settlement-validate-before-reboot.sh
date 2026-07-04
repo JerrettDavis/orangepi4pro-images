@@ -143,6 +143,9 @@ readback_package() {
     34f52a23883a427d6471bdfc69654ef853a6f96a1f406a732acd64a35555852f)
       fail "refusing known-unsafe boot package in settlement gate: $package_sha"
       ;;
+    dac4949d4e5ad3fdb8c3db0bf16811f2ce8ed4948c242ffeebe3c052d940f7a1)
+      fail "refusing known-unsafe boot package in settlement gate: $package_sha"
+      ;;
   esac
   verify_blocks=$(((package_size + block_size - 1) / block_size))
   verify_path=$(mktemp)
