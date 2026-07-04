@@ -1162,6 +1162,12 @@ than through the custom AW_DRM framebuffer/pattern-test path.
   `bootchooser=uboot-logo-preinit-ok`. The useful signal is
   `opi_logo_recover=post-retry-...`; the desired outcome is a visible
   bootloader splash/selector before Linux starts.
+- Reboot result: unsafe. The board did not complete normal startup and required
+  external SD recovery from another machine. After recovery the machine booted
+  NVMe through `bootchooser=extlinux-legacy-nvme`, without the U-Boot
+  `opi_logo_*` diagnostic path. Do not reinstall package SHA
+  `dac4949d4e5ad3fdb8c3db0bf16811f2ce8ed4948c242ffeebe3c052d940f7a1`
+  except for deliberate bench recovery testing.
 
 ## Validation
 
