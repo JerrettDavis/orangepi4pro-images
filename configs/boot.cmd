@@ -381,6 +381,10 @@ if test -n "${opi_hdmi_drv_diag}"; then
 	setenv extraargs "${extraargs} opi_hdmidrv_${opi_hdmi_drv_diag}"
 fi
 
+if test -n "${opi_snps_phy_diag}"; then
+	setenv extraargs "${extraargs} opi_${opi_snps_phy_diag}"
+fi
+
 if test "${bootmenu_first}" = "true"; then
 	echo "Starting U-Boot bootmenu selector"
 	echo "Starting USB for bootmenu keyboard input"

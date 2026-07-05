@@ -112,6 +112,7 @@ grep -q 'sunxi_drm_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot
 grep -q 'sunxi_hdmi_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot HDMI env diagnostics'
 grep -q 'opi_hdmi_secondpass' /boot/boot.cmd || fail 'boot.cmd does not preserve HDMI second-pass diagnostics'
 grep -q 'opi_hdmi_drv_diag' /boot/boot.cmd || fail 'boot.cmd does not preserve HDMI driver-enable diagnostics'
+grep -q 'opi_snps_phy_diag' /boot/boot.cmd || fail 'boot.cmd does not preserve SNPS PHY diagnostics'
 grep -q 'sunxi_show_logo' /boot/boot.cmd || fail 'boot.cmd does not pre-initialize U-Boot video with stock logo command'
 grep -q 'uboot-bootgui-logo-ok' /boot/boot.cmd || fail 'boot.cmd lacks BootGUI logo success marker'
 grep -q 'uboot-logo-preinit-ok' /boot/boot.cmd || fail 'boot.cmd lacks logo preinit success marker'
