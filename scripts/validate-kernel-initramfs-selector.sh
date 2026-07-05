@@ -36,6 +36,7 @@ if [ -f "$artifact" ]; then
   grep -q 'Orange Pi 4 Pro Boot Selector' "$work/init" \
     || fail 'selector menu text missing from artifact'
   [ -x "$work/bin/busybox" ] || fail 'busybox missing from selector artifact'
+  [ -x "$work/bin/fb-bootselect" ] || fail 'framebuffer painter missing from selector artifact'
   [ -e "$work/bin/reboot" ] || fail 'reboot applet missing from selector artifact'
 fi
 

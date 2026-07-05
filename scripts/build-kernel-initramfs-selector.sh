@@ -21,6 +21,7 @@ fail() {
 command -v mkimage >/dev/null 2>&1 || fail 'mkimage is required'
 command -v cpio >/dev/null 2>&1 || fail 'cpio is required'
 command -v gzip >/dev/null 2>&1 || fail 'gzip is required'
+command -v gcc >/dev/null 2>&1 || fail 'gcc is required'
 [ -x "$busybox" ] || fail "busybox not found: $busybox"
 
 work=$(mktemp -d)
@@ -30,6 +31,7 @@ mkdir -p "$root/bin" "$root/sbin" "$root/lib/aarch64-linux-gnu" "$root/lib" \
 
 install -m 0755 "$busybox" "$root/bin/busybox"
 install -m 0755 "$repo_root/initramfs/bootselect-init" "$root/init"
+gcc -Os -s -Wall -Wextra -o "$root/bin/fb-bootselect" "$repo_root/tools/fb-bootselect.c"
 
 while IFS= read -r applet; do
   case "$applet" in

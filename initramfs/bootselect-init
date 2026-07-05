@@ -149,6 +149,9 @@ show_menu() {
   stty sane 2>/dev/null || true
 
   while [ "$remaining" -gt 0 ]; do
+    if [ -x /bin/fb-bootselect ]; then
+      /bin/fb-bootselect "$remaining" >/dev/null 2>&1 || true
+    fi
     for tty in /dev/tty0 /dev/tty1 /dev/console; do
       if [ -c "$tty" ]; then
         {

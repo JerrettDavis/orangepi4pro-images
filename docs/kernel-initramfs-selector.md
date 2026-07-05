@@ -36,6 +36,8 @@ The staging script writes only normal files on `/boot`, `/boot/efi`, and the
 mounted SD root:
 
 - `uInitrd-orangepi4pro-bootselect`
+- direct `/dev/fb0` painter inside the selector initramfs, used as a visible
+  fallback if tty text is not routed cleanly
 - `boot.cmd`
 - `boot.scr`
 - `orangepiEnv.txt`
