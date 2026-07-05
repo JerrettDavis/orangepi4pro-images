@@ -446,6 +446,14 @@ if test "${bootmenu_first}" = "true"; then
 	fi
 	setenv bootmenu_2 "Ubuntu NVMe - verbose boot=run bootmenu_boot_verbose"
 	bootmenu ${bootmenu_timeout}
+	if test "${extraargs}" = "bootchooser=uboot-bootmenu-nosel"; then
+		echo "U-Boot bootmenu returned without selection; running configured default"
+		if test "${bootmenu_default}" = "sd"; then
+			run bootmenu_boot_sd
+		else
+			run bootmenu_boot_nvme
+		fi
+	fi
 fi
 
 if test "${grub_first}" = "true"; then

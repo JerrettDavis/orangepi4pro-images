@@ -311,6 +311,23 @@ If that marker appears, U-Boot entered the menu branch but returned without a
 selection. If `extlinux-legacy-*` still appears, U-Boot did not enter the menu
 branch even though the synced boot files contain it.
 
+2026-07-05 update: after observing a live boot with
+`bootchooser=uboot-bootmenu-nosel`, `configs/boot.cmd` now guards the return
+from `bootmenu`. If the marker is still `nosel` after the command returns, the
+script explicitly runs the configured `bootmenu_default` entry. This keeps a
+black or failed U-Boot menu from falling through ambiguously and should convert
+the next boot marker to `uboot-bootmenu-nvme` or `uboot-bootmenu-sd`.
+
+Current external source anchors checked during this pass:
+
+- Orange Pi vendor U-Boot: `https://github.com/orangepi-xunlong/u-boot-orangepi.git`,
+  branch `v2020.04`, commit `c97dbbcad55f5a1e40c28b1a9874b2e0b9f163c9`.
+- CarterPerez Orange Pi 4 Pro NVMe fix:
+  `https://github.com/CarterPerez-dev/orangepi-4-pro-nvme-fix.git`, branch
+  `main`, commit `fe4c31ec0115d3f2493905be07426f36f666aab5`. That repo
+  describes a PCIe Gen3 speed-change DTB workaround for affected NVMe drives,
+  not a U-Boot display or selector implementation.
+
 ## Script-First SD Boot Package
 
 Installed and then later replaced during recovery on 2026-07-02:

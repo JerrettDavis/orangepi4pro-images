@@ -138,6 +138,15 @@ grep -q 'uboot-bootmenu-nvme' /boot/boot.cmd || fail 'boot.cmd does not contain 
 grep -q 'uboot-bootmenu-sd' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot SD selector marker'
 grep -q 'usb start' /boot/boot.cmd || fail 'boot.cmd does not start USB before bootmenu'
 grep -q 'bootmenu_default' /boot/boot.cmd || fail 'boot.cmd does not support deterministic bootmenu default tests'
+grep -q 'U-Boot bootmenu returned without selection; running configured default' /boot/boot.cmd \
+  || fail 'boot.cmd lacks deterministic fallback after U-Boot bootmenu returns without selection'
+awk '
+  /bootmenu \$\{bootmenu_timeout\}/ { saw_bootmenu = 1; next }
+  saw_bootmenu && /test "\$\{extraargs\}" = "bootchooser=uboot-bootmenu-nosel"/ { saw_nosel_guard = 1; next }
+  saw_nosel_guard && /run bootmenu_boot_sd/ { saw_sd = 1 }
+  saw_nosel_guard && /run bootmenu_boot_nvme/ { saw_nvme = 1 }
+  END { exit saw_bootmenu && saw_nosel_guard && saw_sd && saw_nvme ? 0 : 1 }
+' /boot/boot.cmd || fail 'boot.cmd must run the configured bootmenu default if bootmenu returns without a selection'
 grep -q 'sunxi_drm colorbar' /boot/boot.cmd || fail 'boot.cmd does not support bounded colorbar visual test'
 grep -q 'sunxi_drm fbtest' /boot/boot.cmd || fail 'boot.cmd does not support bounded framebuffer visual test'
 grep -q 'sunxi_hdmi20 pattern 1' /boot/boot.cmd || fail 'boot.cmd does not support bounded HDMI20 pattern visual test'

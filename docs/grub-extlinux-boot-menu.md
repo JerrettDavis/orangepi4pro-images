@@ -163,6 +163,22 @@ The U-Boot `bootmenu` path appends:
 - `bootchooser=uboot-bootmenu-sd`
 - `bootchooser=uboot-bootmenu-nvme-verbose`
 
+The script preloads `bootchooser=uboot-bootmenu-nosel` before invoking
+`bootmenu`. If U-Boot returns without running a menu entry, `boot.cmd` now
+explicitly runs the configured `bootmenu_default` entry. A settled boot should
+therefore report `uboot-bootmenu-nvme` or `uboot-bootmenu-sd`, not leave the
+`nosel` marker behind.
+
+Upstream anchors checked on 2026-07-05:
+
+- Orange Pi U-Boot: `https://github.com/orangepi-xunlong/u-boot-orangepi.git`,
+  branch `v2020.04`, commit `c97dbbcad55f5a1e40c28b1a9874b2e0b9f163c9`.
+- CarterPerez NVMe fix:
+  `https://github.com/CarterPerez-dev/orangepi-4-pro-nvme-fix.git`, branch
+  `main`, commit `fe4c31ec0115d3f2493905be07426f36f666aab5`. This documents a
+  PCIe Gen3 DTB workaround for affected NVMe drives, not a U-Boot display
+  selector.
+
 The direct `booti` probe used `bootchooser=direct-booti-nvme`. That marker was
 not present after reboot, confirming fallback to legacy `bootm`.
 
