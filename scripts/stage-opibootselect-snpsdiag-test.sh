@@ -3,8 +3,8 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 board_repo=${BOARD_REPO:-/home/orangepi/orangepi4pro-board-support}
-package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-commitflush-current.fex}
-expected_package_sha=69bebfb4dd14c3fd2d3f783154fcac74064174149117a8775bb37bfe1a381346
+package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-dualpath-current.fex}
+expected_package_sha=8c3ad3f5c38a3ff1e07c569f37ffdf4bf324fbf06a8d6b675395ee3f425745dd
 device=${DEVICE:-/dev/mmcblk1}
 sd_mount=${SD_MOUNT:-/mnt/opisd-check}
 timeout=30
