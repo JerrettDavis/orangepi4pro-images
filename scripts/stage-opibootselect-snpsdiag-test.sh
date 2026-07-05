@@ -3,8 +3,8 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 board_repo=${BOARD_REPO:-/home/orangepi/orangepi4pro-board-support}
-package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-dtb-alias-embedded-logo.fex}
-expected_package_sha=4958de9eafb8efb9af337c743ee759ed86d8be0605be4994ea15154059ba1ed1
+package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-dtb-alias-embedded-logo-dvi-gate.fex}
+expected_package_sha=83eb86f82cc1928d9b103b1508dcde3704ed3d18cb096d9399655e67a0218b7d
 device=${DEVICE:-/dev/mmcblk1}
 sd_mount=${SD_MOUNT:-/mnt/opisd-check}
 timeout=30
@@ -73,7 +73,8 @@ package_sha=$(sha256sum "$package" | awk '{print $1}')
   --package "$package" \
   --profile script-first \
   --require-hdmi-dtb-aliases \
-  --require-embedded-boot-bmp
+  --require-embedded-boot-bmp \
+  --require-dvi-gate
 
 grep -a -q 'opi_bootselect' "$package" \
   || fail 'package lacks opi_bootselect command'
@@ -83,6 +84,10 @@ grep -a -q 'opi_snps_phy_diag' "$package" \
   || fail 'package lacks SNPS PHY diagnostics'
 grep -a -q 'opibootcommit=' "$package" \
   || fail 'package lacks selector framebuffer commit diagnostics'
+grep -a -q 'cyberdeck force DVI output mode' "$package" \
+  || fail 'package lacks DVI-mode force gate'
+grep -a -q 'opi_hdmi_dvi_diag' "$package" \
+  || fail 'package lacks DVI-mode diagnostics'
 if ! {
   grep -a -q 'boot.bmp decompressed OK' "$package" \
     && grep -a -q 'embedded boot.bmp array' "$package"

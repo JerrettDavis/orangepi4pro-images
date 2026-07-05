@@ -80,6 +80,7 @@ if test "${bootgui_selector}" = "true"; then
 	fi
 	echo "Pre-initializing HDMI before framebuffer boot selector"
 	setenv opi_hdmi_force_secondpass 1
+	setenv opi_hdmi_force_dvi 1
 	sunxi_backlihgt on
 	if sunxi_drm fbtest; then
 		setenv opi_bootselect_video "bootgui-video-preinit-ok"
@@ -104,6 +105,7 @@ if test "${bootgui_selector}" = "true"; then
 		setenv bootonce_target nvme
 		setenv bootchooser bootgui-selector-fail-nvme
 	fi
+	setenv opi_hdmi_force_dvi 0
 	if sunxi_drm_env; then
 		setenv opi_bootselect_post_drm "${opi_drm_diag}"
 	else
@@ -194,6 +196,10 @@ fi
 
 if test -n "${opi_fbtest_diag}"; then
 	setenv extraargs "${extraargs} opi_fb_${opi_fbtest_diag}"
+fi
+
+if test -n "${opi_hdmi_dvi_diag}"; then
+	setenv extraargs "${extraargs} opi_dvi_${opi_hdmi_dvi_diag}"
 fi
 
 if test -n "${opi_bootselect_post_drm}"; then

@@ -164,6 +164,8 @@ grep -q 'selector_logo_de' /boot/boot.cmd || fail 'boot.cmd does not collect log
 grep -q 'opi_logo_${selector_logo_de}' /boot/boot.cmd || fail 'boot.cmd does not preserve logo-path DE/TCON diagnostics'
 grep -q 'opi_hdmi_secondpass' /boot/boot.cmd || fail 'boot.cmd does not preserve HDMI second-pass diagnostics'
 grep -q 'opi_hdmi_drv_diag' /boot/boot.cmd || fail 'boot.cmd does not preserve HDMI driver-enable diagnostics'
+grep -q 'opi_hdmi_force_dvi' /boot/boot.cmd || fail 'boot.cmd does not force gated DVI output during boot GUI preinit'
+grep -q 'opi_hdmi_dvi_diag' /boot/boot.cmd || fail 'boot.cmd does not preserve DVI-mode diagnostics'
 grep -q 'opi_snps_phy_diag' /boot/boot.cmd || fail 'boot.cmd does not preserve SNPS PHY diagnostics'
 grep -q 'opi_fastlogo_diag' /boot/boot.cmd || fail 'boot.cmd does not preserve fastlogo diagnostics'
 grep -q 'sunxi_show_logo' /boot/boot.cmd || fail 'boot.cmd does not pre-initialize U-Boot video with stock logo command'

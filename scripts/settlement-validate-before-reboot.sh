@@ -235,6 +235,12 @@ report() {
       --profile script-first \
       --require-embedded-boot-bmp
   fi
+  if [ "${EXPECTED_PACKAGE_DVI_GATE:-false}" = true ]; then
+    "$board_repo/scripts/validate-boot-package-visual-path.sh" \
+      --package "$package" \
+      --profile script-first \
+      --require-dvi-gate
+  fi
   readback_package
   printf '\n'
 
