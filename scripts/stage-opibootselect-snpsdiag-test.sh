@@ -3,8 +3,8 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 board_repo=${BOARD_REPO:-/home/orangepi/orangepi4pro-board-support}
-package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-dualpath-current.fex}
-expected_package_sha=8c3ad3f5c38a3ff1e07c569f37ffdf4bf324fbf06a8d6b675395ee3f425745dd
+package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-dtb-alias.fex}
+expected_package_sha=aa6d5c7d6fcf5e43a9a5f5a0125ef3f09bb7dc9dc02bf26aa590069a0b0c94a2
 device=${DEVICE:-/dev/mmcblk1}
 sd_mount=${SD_MOUNT:-/mnt/opisd-check}
 timeout=30
@@ -71,7 +71,8 @@ package_sha=$(sha256sum "$package" | awk '{print $1}')
 
 "$board_repo/scripts/validate-boot-package-visual-path.sh" \
   --package "$package" \
-  --profile script-first
+  --profile script-first \
+  --require-hdmi-dtb-aliases
 
 grep -a -q 'opi_bootselect' "$package" \
   || fail 'package lacks opi_bootselect command'
@@ -81,6 +82,14 @@ grep -a -q 'opi_snps_phy_diag' "$package" \
   || fail 'package lacks SNPS PHY diagnostics'
 grep -a -q 'opibootcommit=' "$package" \
   || fail 'package lacks selector framebuffer commit diagnostics'
+if ! {
+  grep -a -q 'clk_tcon_tv' "$package" \
+    && grep -a -q 'clk_bus_hdmi' "$package" \
+    && grep -a -q 'clk_tcon' "$package" \
+    && grep -a -q 'rst_bus_tcon' "$package"
+}; then
+  fail 'package lacks HDMI/TCON DTB clock aliases'
+fi
 
 printf 'package=%s\n' "$package"
 printf 'package_sha256=%s\n' "$package_sha"

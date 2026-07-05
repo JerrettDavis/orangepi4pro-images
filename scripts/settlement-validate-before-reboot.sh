@@ -223,6 +223,12 @@ report() {
   "$board_repo/scripts/sunxi-toc1-package.py" inspect "$package" >/dev/null
   printf 'Expected package hash:\n'
   sha256sum "$package"
+  if [ "${EXPECTED_PACKAGE_HDMI_DTB_ALIASES:-false}" = true ]; then
+    "$board_repo/scripts/validate-boot-package-visual-path.sh" \
+      --package "$package" \
+      --profile script-first \
+      --require-hdmi-dtb-aliases
+  fi
   readback_package
   printf '\n'
 
