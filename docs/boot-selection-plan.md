@@ -2333,6 +2333,30 @@ u-boot-item-sha256=b9bfed5c87f98ec83cb699afcde372fd6165ff9e9673a86d4434bf08949d6
   plus `opi_hdmisp=...` and `opi_hdmidrv_drv=...` diagnostics for the next
   driver patch.
 
+Actual result: failed visually and returned
+`bootchooser=uboot-visual-fbtest-fail`. U-Boot preserved:
+
+```text
+opi_hdmisp=run,firstphy00,firstlock00,secondphy00,secondlock00
+opi_hdmidrv_drv=ret0,phy00,lock00,rst00,out0,clk1
+```
+
+That confirms the local-disable second pass still leaves the DesignWare/SNPS
+PHY reset and lock registers at zero. The cached package did not include the
+newer `opi_snps_phy_diag` instrumentation, so the current source was rebuilt
+and repacked for the next bounded fbtest:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-snpsdiag-current.fex
+sha256=6316342d678674318b1ed1e30c5d0503ef5b30b2ebc23c0db564e332b40634b6
+u-boot-item-sha256=3c2205d0ede98d55c9cdfa3f31c88f589b35d55b71552db1dfd3e46f67f727d7
+```
+
+Expected reboot evidence is still a visible U-Boot fbtest, but if the screen
+stays black the kernel command line should include `opi_snps=...` showing the
+return codes and register state from `_snps_phy_config_init()`, MPLL setup,
+drive setup, power enable, and lock wait.
+
 ## 2026-07-05 Logo-Path DE/TCON Diagnostic
 
 The unmodified vendor SD TOC1 package booted NVMe through extlinux with

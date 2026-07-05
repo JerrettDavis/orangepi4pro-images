@@ -3,8 +3,8 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 board_repo=${BOARD_REPO:-/home/orangepi/orangepi4pro-board-support}
-package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-localdisable.fex}
-expected_package_sha=b63610fa3bfe2fb10f117a5335c866b8003c86769dad1a51749e14064c1b8bd5
+package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-snpsdiag-current.fex}
+expected_package_sha=6316342d678674318b1ed1e30c5d0503ef5b30b2ebc23c0db564e332b40634b6
 device=${DEVICE:-/dev/mmcblk1}
 sd_mount=${SD_MOUNT:-/mnt/opisd-check}
 hold=20
@@ -19,8 +19,8 @@ Usage:
 
 Default mode is dry-run. With --yes and
 ORANGEPI4PRO_STAGE_LOCALDISABLE_FBTEST=1, it:
-  - installs only the hash-locked local-disable second-pass TOC1 package to
-    the SD bootloader package slot;
+  - installs only the hash-locked local-disable/SNPS-diagnostic second-pass
+    TOC1 package to the SD bootloader package slot;
   - stages repo boot assets to NVMe /boot, EFI, and SD /boot;
   - enables selector_visual_test=fbtest with a visible hold;
   - disables bootmenu/kernel selector for this diagnostic boot only.
