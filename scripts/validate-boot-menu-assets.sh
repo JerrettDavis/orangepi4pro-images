@@ -47,6 +47,7 @@ for file in \
   /boot/bootlogo.bmp \
   /boot/boot.bmp \
   /boot/boot1.bmp \
+  /boot/fastbootlogo.bmp \
   /boot/uImage-5.15.147-sun60iw2-cyberdeck \
   /boot/uInitrd-5.15.147-sun60iw2-cyberdeck \
   /boot/uImage-5.15.147-sun60iw2 \
@@ -76,6 +77,7 @@ grep -q "^bootgui_selector_timeout=${expected_bootgui_selector_timeout}$" /boot/
   || fail "bootgui_selector_timeout should be ${expected_bootgui_selector_timeout}"
 cmp -s /boot/bootlogo.bmp /boot/boot.bmp || fail '/boot/bootlogo.bmp must mirror /boot/boot.bmp for A733 U-Boot logo loading'
 cmp -s /boot/boot.bmp /boot/boot1.bmp || fail '/boot/boot1.bmp must mirror /boot/boot.bmp for A733 U-Boot logo loading'
+cmp -s /boot/boot.bmp /boot/fastbootlogo.bmp || fail '/boot/fastbootlogo.bmp must mirror /boot/boot.bmp for A733 fast-logo loading'
 grep -q "^selector_console=${expected_selector_console}$" /boot/orangepiEnv.txt \
   || fail "selector_console should be ${expected_selector_console}"
 grep -q "^selector_prompt=${expected_selector_prompt}$" /boot/orangepiEnv.txt \
@@ -239,6 +241,7 @@ hash_files=(
   /boot/bootlogo.bmp
   /boot/boot.bmp
   /boot/boot1.bmp
+  /boot/fastbootlogo.bmp
 )
 for optional_file in \
   /boot/efi/extlinux/extlinux.conf \
@@ -246,6 +249,7 @@ for optional_file in \
   /boot/efi/bootlogo.bmp \
   /boot/efi/boot.bmp \
   /boot/efi/boot1.bmp \
+  /boot/efi/fastbootlogo.bmp \
   /boot/grub/grub.cfg \
   /boot/EFI/BOOT/BOOTAA64.EFI \
   /boot/EFI/BOOT/grub.cfg \

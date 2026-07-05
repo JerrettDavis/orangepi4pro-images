@@ -16,9 +16,9 @@ Usage:
   scripts/stage-factory-logo-preinit-test.sh [--hold SECONDS] [--source-logo FILE] [--sd-boot-dir DIR]
 
 This restores the Orange Pi logo asset to the filenames the A733 U-Boot logo
-loader actually searches: /boot/bootlogo.bmp, /boot/boot1.bmp, and
-/boot/boot.bmp. It then stages boot.cmd to run `sunxi_show_logo`, hold, and
-boot NVMe through the known legacy bootm path so the result is visible and
+loader searches: /boot/bootlogo.bmp, /boot/boot1.bmp, /boot/boot.bmp, and
+/boot/fastbootlogo.bmp. It then stages boot.cmd to run `sunxi_show_logo`, hold,
+and boot NVMe through the known legacy bootm path so the result is visible and
 recorded in /proc/cmdline.
 
 This writes boot filesystem files only. It does not write bootloader sectors,
@@ -95,6 +95,7 @@ install_logo() {
   install -m 0644 "$source_logo" "$target/bootlogo.bmp"
   install -m 0644 "$source_logo" "$target/boot.bmp"
   install -m 0644 "$source_logo" "$target/boot1.bmp"
+  install -m 0644 "$source_logo" "$target/fastbootlogo.bmp"
 }
 
 stage_args=(

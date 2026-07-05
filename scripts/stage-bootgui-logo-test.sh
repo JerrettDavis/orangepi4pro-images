@@ -15,10 +15,10 @@ Stage a factory BootGUI logo-command diagnostic.
 Usage:
   scripts/stage-bootgui-logo-test.sh [--hold SECONDS] [--source-logo FILE] [--sd-boot-dir DIR]
 
-This restores the Orange Pi logo asset to bootlogo.bmp, boot.bmp, and
-boot1.bmp, then stages boot.cmd to run the vendor `logo` command, hold, and
-boot NVMe through the known legacy bootm path so the result is recorded in
-/proc/cmdline.
+This restores the Orange Pi logo asset to bootlogo.bmp, boot.bmp, boot1.bmp,
+and fastbootlogo.bmp, then stages boot.cmd to run the vendor `logo` command,
+hold, and boot NVMe through the known legacy bootm path so the result is
+recorded in /proc/cmdline.
 
 This writes boot filesystem files only. It does not write bootloader sectors,
 NVMe partitions, SPI, MTD, or TOC1.
@@ -94,6 +94,7 @@ install_logo() {
   install -m 0644 "$source_logo" "$target/bootlogo.bmp"
   install -m 0644 "$source_logo" "$target/boot.bmp"
   install -m 0644 "$source_logo" "$target/boot1.bmp"
+  install -m 0644 "$source_logo" "$target/fastbootlogo.bmp"
 }
 
 stage_args=(

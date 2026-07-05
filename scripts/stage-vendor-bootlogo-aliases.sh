@@ -82,6 +82,7 @@ install_aliases() {
   install -m 0644 "$source_logo" "$target/bootlogo.bmp"
   install -m 0644 "$source_logo" "$target/boot.bmp"
   install -m 0644 "$source_logo" "$target/boot1.bmp"
+  install -m 0644 "$source_logo" "$target/fastbootlogo.bmp"
 }
 
 install_aliases "$boot_dir"
