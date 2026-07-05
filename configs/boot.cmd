@@ -373,6 +373,14 @@ if test "${selector_visual_test}" = "hdmi20_pattern"; then
 	sunxi_hdmi20 pattern 0
 fi
 
+if test -n "${opi_hdmi_secondpass}"; then
+	setenv extraargs "${extraargs} opi_${opi_hdmi_secondpass}"
+fi
+
+if test -n "${opi_hdmi_drv_diag}"; then
+	setenv extraargs "${extraargs} opi_hdmidrv_${opi_hdmi_drv_diag}"
+fi
+
 if test "${bootmenu_first}" = "true"; then
 	echo "Starting U-Boot bootmenu selector"
 	echo "Starting USB for bootmenu keyboard input"

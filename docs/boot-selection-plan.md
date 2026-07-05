@@ -2221,3 +2221,23 @@ Expected evidence after reboot is a visible 20-second U-Boot colorbar before
 Linux, then NVMe Ubuntu with `bootchooser=uboot-visual-colorbar-ok`. If HDMI is
 still black before Linux, `/proc/cmdline` should preserve pre/post U-Boot DRM
 and HDMI diagnostics for the second-pass path.
+
+Actual result: failed visually. The system booted NVMe Ubuntu with
+`bootchooser=uboot-visual-colorbar-ok`, proving the U-Boot colorbar path ran,
+but nothing was visible before Linux. U-Boot diagnostics remained
+`phy00,stat00,rst00,lock00,vid00,gcp00` before and after the colorbar command,
+while Linux later locked the SNPS PHY during its own mode-change sequence.
+
+The next reboot test keeps the same `selector_visual_test=colorbar` stage but
+uses a diagnostic second-pass package that exports:
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-diag.fex
+sha256=4b239d2096dd0b704146c9234d8b65b9cf52f30a8fea14ea2a253caa6c7f5d67
+u-boot-item-sha256=0bdf03e62c2ff60e53fcb1a3403781726e20b435889f308f16616e7e11a66705
+opi_hdmi_secondpass
+opi_hdmi_drv_diag
+```
+
+`configs/boot.cmd` appends those values to the kernel command line when present.
+This is still bootloader-stage work; it is not a userland selector fallback.
