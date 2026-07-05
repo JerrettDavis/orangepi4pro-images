@@ -229,6 +229,12 @@ report() {
       --profile script-first \
       --require-hdmi-dtb-aliases
   fi
+  if [ "${EXPECTED_PACKAGE_EMBEDDED_BOOT_BMP:-false}" = true ]; then
+    "$board_repo/scripts/validate-boot-package-visual-path.sh" \
+      --package "$package" \
+      --profile script-first \
+      --require-embedded-boot-bmp
+  fi
   readback_package
   printf '\n'
 

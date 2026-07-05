@@ -3,8 +3,8 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 board_repo=${BOARD_REPO:-/home/orangepi/orangepi4pro-board-support}
-package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-dtb-alias.fex}
-expected_package_sha=aa6d5c7d6fcf5e43a9a5f5a0125ef3f09bb7dc9dc02bf26aa590069a0b0c94a2
+package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-dtb-alias-embedded-logo.fex}
+expected_package_sha=4958de9eafb8efb9af337c743ee759ed86d8be0605be4994ea15154059ba1ed1
 device=${DEVICE:-/dev/mmcblk1}
 sd_mount=${SD_MOUNT:-/mnt/opisd-check}
 timeout=30
@@ -72,7 +72,8 @@ package_sha=$(sha256sum "$package" | awk '{print $1}')
 "$board_repo/scripts/validate-boot-package-visual-path.sh" \
   --package "$package" \
   --profile script-first \
-  --require-hdmi-dtb-aliases
+  --require-hdmi-dtb-aliases \
+  --require-embedded-boot-bmp
 
 grep -a -q 'opi_bootselect' "$package" \
   || fail 'package lacks opi_bootselect command'
@@ -82,6 +83,12 @@ grep -a -q 'opi_snps_phy_diag' "$package" \
   || fail 'package lacks SNPS PHY diagnostics'
 grep -a -q 'opibootcommit=' "$package" \
   || fail 'package lacks selector framebuffer commit diagnostics'
+if ! {
+  grep -a -q 'boot.bmp decompressed OK' "$package" \
+    && grep -a -q 'embedded boot.bmp array' "$package"
+}; then
+  fail 'package lacks embedded boot.bmp selector-logo path'
+fi
 if ! {
   grep -a -q 'clk_tcon_tv' "$package" \
     && grep -a -q 'clk_bus_hdmi' "$package" \
