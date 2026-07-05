@@ -271,8 +271,7 @@ static int setup_kms(struct kms *k)
         if (get_connector(k->fd, connectors[i], &conn, &modes, &conn_encoders) < 0) {
             continue;
         }
-        if (conn.connection != DRM_MODE_CONNECTED ||
-            conn.connector_type != DRM_MODE_CONNECTOR_HDMIA ||
+        if (conn.connector_type != DRM_MODE_CONNECTOR_HDMIA ||
             conn.count_modes == 0) {
             continue;
         }
@@ -297,7 +296,7 @@ static int setup_kms(struct kms *k)
     free(conn_encoders);
 
     if (!found) {
-        return fail_stage("no-connected-hdmi");
+        return fail_stage("no-usable-hdmi");
     }
 
     k->width = k->mode.hdisplay;
