@@ -131,11 +131,10 @@ if test "${selected_boot}" != "true" && test "${kernel_selector_first}" = "true"
 	setenv extraargs "bootchooser=kernel-initramfs-selector bootselect.timeout=${kernel_selector_timeout}"
 fi
 
-if test "${selected_boot}" != "true" && test "${extlinux_first}" != "true" && test "${grub_first}" != "true" && test "${direct_booti_first}" != "true"; then
+if test "${selected_boot}" != "true" && test "${bootmenu_first}" != "true" && test "${extlinux_first}" != "true" && test "${grub_first}" != "true" && test "${direct_booti_first}" != "true"; then
 	echo "Default boot target: NVMe Ubuntu"
 	setenv selected_boot true
 	setenv extlinux_first false
-	setenv bootmenu_first false
 	setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
 	setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
 	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb

@@ -187,6 +187,13 @@ grep -q 'sysboot -p' /boot/boot.cmd || fail 'boot.cmd does not contain prompted 
   in_default && /setenv selector_visual_test none/ { found = 1 }
   END { exit found ? 0 : 1 }
 ' /boot/boot.cmd || fail 'default NVMe path must not clear staged selector_visual_test'
+awk '
+  /test "\$\{selected_boot\}" != "true"/ && /test "\$\{bootmenu_first\}" != "true"/ { guarded_if = 1; next }
+  guarded_if && /Default boot target: NVMe Ubuntu/ { saw_guard = 1; in_default = 1; next }
+  /if test -n "\$\{opi_bootselect_diag\}"/ { in_default = 0 }
+  in_default && /setenv bootmenu_first false/ { clears_bootmenu = 1 }
+  END { exit saw_guard && !clears_bootmenu ? 0 : 1 }
+' /boot/boot.cmd || fail 'default NVMe path must not disable bootmenu_first before the U-Boot menu block'
 
 grep -q 'Ubuntu NVMe - visible selector' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe selector entry missing'
 grep -q 'Ubuntu NVMe - direct cyberdeck kernel' /boot/extlinux/extlinux.conf || fail 'extlinux direct NVMe menu entry missing'
