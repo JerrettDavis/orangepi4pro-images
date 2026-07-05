@@ -11,6 +11,8 @@ DEFAULT_TARGET=nvme
 TIMEOUT=30
 SELECTED_TARGET=$DEFAULT_TARGET
 BOOTSELECT_METHOD=unset
+BOOTSELECT_FB_RC=unset
+BOOTSELECT_FB_DIAG=unset
 BOOTSELECT_KMS_RC=unset
 BOOTSELECT_KMS_DIAG=unset
 
@@ -82,6 +84,8 @@ write_status_file() {
     printf 'target=%s\n' "$target"
     printf 'timestamp=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)"
     printf 'method=%s\n' "$BOOTSELECT_METHOD"
+    printf 'fb_rc=%s\n' "$BOOTSELECT_FB_RC"
+    printf 'fb_diag=%s\n' "$BOOTSELECT_FB_DIAG"
     printf 'kms_rc=%s\n' "$BOOTSELECT_KMS_RC"
     printf 'kms_diag=%s\n' "$BOOTSELECT_KMS_DIAG"
     printf 'cmdline='
@@ -185,7 +189,7 @@ show_menu() {
 
   while [ "$remaining" -gt 0 ]; do
     if [ -x /bin/fb-bootselect ]; then
-      /bin/fb-bootselect "$remaining" >/dev/null 2>&1 || true
+      /bin/fb-bootselect "$remaining" paint >/dev/null 2>&1 || true
     fi
     for tty in /dev/tty0 /dev/tty1 /dev/console; do
       if [ -c "$tty" ]; then
@@ -219,6 +223,40 @@ show_menu() {
     *)
       printf 'Selected NVMe Ubuntu.\n'
       SELECTED_TARGET=nvme
+      ;;
+  esac
+}
+
+fb_menu() {
+  if [ ! -x /bin/fb-bootselect ]; then
+    return 1
+  fi
+  wait_for_node /dev/fb0 18 || return 1
+  wait_for_node /dev/input/event0 8 || true
+  fb_output=$(/bin/fb-bootselect "$TIMEOUT" 2>&1)
+  rc=$?
+  BOOTSELECT_FB_RC=$rc
+  if [ -n "$fb_output" ]; then
+    BOOTSELECT_FB_DIAG=$(printf '%s' "$fb_output" | tr '\n' ' ' | sed 's/[^A-Za-z0-9_.= -]/_/g')
+  fi
+  case "$rc" in
+    0)
+      BOOTSELECT_METHOD=fb
+      SELECTED_TARGET=nvme
+      return 0
+      ;;
+    10)
+      BOOTSELECT_METHOD=fb
+      SELECTED_TARGET=sd
+      return 0
+      ;;
+    20)
+      BOOTSELECT_METHOD=fb
+      SELECTED_TARGET=reboot
+      return 0
+      ;;
+    *)
+      return 1
       ;;
   esac
 }
@@ -267,8 +305,10 @@ for arg in $(cat /proc/cmdline 2>/dev/null); do
   esac
 done
 sleep 2
-if ! kms_menu; then
-  show_menu
+if ! fb_menu; then
+  if ! kms_menu; then
+    show_menu
+  fi
 fi
 target=$SELECTED_TARGET
 

@@ -1,13 +1,21 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/fb.h>
+#include <linux/input.h>
+#include <poll.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <time.h>
 #include <unistd.h>
+
+#define EXIT_NVME 0
+#define EXIT_SD 10
+#define EXIT_REBOOT 20
+#define EXIT_FB_UNAVAILABLE 111
 
 static uint8_t *fb;
 static struct fb_var_screeninfo var;
@@ -15,12 +23,18 @@ static struct fb_fix_screeninfo fix;
 
 static uint32_t make_color(uint8_t r, uint8_t g, uint8_t b)
 {
+    uint32_t color;
+
     if (var.bits_per_pixel == 16) {
         return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
     }
-    return ((uint32_t)r << var.red.offset) |
-           ((uint32_t)g << var.green.offset) |
-           ((uint32_t)b << var.blue.offset);
+    color = ((uint32_t)r << var.red.offset) |
+            ((uint32_t)g << var.green.offset) |
+            ((uint32_t)b << var.blue.offset);
+    if (var.transp.length > 0) {
+        color |= ((1u << var.transp.length) - 1u) << var.transp.offset;
+    }
+    return color;
 }
 
 static void put_pixel(unsigned int x, unsigned int y, uint32_t color)
@@ -113,32 +127,48 @@ static void draw_text(unsigned int x, unsigned int y, const char *s, unsigned in
     }
 }
 
-int main(int argc, char **argv)
+static int open_fb(void)
 {
     int fd;
     size_t fb_size;
-    uint32_t white, black, gray;
-    char seconds[16];
 
     fd = open("/dev/fb0", O_RDWR);
     if (fd < 0) {
-        return 0;
+        return -1;
     }
     if (ioctl(fd, FBIOGET_VSCREENINFO, &var) < 0 ||
         ioctl(fd, FBIOGET_FSCREENINFO, &fix) < 0) {
         close(fd);
-        return 0;
+        return -1;
     }
     fb_size = fix.smem_len;
     fb = mmap(NULL, fb_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (fb == MAP_FAILED) {
         close(fd);
-        return 0;
+        return -1;
     }
+    return fd;
+}
+
+static void close_fb(int fd)
+{
+    if (fb && fb != MAP_FAILED) {
+        msync(fb, fix.smem_len, MS_SYNC);
+        munmap(fb, fix.smem_len);
+    }
+    close(fd);
+}
+
+static void draw_menu(int selected, int remaining)
+{
+    uint32_t white, black, gray, blue, yellow;
+    char seconds[16];
 
     white = make_color(255, 255, 255);
     black = make_color(0, 0, 0);
     gray = make_color(220, 220, 220);
+    blue = make_color(0, 95, 219);
+    yellow = make_color(255, 212, 74);
 
     fill_rect(0, 0, var.xres, var.yres, white);
     fill_rect(0, 0, var.xres, 24, black);
@@ -148,15 +178,121 @@ int main(int argc, char **argv)
     fill_rect(48, 48, var.xres > 96 ? var.xres - 96 : var.xres, 110, gray);
 
     draw_text(72, 72, "BOOT SELECT", 10, black);
-    draw_text(72, 220, "N NVME", 8, black);
-    draw_text(72, 330, "S SD", 8, black);
-    draw_text(72, 440, "R REBOOT", 8, black);
-    draw_text(72, 560, "TIME", 7, black);
-    snprintf(seconds, sizeof(seconds), "%s", argc > 1 ? argv[1] : "0");
-    draw_text(420, 560, seconds, 7, black);
 
-    msync(fb, fb_size, MS_SYNC);
-    munmap(fb, fb_size);
-    close(fd);
-    return 0;
+    fill_rect(72, 210, 620, 82, selected == 0 ? blue : white);
+    fill_rect(72, 320, 620, 82, selected == 1 ? blue : white);
+    fill_rect(72, 430, 620, 82, selected == 2 ? blue : white);
+
+    draw_text(102, 228, "N NVME", 8, selected == 0 ? white : black);
+    draw_text(102, 338, "S SD", 8, selected == 1 ? white : black);
+    draw_text(102, 448, "R REBOOT", 8, selected == 2 ? white : black);
+    draw_text(72, 560, "TIME", 7, black);
+    snprintf(seconds, sizeof(seconds), "%02d", remaining);
+    draw_text(420, 560, seconds, 7, yellow);
+
+    msync(fb, fix.smem_len, MS_SYNC);
+}
+
+static int open_inputs(struct pollfd *pfds, int max)
+{
+    char path[64];
+    int count = 0;
+
+    for (int i = 0; i < 32 && count < max; i++) {
+        snprintf(path, sizeof(path), "/dev/input/event%d", i);
+        int fd = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+        if (fd >= 0) {
+            pfds[count].fd = fd;
+            pfds[count].events = POLLIN;
+            count++;
+        }
+    }
+    return count;
+}
+
+static int read_choice(int timeout)
+{
+    struct pollfd pfds[32];
+    int count = open_inputs(pfds, 32);
+    int selected = 0;
+    time_t end = time(NULL) + timeout;
+    int last_remaining = -1;
+
+    while (time(NULL) < end) {
+        int remaining = (int)(end - time(NULL));
+        if (remaining != last_remaining) {
+            draw_menu(selected, remaining);
+            last_remaining = remaining;
+        }
+        if (poll(pfds, count, 100) <= 0) {
+            continue;
+        }
+        for (int i = 0; i < count; i++) {
+            struct input_event ev;
+            if (!(pfds[i].revents & POLLIN)) {
+                continue;
+            }
+            while (read(pfds[i].fd, &ev, sizeof(ev)) == sizeof(ev)) {
+                if (ev.type != EV_KEY || ev.value == 0) {
+                    continue;
+                }
+                if (ev.code == KEY_N) {
+                    return EXIT_NVME;
+                }
+                if (ev.code == KEY_S) {
+                    return EXIT_SD;
+                }
+                if (ev.code == KEY_R) {
+                    return EXIT_REBOOT;
+                }
+                if (ev.code == KEY_DOWN) {
+                    selected = (selected + 1) % 3;
+                    draw_menu(selected, remaining);
+                }
+                if (ev.code == KEY_UP) {
+                    selected = (selected + 2) % 3;
+                    draw_menu(selected, remaining);
+                }
+                if (ev.code == KEY_ENTER || ev.code == KEY_KPENTER) {
+                    return selected == 0 ? EXIT_NVME : selected == 1 ? EXIT_SD : EXIT_REBOOT;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < count; i++) {
+        close(pfds[i].fd);
+    }
+    return EXIT_NVME;
+}
+
+int main(int argc, char **argv)
+{
+    int fd;
+    int timeout = 30;
+    int rc;
+
+    if (argc > 1) {
+        timeout = atoi(argv[1]);
+        if (timeout < 5) {
+            timeout = 5;
+        }
+    }
+
+    fd = open_fb();
+    if (fd < 0) {
+        return EXIT_FB_UNAVAILABLE;
+    }
+
+    if (argc > 2 && strcmp(argv[2], "paint") == 0) {
+        draw_menu(0, timeout);
+        close_fb(fd);
+        return EXIT_NVME;
+    }
+
+    fprintf(stderr, "stage=ready fb0=%ux%u bpp=%u line_length=%u smem_len=%u\n",
+            var.xres, var.yres, var.bits_per_pixel, fix.line_length, fix.smem_len);
+    rc = read_choice(timeout);
+    close_fb(fd);
+    return rc;
 }
