@@ -227,7 +227,17 @@ report() {
   printf '\n'
 
   printf 'Running SD boot-resource validation...\n'
-  "$board_repo/scripts/validate-sd-boot-resource.sh" --device "$device" --source-logo /boot/logo.bmp
+  if [ "${EXPECTED_FASTLOGO_RESOURCE:-false}" = true ]; then
+    [ -n "${EXPECTED_FASTLOGO_REGBIN:-}" ] \
+      || fail 'EXPECTED_FASTLOGO_RESOURCE=true requires EXPECTED_FASTLOGO_REGBIN'
+    "$board_repo/scripts/validate-sd-boot-resource.sh" \
+      --device "$device" \
+      --source-logo /boot/logo.bmp \
+      --source-regbin "$EXPECTED_FASTLOGO_REGBIN" \
+      --require-regbin
+  else
+    "$board_repo/scripts/validate-sd-boot-resource.sh" --device "$device" --source-logo /boot/logo.bmp
+  fi
   printf '\n'
 
   printf 'Running live boot-menu asset validation...\n'

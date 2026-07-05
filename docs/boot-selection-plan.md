@@ -1,5 +1,35 @@
 # Boot Selection Plan
 
+Current status on 2026-07-05:
+
+- The machine is booting the NVMe root filesystem:
+  `/dev/nvme0n1p3`, UUID
+  `eb86cfeb-60c7-4513-bc69-f6d28e9d561b`.
+- The SD card still provides the bootloader stage, so boot assets must be kept
+  in sync between NVMe `/boot` and the SD root `/boot`.
+- After the latest recovery, both NVMe and SD `orangepiEnv.txt` were reset to
+  the conservative non-visual default:
+  `bootmenu_first=false`, `selector_visual_test=none`,
+  `selector_logo_preinit=false`, and `selector_diag_force_bootm=false`.
+- The installed SD TOC1 readback is a script-first AW_DRM package with SHA-256
+  `caf7fad850121aee79c509612ac54b837df17ef0b01cc2debbed6f5bbde4cdb8`.
+  It is not the vendor stock SD or vendor stock NVMe package.
+- Board-support now has an offline-only fastlogo build profile that targets
+  the vendor `CONFIG_SUNXI_TV_FASTLOGO` path. Its package candidate is:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-fastlogo-scriptfirst.fex`
+- That candidate validates offline with profile `fastlogo-scriptfirst`, package
+  SHA-256
+  `51b913e22126a67659432f13587447b9542208446dbd4220d35ae3f9fe6d249f`,
+  and U-Boot item SHA-256
+  `8245a8f47c9db20f93e7ea18e1123e62e6cb87536809a3f12d24cca63572f949`.
+- It is not ready to install as a visual fix because the factory fastlogo path
+  requires `LogoRegData.bin` in the Allwinner bootloader resource area, and no
+  valid copy was found locally.
+- For future fastlogo tests, `settlement-validate-before-reboot.sh` supports
+  `EXPECTED_FASTLOGO_RESOURCE=true` with `EXPECTED_FASTLOGO_REGBIN=/path/to/LogoRegData.bin`.
+  Do not set that flag unless the register table has been recovered and staged
+  with board-support `stage-sd-boot-resource.sh --source-regbin`.
+
 Current status on 2026-07-04:
 
 - The machine boots NVMe Ubuntu through extlinux.
