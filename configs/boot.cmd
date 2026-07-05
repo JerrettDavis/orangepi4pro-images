@@ -15,6 +15,7 @@ setenv earlycon "on"
 setenv bootmenu_first "false"
 setenv bootmenu_timeout "20"
 setenv bootmenu_default "nvme"
+setenv bootmenu_video_preinit "false"
 setenv kernel_selector_first "false"
 setenv kernel_selector_timeout "10"
 setenv selector_visual_test "none"
@@ -427,16 +428,32 @@ if test "${bootmenu_first}" = "true"; then
 	setenv stdout "serial,vidconsole"
 	setenv stderr "serial,vidconsole"
 	setenv bootmenu_delay "${bootmenu_timeout}"
+	if test "${bootmenu_video_preinit}" = "true"; then
+		echo "Pre-initializing HDMI before U-Boot bootmenu"
+		setenv opi_hdmi_force_secondpass 1
+		sunxi_backlihgt on
+		if sunxi_drm fbtest; then
+			setenv bootmenu_video_diag "bootmenu-video-preinit-ok"
+		else
+			setenv bootmenu_video_diag "bootmenu-video-preinit-fail"
+		fi
+		setenv opi_hdmi_force_secondpass 0
+		if test -z "${opi_fbtest_diag}"; then
+			setenv opi_fbtest_diag "fbtest=unset"
+		fi
+		cls
+	fi
 	setenv selected_boot true
 	setenv extlinux_first false
 	setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
 	setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck
 	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
 	setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
-	setenv extraargs bootchooser=uboot-bootmenu-nosel
-	setenv bootmenu_boot_nvme "setenv selected_boot true; setenv extlinux_first false; setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck; setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck; setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b; setenv extraargs bootchooser=uboot-bootmenu-nvme"
-	setenv bootmenu_boot_sd "setenv selected_boot true; setenv extlinux_first false; setenv boot_kernel uImage-5.15.147-sun60iw2; setenv boot_initrd uInitrd-5.15.147-sun60iw2; setenv boot_dtb dtb-5.15.147-sun60iw2/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=dc683cb4-0847-4d2f-83f1-184d35749d4c; setenv extraargs bootchooser=uboot-bootmenu-sd"
-	setenv bootmenu_boot_verbose "setenv selected_boot true; setenv extlinux_first false; setenv verbosity 7; setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck; setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck; setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b; setenv extraargs bootchooser=uboot-bootmenu-nvme-verbose"
+	setenv bootmenu_marker nosel
+	setenv extraargs "bootchooser=uboot-bootmenu-nosel ${bootmenu_video_diag}"
+	setenv bootmenu_boot_nvme "setenv bootmenu_marker nvme; setenv selected_boot true; setenv extlinux_first false; setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck; setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck; setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b; setenv extraargs bootchooser=uboot-bootmenu-nvme ${bootmenu_video_diag}"
+	setenv bootmenu_boot_sd "setenv bootmenu_marker sd; setenv selected_boot true; setenv extlinux_first false; setenv boot_kernel uImage-5.15.147-sun60iw2; setenv boot_initrd uInitrd-5.15.147-sun60iw2; setenv boot_dtb dtb-5.15.147-sun60iw2/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=dc683cb4-0847-4d2f-83f1-184d35749d4c; setenv extraargs bootchooser=uboot-bootmenu-sd ${bootmenu_video_diag}"
+	setenv bootmenu_boot_verbose "setenv bootmenu_marker verbose; setenv selected_boot true; setenv extlinux_first false; setenv verbosity 7; setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck; setenv boot_initrd uInitrd-5.15.147-sun60iw2-cyberdeck; setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb; setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b; setenv extraargs bootchooser=uboot-bootmenu-nvme-verbose ${bootmenu_video_diag}"
 	if test "${bootmenu_default}" = "sd"; then
 		setenv bootmenu_0 "Ubuntu SD - stock kernel=run bootmenu_boot_sd"
 		setenv bootmenu_1 "Ubuntu NVMe - cyberdeck kernel=run bootmenu_boot_nvme"
@@ -446,7 +463,7 @@ if test "${bootmenu_first}" = "true"; then
 	fi
 	setenv bootmenu_2 "Ubuntu NVMe - verbose boot=run bootmenu_boot_verbose"
 	bootmenu ${bootmenu_timeout}
-	if test "${extraargs}" = "bootchooser=uboot-bootmenu-nosel"; then
+	if test "${bootmenu_marker}" = "nosel"; then
 		echo "U-Boot bootmenu returned without selection; running configured default"
 		if test "${bootmenu_default}" = "sd"; then
 			run bootmenu_boot_sd

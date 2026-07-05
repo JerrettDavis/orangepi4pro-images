@@ -10,6 +10,7 @@ direct_booti_first=false
 bootmenu_first=false
 bootmenu_timeout=200
 bootmenu_default=nvme
+bootmenu_video_preinit=false
 kernel_selector_first=false
 kernel_selector_timeout=10
 selector_console=false

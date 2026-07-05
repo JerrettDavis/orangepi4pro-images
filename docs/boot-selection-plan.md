@@ -2357,6 +2357,26 @@ stays black the kernel command line should include `opi_snps=...` showing the
 return codes and register state from `_snps_phy_config_init()`, MPLL setup,
 drive setup, power enable, and lock wait.
 
+Actual SNPS-diagnostic fbtest result: U-Boot reported
+`bootchooser=uboot-visual-fbtest-ok`, `opi_fb_fbtest=ok`, and
+`opi_snps=ret0,init0,mpll0,drive0,wait1,...phy03,lock70...`. This proves the
+rebuilt package can bring the SNPS PHY to a locked state before Linux.
+
+The next staged selector test uses that same package but enables U-Boot
+`bootmenu` instead of the standalone fbtest boot:
+
+```text
+scripts/stage-snpsdiag-bootmenu-test.sh --timeout 30 --default nvme --yes
+ORANGEPI4PRO_STAGE_SNPSDIAG_BOOTMENU=1
+bootmenu_first=true
+bootmenu_video_preinit=true
+bootmenu_timeout=30
+```
+
+Expected evidence after reboot is a visible U-Boot menu with NVMe and SD
+entries. If no key is selected, the deterministic fallback should boot NVMe
+with `bootchooser=uboot-bootmenu-nvme bootmenu-video-preinit-ok`.
+
 ## 2026-07-05 Logo-Path DE/TCON Diagnostic
 
 The unmodified vendor SD TOC1 package booted NVMe through extlinux with
