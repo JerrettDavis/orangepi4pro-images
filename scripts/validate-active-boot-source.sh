@@ -57,6 +57,12 @@ elif grep -q 'bootchooser=uboot-visual-hdmi20-pattern-ok' /proc/cmdline; then
   printf 'Current boot ran the U-Boot HDMI20 pattern visual test successfully.\n'
 elif grep -q 'bootchooser=uboot-visual-hdmi20-pattern-fail' /proc/cmdline; then
   printf 'Current boot ran the U-Boot HDMI20 pattern visual test and the command failed.\n'
+elif grep -q 'bootchooser=bootgui-selector-nvme' /proc/cmdline; then
+  printf 'Current boot came through the framebuffer U-Boot selector NVMe entry.\n'
+elif grep -q 'bootchooser=bootgui-selector-sd' /proc/cmdline; then
+  printf 'Current boot came through the framebuffer U-Boot selector SD entry.\n'
+elif grep -q 'bootchooser=bootgui-selector-fail-nvme' /proc/cmdline; then
+  printf 'Current boot entered the framebuffer U-Boot selector but fell back to NVMe.\n'
 else
   printf 'Current boot has no bootchooser marker; U-Boot likely used an older boot.scr.\n'
 fi

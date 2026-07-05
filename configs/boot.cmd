@@ -24,6 +24,8 @@ setenv selector_logo_preinit "false"
 setenv selector_logo_command "sunxi_show_logo"
 setenv selector_logo_hold "3"
 setenv selector_diag_force_bootm "false"
+setenv bootgui_selector "false"
+setenv bootgui_selector_timeout "10"
 
 echo "Boot script loaded from ${devtype} ${devnum}"
 
@@ -71,6 +73,24 @@ if test "${bootgui_selector}" = "true"; then
 	else
 		setenv opi_bootselect_pre_drm "drm=missing"
 	fi
+	if sunxi_hdmi_env; then
+		setenv opi_bootselect_pre_hdmi "${opi_hdmi_diag}"
+	else
+		setenv opi_bootselect_pre_hdmi "hdmi=diag-missing"
+	fi
+	echo "Pre-initializing HDMI before framebuffer boot selector"
+	setenv opi_hdmi_force_secondpass 1
+	sunxi_backlihgt on
+	if sunxi_drm fbtest; then
+		setenv opi_bootselect_video "bootgui-video-preinit-ok"
+	else
+		setenv opi_bootselect_video "bootgui-video-preinit-fail"
+	fi
+	setenv opi_hdmi_force_secondpass 0
+	if test -z "${opi_fbtest_diag}"; then
+		setenv opi_fbtest_diag "fbtest=unset"
+	fi
+	cls
 	if opi_bootselect ${bootgui_selector_timeout}; then
 		if test "${opi_bootselect_target}" = "sd"; then
 			setenv bootonce_target sd
@@ -88,6 +108,11 @@ if test "${bootgui_selector}" = "true"; then
 		setenv opi_bootselect_post_drm "${opi_drm_diag}"
 	else
 		setenv opi_bootselect_post_drm "drm=missing"
+	fi
+	if sunxi_hdmi_env; then
+		setenv opi_bootselect_post_hdmi "${opi_hdmi_diag}"
+	else
+		setenv opi_bootselect_post_hdmi "hdmi=diag-missing"
 	fi
 fi
 
@@ -155,8 +180,24 @@ if test -n "${opi_bootselect_pre_drm}"; then
 	setenv extraargs "${extraargs} opi_pre_${opi_bootselect_pre_drm}"
 fi
 
+if test -n "${opi_bootselect_pre_hdmi}"; then
+	setenv extraargs "${extraargs} opi_pre_${opi_bootselect_pre_hdmi}"
+fi
+
+if test -n "${opi_bootselect_video}"; then
+	setenv extraargs "${extraargs} ${opi_bootselect_video}"
+fi
+
+if test -n "${opi_fbtest_diag}"; then
+	setenv extraargs "${extraargs} opi_fb_${opi_fbtest_diag}"
+fi
+
 if test -n "${opi_bootselect_post_drm}"; then
 	setenv extraargs "${extraargs} opi_post_${opi_bootselect_post_drm}"
+fi
+
+if test -n "${opi_bootselect_post_hdmi}"; then
+	setenv extraargs "${extraargs} opi_post_${opi_bootselect_post_hdmi}"
 fi
 
 if test "${selector_logo_preinit}" = "true"; then

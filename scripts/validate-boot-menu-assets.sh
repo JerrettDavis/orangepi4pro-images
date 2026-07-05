@@ -141,9 +141,10 @@ grep -q 'uboot-bootmenu-nvme' /boot/boot.cmd || fail 'boot.cmd does not contain 
 grep -q 'uboot-bootmenu-sd' /boot/boot.cmd || fail 'boot.cmd does not contain U-Boot SD selector marker'
 grep -q 'usb start' /boot/boot.cmd || fail 'boot.cmd does not start USB before bootmenu'
 grep -q 'bootmenu_default' /boot/boot.cmd || fail 'boot.cmd does not support deterministic bootmenu default tests'
-grep -q 'bootmenu_video_preinit' /boot/boot.cmd || fail 'boot.cmd does not support HDMI preinit before bootmenu'
-grep -q 'bootmenu-video-preinit-ok' /boot/boot.cmd || fail 'boot.cmd lacks bootmenu video preinit success marker'
-grep -q 'bootmenu_marker' /boot/boot.cmd || fail 'boot.cmd lacks robust bootmenu selection marker'
+	grep -q 'bootmenu_video_preinit' /boot/boot.cmd || fail 'boot.cmd does not support HDMI preinit before bootmenu'
+	grep -q 'bootmenu-video-preinit-ok' /boot/boot.cmd || fail 'boot.cmd lacks bootmenu video preinit success marker'
+	grep -q 'bootgui-video-preinit-ok' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI video preinit success marker'
+	grep -q 'bootmenu_marker' /boot/boot.cmd || fail 'boot.cmd lacks robust bootmenu selection marker'
 grep -q 'U-Boot bootmenu returned without selection; running configured default' /boot/boot.cmd \
   || fail 'boot.cmd lacks deterministic fallback after U-Boot bootmenu returns without selection'
 awk '
@@ -272,11 +273,12 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
   | sed -E "s/^bootmenu_default=.*/bootmenu_default=${expected_bootmenu_default}/" \
   | sed -E "s/^bootmenu_video_preinit=.*/bootmenu_video_preinit=${expected_bootmenu_video_preinit}/" \
-  | sed -E "s/^kernel_selector_first=.*/kernel_selector_first=${expected_kernel_selector_first}/" \
-  | sed -E "s/^kernel_selector_timeout=.*/kernel_selector_timeout=${expected_kernel_selector_timeout}/" \
-  | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
-  | sed '/^$/d' \
-  > "$repo_env_cmp"
+	  | sed -E "s/^kernel_selector_first=.*/kernel_selector_first=${expected_kernel_selector_first}/" \
+	  | sed -E "s/^kernel_selector_timeout=.*/kernel_selector_timeout=${expected_kernel_selector_timeout}/" \
+	  | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
+	  | sed -E "s/^bootgui_selector_timeout=.*/bootgui_selector_timeout=${expected_bootgui_selector_timeout}/" \
+	  | sed '/^$/d' \
+	  > "$repo_env_cmp"
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   /boot/orangepiEnv.txt \
   | sed -E "s/^selector_prompt=.*/selector_prompt=${expected_selector_prompt}/" \
@@ -294,11 +296,12 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
   | sed -E "s/^bootmenu_default=.*/bootmenu_default=${expected_bootmenu_default}/" \
   | sed -E "s/^bootmenu_video_preinit=.*/bootmenu_video_preinit=${expected_bootmenu_video_preinit}/" \
-  | sed -E "s/^kernel_selector_first=.*/kernel_selector_first=${expected_kernel_selector_first}/" \
-  | sed -E "s/^kernel_selector_timeout=.*/kernel_selector_timeout=${expected_kernel_selector_timeout}/" \
-  | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
-  | sed '/^$/d' \
-  > "$boot_env_cmp"
+	  | sed -E "s/^kernel_selector_first=.*/kernel_selector_first=${expected_kernel_selector_first}/" \
+	  | sed -E "s/^kernel_selector_timeout=.*/kernel_selector_timeout=${expected_kernel_selector_timeout}/" \
+	  | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
+	  | sed -E "s/^bootgui_selector_timeout=.*/bootgui_selector_timeout=${expected_bootgui_selector_timeout}/" \
+	  | sed '/^$/d' \
+	  > "$boot_env_cmp"
 cmp -s "$repo_env_cmp" "$boot_env_cmp" \
   || fail '/boot/orangepiEnv.txt differs from configs/orangepiEnv.txt beyond allowed prompt-test overrides'
 sed -E "s/^DEFAULT .*/DEFAULT ${expected_extlinux_default}/" \
