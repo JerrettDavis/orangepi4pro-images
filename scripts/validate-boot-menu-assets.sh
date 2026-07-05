@@ -112,6 +112,9 @@ grep -q 'sunxi_drm fbtest' /boot/boot.cmd || fail 'boot.cmd does not support bou
 grep -q 'sunxi_hdmi20 pattern 1' /boot/boot.cmd || fail 'boot.cmd does not support bounded HDMI20 pattern visual test'
 grep -q 'sunxi_drm_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot DRM env diagnostics'
 grep -q 'sunxi_hdmi_env' /boot/boot.cmd || fail 'boot.cmd does not collect U-Boot HDMI env diagnostics'
+grep -q 'selector_logo_de' /boot/boot.cmd || fail 'boot.cmd does not collect logo-path DE/TCON diagnostics'
+# shellcheck disable=SC2016
+grep -q 'opi_logo_${selector_logo_de}' /boot/boot.cmd || fail 'boot.cmd does not preserve logo-path DE/TCON diagnostics'
 grep -q 'opi_hdmi_secondpass' /boot/boot.cmd || fail 'boot.cmd does not preserve HDMI second-pass diagnostics'
 grep -q 'opi_hdmi_drv_diag' /boot/boot.cmd || fail 'boot.cmd does not preserve HDMI driver-enable diagnostics'
 grep -q 'opi_snps_phy_diag' /boot/boot.cmd || fail 'boot.cmd does not preserve SNPS PHY diagnostics'

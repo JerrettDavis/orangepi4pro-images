@@ -2265,3 +2265,22 @@ boot-script display recycle path.
 sha256=b63610fa3bfe2fb10f117a5335c866b8003c86769dad1a51749e14064c1b8bd5
 u-boot-item-sha256=b9bfed5c87f98ec83cb699afcde372fd6165ff9e9673a86d4434bf08949d6dd6
 ```
+
+## 2026-07-05 Logo-Path DE/TCON Diagnostic
+
+The unmodified vendor SD TOC1 package booted NVMe through extlinux with
+`bootchooser=extlinux-legacy-nvme`, but still showed no pre-Linux display. That
+rules out the length-preserving script-first scan-order patch as the cause of
+the missing factory splash.
+
+The next boot returns to the known-booting script-first diagnostic package and
+adds one read-only signal to the `sunxi_show_logo` path: after the logo command
+returns, `boot.cmd` now calls `sunxi_de_env` and appends `opi_logo_de=...` to
+the kernel command line. Existing logo diagnostics already preserve HDMI and
+DRM state. This should show whether U-Boot has a valid DE/TCON scanout feeding
+the HDMI path while the monitor remains black.
+
+This test does not add a display recycle/reinit path, does not write boot0, and
+does not change root-selection policy. Expected reboot evidence is either a
+visible pre-Linux screen, or an NVMe boot with `bootchooser=uboot-logo-preinit-ok`
+plus `opi_logo_de=...` for the next driver-level patch.

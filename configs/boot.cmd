@@ -175,9 +175,19 @@ if test "${selector_logo_preinit}" = "true"; then
 			setenv selector_logo_drm "drm=diag-missing"
 		fi
 	fi
+	if sunxi_de_env; then
+		setenv selector_logo_de "${opi_de_diag}"
+	else
+		if test -n "${opi_de_diag}"; then
+			setenv selector_logo_de "${opi_de_diag}"
+		else
+			setenv selector_logo_de "de=diag-missing"
+		fi
+	fi
 	setenv extraargs "${extraargs} ${selector_logo_diag}"
 	setenv extraargs "${extraargs} opi_logo_${selector_logo_hdmi}"
 	setenv extraargs "${extraargs} opi_logo_${selector_logo_drm}"
+	setenv extraargs "${extraargs} opi_logo_${selector_logo_de}"
 	if test -n "${opi_logo_recover}"; then
 		setenv extraargs "${extraargs} opi_logo_recover=${opi_logo_recover}"
 	fi
