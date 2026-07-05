@@ -28,8 +28,10 @@ struct kms {
     int fd;
     uint32_t connector_id;
     uint32_t crtc_id;
+    uint32_t crtc_index;
     uint32_t fb_id;
     uint32_t handle;
+    uint32_t plane_id;
     uint32_t pitch;
     uint32_t width;
     uint32_t height;
@@ -258,6 +260,72 @@ static int pick_crtc(int fd, const struct drm_mode_card_res *res,
     return res->count_crtcs ? (int)crtcs[0] : -1;
 }
 
+static uint32_t crtc_index_by_id(const struct drm_mode_card_res *res,
+                                 const uint32_t *crtcs, uint32_t crtc_id)
+{
+    uint32_t i;
+
+    for (i = 0; i < res->count_crtcs; i++) {
+        if (crtcs[i] == crtc_id) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+static int bind_plane(struct kms *k)
+{
+    struct drm_mode_get_plane_res plane_res;
+    struct drm_mode_get_plane plane;
+    struct drm_mode_set_plane set_plane;
+    uint32_t *plane_ids;
+    uint32_t i;
+
+    memset(&plane_res, 0, sizeof(plane_res));
+    if (ioctl(k->fd, DRM_IOCTL_MODE_GETPLANERESOURCES, &plane_res) < 0 ||
+        plane_res.count_planes == 0) {
+        return -1;
+    }
+
+    plane_ids = calloc(plane_res.count_planes, sizeof(*plane_ids));
+    if (!plane_ids) {
+        return -1;
+    }
+    plane_res.plane_id_ptr = (uintptr_t)plane_ids;
+    if (ioctl(k->fd, DRM_IOCTL_MODE_GETPLANERESOURCES, &plane_res) < 0) {
+        free(plane_ids);
+        return -1;
+    }
+
+    for (i = 0; i < plane_res.count_planes; i++) {
+        memset(&plane, 0, sizeof(plane));
+        plane.plane_id = plane_ids[i];
+        if (ioctl(k->fd, DRM_IOCTL_MODE_GETPLANE, &plane) < 0) {
+            continue;
+        }
+        if (!(plane.possible_crtcs & (1u << k->crtc_index))) {
+            continue;
+        }
+
+        memset(&set_plane, 0, sizeof(set_plane));
+        set_plane.plane_id = plane.plane_id;
+        set_plane.crtc_id = k->crtc_id;
+        set_plane.fb_id = k->fb_id;
+        set_plane.crtc_w = k->width;
+        set_plane.crtc_h = k->height;
+        set_plane.src_w = k->width << 16;
+        set_plane.src_h = k->height << 16;
+        if (ioctl(k->fd, DRM_IOCTL_MODE_SETPLANE, &set_plane) == 0) {
+            k->plane_id = plane.plane_id;
+            free(plane_ids);
+            return 0;
+        }
+    }
+
+    free(plane_ids);
+    return -1;
+}
+
 static struct drm_mode_modeinfo fixed_1024x600_mode(void)
 {
     struct drm_mode_modeinfo mode;
@@ -331,6 +399,7 @@ static int setup_kms(struct kms *k)
         }
         k->crtc_id = (uint32_t)pick_crtc(k->fd, &res, crtcs, conn_encoders,
                                          conn.count_encoders, conn.encoder_id);
+        k->crtc_index = crtc_index_by_id(&res, crtcs, k->crtc_id);
         found = k->crtc_id != 0;
     }
 
@@ -389,8 +458,12 @@ static int setup_kms(struct kms *k)
     if (ioctl(k->fd, DRM_IOCTL_MODE_SETCRTC, &crtc) < 0) {
         return fail_stage("setcrtc");
     }
-    fprintf(stderr, "stage=ready connector=%u crtc=%u fb=%u mode=%ux%u pitch=%u\n",
-            k->connector_id, k->crtc_id, k->fb_id, k->width, k->height, k->pitch);
+    if (bind_plane(k) < 0) {
+        k->plane_id = 0;
+    }
+    fprintf(stderr, "stage=ready connector=%u crtc=%u crtc_index=%u plane=%u fb=%u mode=%ux%u pitch=%u\n",
+            k->connector_id, k->crtc_id, k->crtc_index, k->plane_id,
+            k->fb_id, k->width, k->height, k->pitch);
     return 0;
 }
 
