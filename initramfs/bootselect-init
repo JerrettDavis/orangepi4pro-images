@@ -186,7 +186,7 @@ case "$target" in
     fallback_nvme_root
     ;;
   nvme)
-    set_extlinux_default bootselect || true
+    set_extlinux_default ubuntu-nvme || true
     printf 'Continuing into NVMe Ubuntu...\n'
     sleep 1
     fallback_nvme_root

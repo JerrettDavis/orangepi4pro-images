@@ -23,7 +23,9 @@ scripts/build-kernel-initramfs-selector.sh build/uInitrd-orangepi4pro-bootselect
 scripts/validate-kernel-initramfs-selector.sh build/uInitrd-orangepi4pro-bootselect
 ```
 
-Stage for the next reboot:
+Stage for the next reboot. The staged extlinux `ubuntu-nvme` entry loads the
+visible selector; the direct NVMe entry remains available as
+`ubuntu-nvme-direct`.
 
 ```sh
 sudo scripts/stage-kernel-initramfs-selector.sh --timeout 10

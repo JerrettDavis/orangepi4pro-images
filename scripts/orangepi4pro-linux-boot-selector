@@ -11,7 +11,7 @@ sd_boot_mount=/mnt/opisd-check
 bootonce_relative_path=boot/orangepiBootOnce.txt
 clear_only=false
 mirror_nvme_boot=true
-restore_extlinux_default=bootselect
+restore_extlinux_default=ubuntu-nvme
 
 if [ -r "$config_file" ]; then
   # shellcheck source=/dev/null

@@ -156,10 +156,10 @@ if [ -d "$efi_dir" ]; then
   install -m 0644 /boot/orangepiEnv.txt "$efi_dir/orangepiEnv.txt"
 fi
 
-set_extlinux_default_file /boot/extlinux/extlinux.conf bootselect
-set_extlinux_default_file "$sd_root/boot/extlinux/extlinux.conf" bootselect
+set_extlinux_default_file /boot/extlinux/extlinux.conf ubuntu-nvme
+set_extlinux_default_file "$sd_root/boot/extlinux/extlinux.conf" ubuntu-nvme
 if [ -d "$efi_dir" ]; then
-  set_extlinux_default_file "$efi_dir/extlinux/extlinux.conf" bootselect
+  set_extlinux_default_file "$efi_dir/extlinux/extlinux.conf" ubuntu-nvme
 fi
 
 rm -f /boot/orangepiBootOnce.txt "$sd_root/boot/orangepiBootOnce.txt" "$efi_dir/orangepiBootOnce.txt"
