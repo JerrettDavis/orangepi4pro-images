@@ -32,6 +32,8 @@ mkdir -p "$root/bin" "$root/sbin" "$root/lib/aarch64-linux-gnu" "$root/lib" \
 install -m 0755 "$busybox" "$root/bin/busybox"
 install -m 0755 "$repo_root/initramfs/bootselect-init" "$root/init"
 gcc -Os -s -Wall -Wextra -o "$root/bin/fb-bootselect" "$repo_root/tools/fb-bootselect.c"
+gcc -Os -s -Wall -Wextra -I/usr/include/drm \
+  -o "$root/bin/kms-bootselect" "$repo_root/tools/kms-bootselect.c"
 
 while IFS= read -r applet; do
   case "$applet" in

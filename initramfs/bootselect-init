@@ -32,6 +32,17 @@ wait_for_device() {
   [ -b "$dev" ]
 }
 
+wait_for_node() {
+  node=$1
+  limit=${2:-12}
+  count=0
+  while [ ! -e "$node" ] && [ "$count" -lt "$limit" ]; do
+    sleep 1
+    count=$((count + 1))
+  done
+  [ -e "$node" ]
+}
+
 set_extlinux_default_file() {
   file=$1
   target=$2
@@ -188,6 +199,33 @@ show_menu() {
   esac
 }
 
+kms_menu() {
+  if [ ! -x /bin/kms-bootselect ]; then
+    return 1
+  fi
+  wait_for_node /dev/dri/card0 12 || return 1
+  wait_for_node /dev/input/event0 8 || true
+  /bin/kms-bootselect "$TIMEOUT"
+  rc=$?
+  case "$rc" in
+    0)
+      SELECTED_TARGET=nvme
+      return 0
+      ;;
+    10)
+      SELECTED_TARGET=sd
+      return 0
+      ;;
+    20)
+      SELECTED_TARGET=reboot
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 mount_basics
 for arg in $(cat /proc/cmdline 2>/dev/null); do
   case "$arg" in
@@ -197,7 +235,9 @@ for arg in $(cat /proc/cmdline 2>/dev/null); do
   esac
 done
 sleep 2
-show_menu
+if ! kms_menu; then
+  show_menu
+fi
 target=$SELECTED_TARGET
 
 case "$target" in

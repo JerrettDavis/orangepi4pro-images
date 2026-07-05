@@ -39,6 +39,7 @@ grep -q 'orangepiBootOnce.txt' configs/boot.cmd
 
 printf 'Checking kernel initramfs selector...\n'
 gcc -Wall -Wextra -fsyntax-only tools/fb-bootselect.c
+gcc -Wall -Wextra -I/usr/include/drm -fsyntax-only tools/kms-bootselect.c
 tmp_selector=$(mktemp)
 scripts/build-kernel-initramfs-selector.sh "$tmp_selector" >/tmp/orangepi4pro-kernel-selector-build.out
 scripts/validate-kernel-initramfs-selector.sh "$tmp_selector"

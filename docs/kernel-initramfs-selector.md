@@ -5,10 +5,20 @@ HDMI display is not visible before Linux initializes DRM. The kernel initramfs
 selector is a bounded fallback that runs before mounting a real Ubuntu root.
 
 It is not a desktop or X11 selector. U-Boot loads the current cyberdeck kernel
-with `uInitrd-orangepi4pro-bootselect`; the initramfs displays a high-contrast
-tty1 menu, writes `orangepiBootOnce.txt` to both boot locations, syncs, and
-reboots. The next U-Boot pass consumes the existing boot-script target path and
-boots either NVMe Ubuntu or SD recovery Ubuntu.
+with `uInitrd-orangepi4pro-bootselect`; the initramfs first tries a small
+DRM/KMS selector that explicitly modesets `/dev/dri/card0` to the
+Linux-proven `1024x600` HDMI mode and draws a high-contrast menu into a dumb
+scanout buffer. This avoids the observed failure where fbcon writes completed
+while the panel was still black. If KMS is unavailable or mode setting fails,
+the initramfs falls back to the older tty/direct-fb menu.
+
+Selections:
+
+- `N`, Enter on the default item, or timeout: continue into NVMe Ubuntu.
+- `S`: set extlinux `DEFAULT ubuntu-sd` on the boot copies and reboot once.
+  The clear-only cleanup unit restores `DEFAULT ubuntu-nvme` after the selected
+  OS boots.
+- `R`: reboot without changing the selected OS.
 
 Default repository state keeps this disabled:
 
@@ -36,6 +46,8 @@ The staging script writes only normal files on `/boot`, `/boot/efi`, and the
 mounted SD root:
 
 - `uInitrd-orangepi4pro-bootselect`
+- DRM/KMS selector inside the selector initramfs, used before the tty/fb
+  fallback
 - direct `/dev/fb0` painter inside the selector initramfs, used as a visible
   fallback if tty text is not routed cleanly
 - `boot.cmd`
