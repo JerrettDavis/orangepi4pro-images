@@ -389,6 +389,8 @@ static int setup_kms(struct kms *k)
     if (ioctl(k->fd, DRM_IOCTL_MODE_SETCRTC, &crtc) < 0) {
         return fail_stage("setcrtc");
     }
+    fprintf(stderr, "stage=ready connector=%u crtc=%u fb=%u mode=%ux%u pitch=%u\n",
+            k->connector_id, k->crtc_id, k->fb_id, k->width, k->height, k->pitch);
     return 0;
 }
 
@@ -483,6 +485,7 @@ int main(int argc, char **argv)
         return EXIT_KMS_UNAVAILABLE;
     }
 
+    sleep(3);
     draw_menu(&global_kms, 0, timeout);
     return read_choice(timeout);
 }
