@@ -2241,3 +2241,27 @@ opi_hdmi_drv_diag
 
 `configs/boot.cmd` appends those values to the kernel command line when present.
 This is still bootloader-stage work; it is not a userland selector fallback.
+
+Actual result: failed visually but confirmed the failure boundary. U-Boot ran
+the second pass and exported:
+
+```text
+opi_hdmisp=run,firstphy00,firstlock00,secondphy00,secondlock00
+opi_hdmidrv_drv=ret0,phy00,lock00,rst00,out0,clk1
+```
+
+So `sunxi_hdmi_config()` returned success, but the DesignWare/SNPS HDMI core
+still had reset and lock state at zero. Linux later became visible after its
+own HDMI atomic disable/enable sequence.
+
+The next test keeps the same colorbar stage and diagnostic bootargs, but uses a
+refined second-pass package whose retry first calls the local HDMI driver
+disable/disconfig path before TCON exit and clock cycling. This remains narrower
+than the previous unsafe `sunxi_drm hdmi_recycle` command and does not add a
+boot-script display recycle path.
+
+```text
+/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-localdisable.fex
+sha256=b63610fa3bfe2fb10f117a5335c866b8003c86769dad1a51749e14064c1b8bd5
+u-boot-item-sha256=b9bfed5c87f98ec83cb699afcde372fd6165ff9e9673a86d4434bf08949d6dd6
+```
