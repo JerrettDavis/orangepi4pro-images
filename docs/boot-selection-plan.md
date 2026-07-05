@@ -2317,6 +2317,22 @@ sha256=b63610fa3bfe2fb10f117a5335c866b8003c86769dad1a51749e14064c1b8bd5
 u-boot-item-sha256=b9bfed5c87f98ec83cb699afcde372fd6165ff9e9673a86d4434bf08949d6dd6
 ```
 
+2026-07-05 staged local-disable fbtest visual diagnostic:
+
+- Staging helper:
+  `scripts/stage-localdisable-fbtest-visual-test.sh --hold 20 --yes`
+  with `ORANGEPI4PRO_STAGE_LOCALDISABLE_FBTEST=1`.
+- Installed package:
+  `/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-localdisable.fex`
+  (`b63610fa3bfe2fb10f117a5335c866b8003c86769dad1a51749e14064c1b8bd5`).
+- Boot env for this diagnostic:
+  `selector_visual_test=fbtest`, `selector_visual_hold=20`,
+  `bootmenu_first=false`, `kernel_selector_first=false`.
+- Expected reboot evidence: a visible U-Boot framebuffer test held for 20
+  seconds before NVMe Linux, or a boot with `bootchooser=uboot-visual-fbtest-*`
+  plus `opi_hdmisp=...` and `opi_hdmidrv_drv=...` diagnostics for the next
+  driver patch.
+
 ## 2026-07-05 Logo-Path DE/TCON Diagnostic
 
 The unmodified vendor SD TOC1 package booted NVMe through extlinux with
