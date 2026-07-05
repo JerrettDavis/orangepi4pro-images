@@ -175,6 +175,12 @@ static int get_resources(int fd, struct drm_mode_card_res *res,
     return 0;
 }
 
+static int fail_stage(const char *stage)
+{
+    fprintf(stderr, "stage=%s errno=%d %s\n", stage, errno, strerror(errno));
+    return -1;
+}
+
 static int get_connector(int fd, uint32_t id, struct drm_mode_get_connector *conn,
                          struct drm_mode_modeinfo **modes, uint32_t **encoders)
 {
@@ -247,12 +253,12 @@ static int setup_kms(struct kms *k)
     memset(k, 0, sizeof(*k));
     k->fd = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
     if (k->fd < 0) {
-        return -1;
+        return fail_stage("open-card0");
     }
     ioctl(k->fd, DRM_IOCTL_SET_MASTER, 0);
 
     if (get_resources(k->fd, &res, &crtcs, &connectors, &encoders) < 0) {
-        return -1;
+        return fail_stage("get-resources");
     }
 
     for (i = 0; i < res.count_connectors && !found; i++) {
@@ -291,7 +297,7 @@ static int setup_kms(struct kms *k)
     free(conn_encoders);
 
     if (!found) {
-        return -1;
+        return fail_stage("no-connected-hdmi");
     }
 
     k->width = k->mode.hdisplay;
@@ -301,7 +307,7 @@ static int setup_kms(struct kms *k)
     create.height = k->height;
     create.bpp = 32;
     if (ioctl(k->fd, DRM_IOCTL_MODE_CREATE_DUMB, &create) < 0) {
-        return -1;
+        return fail_stage("create-dumb");
     }
     k->handle = create.handle;
     k->pitch = create.pitch;
@@ -315,18 +321,18 @@ static int setup_kms(struct kms *k)
     fb.depth = 24;
     fb.handle = k->handle;
     if (ioctl(k->fd, DRM_IOCTL_MODE_ADDFB, &fb) < 0) {
-        return -1;
+        return fail_stage("addfb");
     }
     k->fb_id = fb.fb_id;
 
     memset(&map, 0, sizeof(map));
     map.handle = k->handle;
     if (ioctl(k->fd, DRM_IOCTL_MODE_MAP_DUMB, &map) < 0) {
-        return -1;
+        return fail_stage("map-dumb");
     }
     k->pixels = mmap(NULL, k->size, PROT_READ | PROT_WRITE, MAP_SHARED, k->fd, map.offset);
     if (k->pixels == MAP_FAILED) {
-        return -1;
+        return fail_stage("mmap-dumb");
     }
 
     memset(&crtc, 0, sizeof(crtc));
@@ -337,7 +343,7 @@ static int setup_kms(struct kms *k)
     crtc.mode = k->mode;
     crtc.mode_valid = 1;
     if (ioctl(k->fd, DRM_IOCTL_MODE_SETCRTC, &crtc) < 0) {
-        return -1;
+        return fail_stage("setcrtc");
     }
     return 0;
 }

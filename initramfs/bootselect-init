@@ -12,6 +12,7 @@ TIMEOUT=30
 SELECTED_TARGET=$DEFAULT_TARGET
 BOOTSELECT_METHOD=unset
 BOOTSELECT_KMS_RC=unset
+BOOTSELECT_KMS_DIAG=unset
 
 mountpoint_mounted() {
   grep -q " $1 " /proc/mounts 2>/dev/null
@@ -45,6 +46,23 @@ wait_for_node() {
   [ -e "$node" ]
 }
 
+wait_for_hdmi_connected() {
+  status=/sys/class/drm/card0-HDMI-A-1/status
+  modes=/sys/class/drm/card0-HDMI-A-1/modes
+  limit=${1:-18}
+  count=0
+  while [ "$count" -lt "$limit" ]; do
+    if [ -f "$status" ] && grep -q '^connected$' "$status" 2>/dev/null; then
+      if [ ! -f "$modes" ] || grep -q '^1024x600$' "$modes" 2>/dev/null; then
+        return 0
+      fi
+    fi
+    sleep 1
+    count=$((count + 1))
+  done
+  return 1
+}
+
 set_extlinux_default_file() {
   file=$1
   target=$2
@@ -65,6 +83,7 @@ write_status_file() {
     printf 'timestamp=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)"
     printf 'method=%s\n' "$BOOTSELECT_METHOD"
     printf 'kms_rc=%s\n' "$BOOTSELECT_KMS_RC"
+    printf 'kms_diag=%s\n' "$BOOTSELECT_KMS_DIAG"
     printf 'cmdline='
     cat /proc/cmdline 2>/dev/null || true
     printf '\n'
@@ -209,10 +228,14 @@ kms_menu() {
     return 1
   fi
   wait_for_node /dev/dri/card0 12 || return 1
+  wait_for_hdmi_connected 18 || BOOTSELECT_KMS_DIAG=hdmi-connect-timeout
   wait_for_node /dev/input/event0 8 || true
-  /bin/kms-bootselect "$TIMEOUT"
+  kms_output=$(/bin/kms-bootselect "$TIMEOUT" 2>&1)
   rc=$?
   BOOTSELECT_KMS_RC=$rc
+  if [ -n "$kms_output" ]; then
+    BOOTSELECT_KMS_DIAG=$(printf '%s' "$kms_output" | tr '\n' ' ' | sed 's/[^A-Za-z0-9_.= -]/_/g')
+  fi
   case "$rc" in
     0)
       BOOTSELECT_METHOD=kms
