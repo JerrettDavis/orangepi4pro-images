@@ -3,8 +3,8 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 board_repo=${BOARD_REPO:-/home/orangepi/orangepi4pro-board-support}
-package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-current.fex}
-expected_package_sha=7b1497e4dec101a8e7eea7b6aad100ee4549bebfc89b6b7601d8337433db5848
+package=${PACKAGE:-/var/cache/orangepi4pro-images/build/boot-package-candidates/boot_package_sd-early-display-secondpass-opibootselect-commitflush-current.fex}
+expected_package_sha=69bebfb4dd14c3fd2d3f783154fcac74064174149117a8775bb37bfe1a381346
 device=${DEVICE:-/dev/mmcblk1}
 sd_mount=${SD_MOUNT:-/mnt/opisd-check}
 timeout=30
@@ -79,6 +79,8 @@ grep -a -q 'BOOTLOADER TEST SCREEN' "$package" \
   || fail 'package lacks high-contrast selector test screen'
 grep -a -q 'opi_snps_phy_diag' "$package" \
   || fail 'package lacks SNPS PHY diagnostics'
+grep -a -q 'opibootcommit=' "$package" \
+  || fail 'package lacks selector framebuffer commit diagnostics'
 
 printf 'package=%s\n' "$package"
 printf 'package_sha256=%s\n' "$package_sha"

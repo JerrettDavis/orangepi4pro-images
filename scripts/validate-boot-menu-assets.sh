@@ -187,6 +187,7 @@ grep -q 'bootchooser=boot-script-default-nvme' /boot/boot.cmd || fail 'boot.cmd 
 grep -q 'bootchooser=kernel-initramfs-selector' /boot/boot.cmd || fail 'boot.cmd lacks kernel initramfs selector marker'
 grep -q 'uInitrd-orangepi4pro-bootselect' /boot/boot.cmd || fail 'boot.cmd lacks kernel initramfs selector initrd'
 grep -q 'opi_bootselect' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI selector command'
+grep -q 'opi_bootselect_commit' /boot/boot.cmd || fail 'boot.cmd does not preserve boot GUI framebuffer commit diagnostics'
 grep -q 'bootgui-selector-sd' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI SD marker'
 grep -q 'bootgui-selector-nvme' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI NVMe marker'
 grep -q 'sysboot' /boot/boot.cmd || fail 'boot.cmd does not contain extlinux handoff'

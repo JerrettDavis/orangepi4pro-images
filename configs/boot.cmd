@@ -176,6 +176,10 @@ if test -n "${opi_bootselect_logo}"; then
 	setenv extraargs "${extraargs} opibootlogo=${opi_bootselect_logo}"
 fi
 
+if test -n "${opi_bootselect_commit}"; then
+	setenv extraargs "${extraargs} ${opi_bootselect_commit}"
+fi
+
 if test -n "${opi_bootselect_pre_drm}"; then
 	setenv extraargs "${extraargs} opi_pre_${opi_bootselect_pre_drm}"
 fi
