@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 sd_root=/mnt/opisd-rw
 efi_dir=/boot/efi
-timeout=20
+timeout=30
 artifact="$repo_root/build/uInitrd-orangepi4pro-bootselect"
 
 usage() {

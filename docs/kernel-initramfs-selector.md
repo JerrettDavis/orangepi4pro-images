@@ -28,7 +28,7 @@ visible selector; the direct NVMe entry remains available as
 `ubuntu-nvme-direct`.
 
 ```sh
-sudo scripts/stage-kernel-initramfs-selector.sh --timeout 20
+sudo scripts/stage-kernel-initramfs-selector.sh --timeout 30
 sudo scripts/settlement-validate-before-reboot.sh --expected-bootchooser boot-script-default-nvme
 ```
 

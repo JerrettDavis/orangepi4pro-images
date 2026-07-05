@@ -8,7 +8,7 @@ EFI_BOOT_DEV=/dev/nvme0n1p1
 SD_ROOT_DEV=/dev/mmcblk1p1
 NVME_ROOT_DEV=/dev/nvme0n1p3
 DEFAULT_TARGET=nvme
-TIMEOUT=20
+TIMEOUT=30
 SELECTED_TARGET=$DEFAULT_TARGET
 
 mountpoint_mounted() {
@@ -139,24 +139,29 @@ emergency_shell() {
 show_menu() {
   choice=
   remaining=$TIMEOUT
+  input_tty=/dev/console
 
   if [ -c /dev/tty1 ]; then
-    exec </dev/tty1 >/dev/tty1 2>&1
-  else
-    exec </dev/console >/dev/console 2>&1
+    input_tty=/dev/tty1
   fi
 
+  exec <"$input_tty" >/dev/console 2>&1
   stty sane 2>/dev/null || true
-  printf '\033[?25h\033[30;47m\033[2J\033[H'
-  printf 'Orange Pi 4 Pro Boot Selector\n'
-  printf '\n'
-  printf 'n  Ubuntu NVMe (default)\n'
-  printf 's  Ubuntu SD recovery\n'
-  printf 'r  Reboot without changing target\n'
-  printf '\n'
 
   while [ "$remaining" -gt 0 ]; do
-    printf '\rSelect target [%s seconds]: ' "$remaining"
+    for tty in /dev/tty0 /dev/tty1 /dev/console; do
+      if [ -c "$tty" ]; then
+        {
+          printf '\033[?25h\033[30;47m\033[2J\033[H'
+          printf 'Orange Pi 4 Pro Boot Selector\n'
+          printf '=============================\n\n'
+          printf 'n  Ubuntu NVMe (default)\n'
+          printf 's  Ubuntu SD recovery\n'
+          printf 'r  Reboot without changing target\n\n'
+          printf 'Select target [%s seconds]: ' "$remaining"
+        } > "$tty" 2>/dev/null || true
+      fi
+    done
     if read -r -t 1 choice; then
       break
     fi
@@ -185,9 +190,10 @@ for arg in $(cat /proc/cmdline 2>/dev/null); do
   case "$arg" in
     bootselect.timeout=*)
       TIMEOUT=${arg#bootselect.timeout=}
-      ;;
+    ;;
   esac
 done
+sleep 2
 show_menu
 target=$SELECTED_TARGET
 
