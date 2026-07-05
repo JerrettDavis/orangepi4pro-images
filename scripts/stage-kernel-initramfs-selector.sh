@@ -27,10 +27,10 @@ set_env_key() {
   value=$3
   tmp=$(mktemp)
 
-  if grep -q "^${key}=" "$env_file"; then
-    sed "s/^${key}=.*/${key}=${value}/" "$env_file" > "$tmp"
-  else
-    awk -v key="$key" -v value="$value" '
+  awk -v key="$key" -v value="$value" '
+      $0 ~ "^" key "=" {
+        next
+      }
       { print }
       $0 ~ /^bootmenu_default=/ && inserted == 0 {
         printf "%s=%s\n", key, value
@@ -42,7 +42,6 @@ set_env_key() {
         }
       }
     ' "$env_file" > "$tmp"
-  fi
   install -m 0644 "$tmp" "$env_file"
   rm -f "$tmp"
 }
