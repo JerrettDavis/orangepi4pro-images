@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 sd_root=/mnt/opisd-rw
 efi_dir=/boot/efi
-timeout=10
+timeout=20
 artifact="$repo_root/build/uInitrd-orangepi4pro-bootselect"
 
 usage() {
@@ -53,6 +53,16 @@ set_extlinux_default_file() {
   tmp=$(mktemp)
 
   sed "s/^DEFAULT .*/DEFAULT ${target}/" "$file" > "$tmp"
+  install -m 0644 "$tmp" "$file"
+  rm -f "$tmp"
+}
+
+set_bootselect_timeout_file() {
+  file=$1
+  value=$2
+  tmp=$(mktemp)
+
+  sed -E "s/bootselect[.]timeout=[0-9]+/bootselect.timeout=${value}/" "$file" > "$tmp"
   install -m 0644 "$tmp" "$file"
   rm -f "$tmp"
 }
@@ -157,12 +167,16 @@ if [ -d "$efi_dir" ]; then
 fi
 
 set_extlinux_default_file /boot/extlinux/extlinux.conf ubuntu-nvme
+set_bootselect_timeout_file /boot/extlinux/extlinux.conf "$timeout"
 set_extlinux_default_file "$sd_root/boot/extlinux/extlinux.conf" ubuntu-nvme
+set_bootselect_timeout_file "$sd_root/boot/extlinux/extlinux.conf" "$timeout"
 if [ -d "$efi_dir" ]; then
   set_extlinux_default_file "$efi_dir/extlinux/extlinux.conf" ubuntu-nvme
+  set_bootselect_timeout_file "$efi_dir/extlinux/extlinux.conf" "$timeout"
 fi
 
-rm -f /boot/orangepiBootOnce.txt "$sd_root/boot/orangepiBootOnce.txt" "$efi_dir/orangepiBootOnce.txt"
+rm -f /boot/orangepiBootOnce.txt "$sd_root/boot/orangepiBootOnce.txt" "$efi_dir/orangepiBootOnce.txt" \
+  /boot/bootselect-last.txt "$sd_root/boot/bootselect-last.txt" "$efi_dir/bootselect-last.txt"
 
 for target_root in / "$sd_root"; do
   install -d -m 0755 \

@@ -195,6 +195,8 @@ grep -q '^LABEL ubuntu-nvme$' /boot/extlinux/extlinux.conf || fail 'extlinux sel
 grep -q '^LABEL ubuntu-nvme-direct$' /boot/extlinux/extlinux.conf || fail 'extlinux direct NVMe label missing'
 grep -q 'bootchooser=kernel-initramfs-selector' /boot/extlinux/extlinux.conf \
   || fail 'extlinux selector marker missing'
+grep -q "bootselect.timeout=${expected_kernel_selector_timeout}" /boot/extlinux/extlinux.conf \
+  || fail "extlinux selector timeout should be ${expected_kernel_selector_timeout}"
 grep -q "^PROMPT ${expected_extlinux_prompt}$" /boot/extlinux/extlinux.conf \
   || fail "extlinux prompt should be ${expected_extlinux_prompt}"
 grep -q "^TIMEOUT ${expected_extlinux_timeout}$" /boot/extlinux/extlinux.conf \

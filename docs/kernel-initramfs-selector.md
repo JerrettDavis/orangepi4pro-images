@@ -28,7 +28,7 @@ visible selector; the direct NVMe entry remains available as
 `ubuntu-nvme-direct`.
 
 ```sh
-sudo scripts/stage-kernel-initramfs-selector.sh --timeout 10
+sudo scripts/stage-kernel-initramfs-selector.sh --timeout 20
 sudo scripts/settlement-validate-before-reboot.sh --expected-bootchooser boot-script-default-nvme
 ```
 
@@ -41,6 +41,7 @@ mounted SD root:
 - `orangepiEnv.txt`
 - versioned `uImage`, `uInitrd`, and DTB files needed when U-Boot sources the
   EFI partition copy first
+- `bootselect-last.txt` evidence files after the selector runs
 - the clear-only `orangepi4pro-linux-boot-selector.service` cleanup unit
 
 It does not write boot sectors, U-Boot TOC1 packages, partition tables, or

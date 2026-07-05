@@ -8,7 +8,7 @@ EFI_BOOT_DEV=/dev/nvme0n1p1
 SD_ROOT_DEV=/dev/mmcblk1p1
 NVME_ROOT_DEV=/dev/nvme0n1p3
 DEFAULT_TARGET=nvme
-TIMEOUT=10
+TIMEOUT=20
 SELECTED_TARGET=$DEFAULT_TARGET
 
 mountpoint_mounted() {
@@ -42,6 +42,21 @@ set_extlinux_default_file() {
   sync
 }
 
+write_status_file() {
+  mount_dir=$1
+  target=$2
+  status_file=$3
+
+  {
+    printf 'target=%s\n' "$target"
+    printf 'timestamp=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)"
+    printf 'cmdline='
+    cat /proc/cmdline 2>/dev/null || true
+    printf '\n'
+  } > "$mount_dir/$status_file"
+  sync
+}
+
 set_extlinux_default() {
   target=$1
   ok=false
@@ -49,16 +64,19 @@ set_extlinux_default() {
   mkdir -p /mnt/nvmeboot /mnt/efiboot /mnt/sdroot
   if wait_for_device "$NVME_BOOT_DEV" 8 && mount -t ext4 -o rw "$NVME_BOOT_DEV" /mnt/nvmeboot; then
     set_extlinux_default_file /mnt/nvmeboot/extlinux/extlinux.conf "$target" && ok=true
+    write_status_file /mnt/nvmeboot "$target" bootselect-last.txt || true
     umount /mnt/nvmeboot || true
   fi
 
   if wait_for_device "$EFI_BOOT_DEV" 8 && mount -t vfat -o rw "$EFI_BOOT_DEV" /mnt/efiboot; then
     set_extlinux_default_file /mnt/efiboot/extlinux/extlinux.conf "$target" && ok=true
+    write_status_file /mnt/efiboot "$target" bootselect-last.txt || true
     umount /mnt/efiboot || true
   fi
 
   if wait_for_device "$SD_ROOT_DEV" 8 && mount -t ext4 -o rw "$SD_ROOT_DEV" /mnt/sdroot; then
     set_extlinux_default_file /mnt/sdroot/boot/extlinux/extlinux.conf "$target" && ok=true
+    write_status_file /mnt/sdroot "$target" boot/bootselect-last.txt || true
     umount /mnt/sdroot || true
   fi
 
