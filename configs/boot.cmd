@@ -15,6 +15,8 @@ setenv earlycon "on"
 setenv bootmenu_first "false"
 setenv bootmenu_timeout "20"
 setenv bootmenu_default "nvme"
+setenv kernel_selector_first "false"
+setenv kernel_selector_timeout "10"
 setenv selector_visual_test "none"
 setenv selector_visual_hold "8"
 setenv selector_logo_preinit "false"
@@ -112,6 +114,21 @@ if test "${bootonce_target}" = "nvme"; then
 	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
 	setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
 	setenv extraargs bootchooser=${bootchooser}
+fi
+
+if test "${selected_boot}" != "true" && test "${kernel_selector_first}" = "true"; then
+	echo "Starting Linux kernel initramfs selector"
+	setenv selected_boot true
+	setenv extlinux_first false
+	setenv bootmenu_first false
+	setenv selector_visual_test none
+	setenv boot_kernel uImage-5.15.147-sun60iw2-cyberdeck
+	setenv boot_initrd uInitrd-orangepi4pro-bootselect
+	setenv boot_dtb dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb
+	setenv rootdev UUID=eb86cfeb-60c7-4513-bc69-f6d28e9d561b
+	setenv bootlogo false
+	setenv verbosity 3
+	setenv extraargs "bootchooser=kernel-initramfs-selector bootselect.timeout=${kernel_selector_timeout}"
 fi
 
 if test "${selected_boot}" != "true" && test "${extlinux_first}" != "true" && test "${grub_first}" != "true" && test "${direct_booti_first}" != "true"; then

@@ -1,0 +1,161 @@
+#!/bin/sh
+
+PATH=/bin:/sbin
+export PATH
+
+NVME_BOOT_DEV=/dev/nvme0n1p2
+SD_ROOT_DEV=/dev/mmcblk1p1
+NVME_ROOT_DEV=/dev/nvme0n1p3
+DEFAULT_TARGET=nvme
+TIMEOUT=10
+SELECTED_TARGET=$DEFAULT_TARGET
+
+mountpoint_mounted() {
+  grep -q " $1 " /proc/mounts 2>/dev/null
+}
+
+mount_basics() {
+  mountpoint_mounted /proc || mount -t proc proc /proc
+  mountpoint_mounted /sys || mount -t sysfs sysfs /sys
+  mountpoint_mounted /dev || mount -t devtmpfs devtmpfs /dev
+}
+
+wait_for_device() {
+  dev=$1
+  limit=${2:-12}
+  count=0
+  while [ ! -b "$dev" ] && [ "$count" -lt "$limit" ]; do
+    sleep 1
+    count=$((count + 1))
+  done
+  [ -b "$dev" ]
+}
+
+write_bootonce_to_mount() {
+  mount_dir=$1
+  rel_path=$2
+  target=$3
+  case "$rel_path" in
+    boot/*)
+      mkdir -p "$mount_dir/boot"
+      ;;
+  esac
+  {
+    printf 'bootonce_target=%s\n' "$target"
+    printf 'bootonce_source=kernel-initramfs-selector\n'
+  } > "$mount_dir/$rel_path"
+  sync
+}
+
+write_bootonce() {
+  target=$1
+  ok=false
+
+  mkdir -p /mnt/nvmeboot /mnt/sdroot
+  if wait_for_device "$NVME_BOOT_DEV" 8 && mount -t ext4 -o rw "$NVME_BOOT_DEV" /mnt/nvmeboot; then
+    write_bootonce_to_mount /mnt/nvmeboot orangepiBootOnce.txt "$target" && ok=true
+    umount /mnt/nvmeboot || true
+  fi
+
+  if wait_for_device "$SD_ROOT_DEV" 8 && mount -t ext4 -o rw "$SD_ROOT_DEV" /mnt/sdroot; then
+    write_bootonce_to_mount /mnt/sdroot boot/orangepiBootOnce.txt "$target" && ok=true
+    umount /mnt/sdroot || true
+  fi
+
+  [ "$ok" = true ]
+}
+
+fallback_nvme_root() {
+  mkdir -p /newroot
+  wait_for_device "$NVME_ROOT_DEV" 12 || emergency_shell "NVMe root device is unavailable"
+  mount -t ext4 -o rw "$NVME_ROOT_DEV" /newroot || emergency_shell "Could not mount NVMe root"
+  mkdir -p /newroot/proc /newroot/sys /newroot/dev
+  mount --move /proc /newroot/proc || true
+  mount --move /sys /newroot/sys || true
+  mount --move /dev /newroot/dev || true
+  exec switch_root /newroot /sbin/init
+  emergency_shell "switch_root failed"
+}
+
+emergency_shell() {
+  reason=$1
+  printf '\n%s\n' "$reason"
+  printf 'Dropping to initramfs shell. Type reboot to restart.\n'
+  exec sh
+}
+
+show_menu() {
+  choice=
+  remaining=$TIMEOUT
+
+  if [ -c /dev/tty1 ]; then
+    exec </dev/tty1 >/dev/tty1 2>&1
+  else
+    exec </dev/console >/dev/console 2>&1
+  fi
+
+  stty sane 2>/dev/null || true
+  printf '\033[?25h\033[30;47m\033[2J\033[H'
+  printf 'Orange Pi 4 Pro Boot Selector\n'
+  printf '\n'
+  printf 'n  Ubuntu NVMe (default)\n'
+  printf 's  Ubuntu SD recovery\n'
+  printf 'r  Reboot without changing target\n'
+  printf '\n'
+
+  while [ "$remaining" -gt 0 ]; do
+    printf '\rSelect target [%s seconds]: ' "$remaining"
+    if read -r -t 1 choice; then
+      break
+    fi
+    remaining=$((remaining - 1))
+  done
+  printf '\n'
+
+  case "$choice" in
+    s|S|sd|SD)
+      printf 'Selected SD recovery Ubuntu.\n'
+      SELECTED_TARGET=sd
+      ;;
+    r|R|reboot)
+      printf 'Rebooting without a target change.\n'
+      SELECTED_TARGET=reboot
+      ;;
+    *)
+      printf 'Selected NVMe Ubuntu.\n'
+      SELECTED_TARGET=nvme
+      ;;
+  esac
+}
+
+mount_basics
+for arg in $(cat /proc/cmdline 2>/dev/null); do
+  case "$arg" in
+    bootselect.timeout=*)
+      TIMEOUT=${arg#bootselect.timeout=}
+      ;;
+  esac
+done
+show_menu
+target=$SELECTED_TARGET
+
+case "$target" in
+  sd|nvme)
+    if write_bootonce "$target"; then
+      printf 'Boot request written. Rebooting into %s...\n' "$target"
+      sleep 2
+      sync
+      reboot -f
+    fi
+    printf 'Could not write boot request; continuing NVMe root as fallback.\n'
+    sleep 2
+    fallback_nvme_root
+    ;;
+  reboot)
+    sync
+    reboot -f
+    ;;
+  *)
+    fallback_nvme_root
+    ;;
+esac

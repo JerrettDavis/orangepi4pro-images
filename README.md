@@ -26,9 +26,10 @@ about the target path and preconditions.
 - Kernel: `5.15.147-sun60iw2-cyberdeck`
 - Boot flow: vendor U-Boot loads `boot.scr`; the boot script selects NVMe by
   default or SD/NVMe from `orangepiBootOnce.txt`, then boots via legacy `bootm`.
-- Current selector target: bootloader-stage selection only. X11/userland
-  selectors were removed from the active path because they defer selection
-  until after a full Linux boot.
+- Current selector target: bootloader-stage selection first. Because HDMI is
+  still black inside vendor U-Boot, `docs/kernel-initramfs-selector.md` provides
+  a visible pre-root fallback that runs before mounting Ubuntu and re-enters the
+  existing boot-script target path.
 - While the SD card is inserted, vendor U-Boot still loads the active
   `boot.scr` from SD, then mounts the NVMe root via `rootdev`.
 
@@ -50,6 +51,13 @@ sudo scripts/install-linux-boot-selector.sh --target-root /mnt/opisd-ro
 
 The systemd unit only clears stale one-shot boot files before LightDM. It does
 not display a selector and does not defer selection to the desktop.
+
+Build and validate the kernel-stage selector without staging it:
+
+```bash
+scripts/build-kernel-initramfs-selector.sh build/uInitrd-orangepi4pro-bootselect
+scripts/validate-kernel-initramfs-selector.sh build/uInitrd-orangepi4pro-bootselect
+```
 
 ## Validation
 

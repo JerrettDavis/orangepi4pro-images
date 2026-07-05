@@ -37,6 +37,15 @@ grep -q 'write_bootonce nvme' scripts/orangepi4pro-linux-boot-selector
 grep -q -- '--boot-nvme' scripts/orangepi4pro-linux-boot-selector
 grep -q 'orangepiBootOnce.txt' configs/boot.cmd
 
+printf 'Checking kernel initramfs selector...\n'
+tmp_selector=$(mktemp)
+scripts/build-kernel-initramfs-selector.sh "$tmp_selector" >/tmp/orangepi4pro-kernel-selector-build.out
+scripts/validate-kernel-initramfs-selector.sh "$tmp_selector"
+grep -q 'Built ' /tmp/orangepi4pro-kernel-selector-build.out
+grep -q 'orangepi4pro-linux-boot-selector.service' scripts/stage-kernel-initramfs-selector.sh
+grep -q 'multi-user.target.wants' scripts/stage-kernel-initramfs-selector.sh
+rm -f "$tmp_selector" /tmp/orangepi4pro-kernel-selector-build.out
+
 printf 'Checking boot-script safety guards...\n'
 if grep -RInE '^[[:space:]]*sunxi_show_bmp[[:space:]]+boot[.]bmp' configs scripts docs; then
   printf 'ERROR: sunxi_show_bmp boot.bmp must not be called from boot scripts\n' >&2
