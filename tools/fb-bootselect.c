@@ -20,6 +20,7 @@
 static uint8_t *fb;
 static struct fb_var_screeninfo var;
 static struct fb_fix_screeninfo fix;
+static unsigned int fb_pages = 1;
 
 static uint32_t make_color(uint8_t r, uint8_t g, uint8_t b)
 {
@@ -37,19 +38,32 @@ static uint32_t make_color(uint8_t r, uint8_t g, uint8_t b)
     return color;
 }
 
-static void put_pixel(unsigned int x, unsigned int y, uint32_t color)
+static void put_pixel_page(unsigned int page, unsigned int x, unsigned int y, uint32_t color)
 {
     unsigned int bytes = var.bits_per_pixel / 8;
+    size_t page_offset = (size_t)page * fix.line_length * var.yres;
     uint8_t *p;
 
     if (x >= var.xres || y >= var.yres || bytes == 0) {
         return;
     }
-    p = fb + (y + var.yoffset) * fix.line_length + (x + var.xoffset) * bytes;
+    if (page_offset + (size_t)y * fix.line_length + (size_t)(x + var.xoffset) * bytes + bytes > fix.smem_len) {
+        return;
+    }
+    p = fb + page_offset + (size_t)y * fix.line_length + (size_t)(x + var.xoffset) * bytes;
     if (bytes == 2) {
         *(uint16_t *)p = (uint16_t)color;
     } else {
         *(uint32_t *)p = color;
+    }
+}
+
+static void put_pixel(unsigned int x, unsigned int y, uint32_t color)
+{
+    unsigned int page;
+
+    for (page = 0; page < fb_pages; page++) {
+        put_pixel_page(page, x, y, color);
     }
 }
 
@@ -131,6 +145,7 @@ static int open_fb(void)
 {
     int fd;
     size_t fb_size;
+    unsigned int page_size;
 
     fd = open("/dev/fb0", O_RDWR);
     if (fd < 0) {
@@ -141,7 +156,20 @@ static int open_fb(void)
         close(fd);
         return -1;
     }
+    ioctl(fd, FBIOBLANK, FB_BLANK_UNBLANK);
+    var.xoffset = 0;
+    var.yoffset = 0;
+    var.activate = FB_ACTIVATE_NOW;
+    ioctl(fd, FBIOPAN_DISPLAY, &var);
+    ioctl(fd, FBIOPUT_VSCREENINFO, &var);
     fb_size = fix.smem_len;
+    page_size = fix.line_length * var.yres;
+    if (page_size > 0 && fix.smem_len >= page_size) {
+        fb_pages = fix.smem_len / page_size;
+        if (fb_pages < 1) {
+            fb_pages = 1;
+        }
+    }
     fb = mmap(NULL, fb_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (fb == MAP_FAILED) {
         close(fd);
@@ -290,8 +318,12 @@ int main(int argc, char **argv)
         return EXIT_NVME;
     }
 
-    fprintf(stderr, "stage=ready fb0=%ux%u bpp=%u line_length=%u smem_len=%u\n",
-            var.xres, var.yres, var.bits_per_pixel, fix.line_length, fix.smem_len);
+    fprintf(stderr,
+            "stage=ready fb0=%ux%u virt=%ux%u offset=%u,%u bpp=%u line_length=%u smem_len=%u pages=%u rgba=%u:%u,%u:%u,%u:%u,%u:%u\n",
+            var.xres, var.yres, var.xres_virtual, var.yres_virtual, var.xoffset, var.yoffset,
+            var.bits_per_pixel, fix.line_length, fix.smem_len, fb_pages,
+            var.red.length, var.red.offset, var.green.length, var.green.offset,
+            var.blue.length, var.blue.offset, var.transp.length, var.transp.offset);
     rc = read_choice(timeout);
     close_fb(fd);
     return rc;
