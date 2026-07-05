@@ -77,6 +77,8 @@ fi
 
 if [ -n "$sd_boot_dir" ]; then
   with_writable_mount "$sd_boot_dir"
+  cp -a "$boot_dir/boot.cmd" "$sd_boot_dir/boot.cmd"
+  cp -a "$boot_dir/boot.scr" "$sd_boot_dir/boot.scr"
 fi
 
 sync
