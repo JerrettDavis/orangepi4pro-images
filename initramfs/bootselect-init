@@ -10,6 +10,8 @@ NVME_ROOT_DEV=/dev/nvme0n1p3
 DEFAULT_TARGET=nvme
 TIMEOUT=30
 SELECTED_TARGET=$DEFAULT_TARGET
+BOOTSELECT_METHOD=unset
+BOOTSELECT_KMS_RC=unset
 
 mountpoint_mounted() {
   grep -q " $1 " /proc/mounts 2>/dev/null
@@ -61,6 +63,8 @@ write_status_file() {
   {
     printf 'target=%s\n' "$target"
     printf 'timestamp=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)"
+    printf 'method=%s\n' "$BOOTSELECT_METHOD"
+    printf 'kms_rc=%s\n' "$BOOTSELECT_KMS_RC"
     printf 'cmdline='
     cat /proc/cmdline 2>/dev/null || true
     printf '\n'
@@ -151,6 +155,7 @@ show_menu() {
   choice=
   remaining=$TIMEOUT
   input_tty=/dev/console
+  BOOTSELECT_METHOD=tty-fb-fallback
 
   if [ -c /dev/tty1 ]; then
     input_tty=/dev/tty1
@@ -207,16 +212,20 @@ kms_menu() {
   wait_for_node /dev/input/event0 8 || true
   /bin/kms-bootselect "$TIMEOUT"
   rc=$?
+  BOOTSELECT_KMS_RC=$rc
   case "$rc" in
     0)
+      BOOTSELECT_METHOD=kms
       SELECTED_TARGET=nvme
       return 0
       ;;
     10)
+      BOOTSELECT_METHOD=kms
       SELECTED_TARGET=sd
       return 0
       ;;
     20)
+      BOOTSELECT_METHOD=kms
       SELECTED_TARGET=reboot
       return 0
       ;;

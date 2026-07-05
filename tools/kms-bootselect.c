@@ -249,6 +249,7 @@ static int setup_kms(struct kms *k)
     if (k->fd < 0) {
         return -1;
     }
+    ioctl(k->fd, DRM_IOCTL_SET_MASTER, 0);
 
     if (get_resources(k->fd, &res, &crtcs, &connectors, &encoders) < 0) {
         return -1;
