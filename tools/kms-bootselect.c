@@ -184,6 +184,10 @@ static int fail_stage(const char *stage)
 static int get_connector(int fd, uint32_t id, struct drm_mode_get_connector *conn,
                          struct drm_mode_modeinfo **modes, uint32_t **encoders)
 {
+    uint32_t *props;
+    uint64_t *prop_values;
+    int ret;
+
     memset(conn, 0, sizeof(*conn));
     conn->connector_id = id;
     if (ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, conn) < 0) {
@@ -192,16 +196,22 @@ static int get_connector(int fd, uint32_t id, struct drm_mode_get_connector *con
 
     *modes = calloc(conn->count_modes ? conn->count_modes : 1, sizeof(**modes));
     *encoders = calloc(conn->count_encoders ? conn->count_encoders : 1, sizeof(**encoders));
-    if (!*modes || !*encoders) {
+    props = calloc(conn->count_props ? conn->count_props : 1, sizeof(*props));
+    prop_values = calloc(conn->count_props ? conn->count_props : 1, sizeof(*prop_values));
+    if (!*modes || !*encoders || !props || !prop_values) {
+        free(props);
+        free(prop_values);
         return -1;
     }
 
     conn->modes_ptr = (uintptr_t)*modes;
     conn->encoders_ptr = (uintptr_t)*encoders;
-    if (ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, conn) < 0) {
-        return -1;
-    }
-    return 0;
+    conn->props_ptr = (uintptr_t)props;
+    conn->prop_values_ptr = (uintptr_t)prop_values;
+    ret = ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, conn);
+    free(props);
+    free(prop_values);
+    return ret < 0 ? -1 : 0;
 }
 
 static int pick_crtc(int fd, const struct drm_mode_card_res *res,
