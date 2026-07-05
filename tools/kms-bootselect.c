@@ -237,6 +237,27 @@ static int pick_crtc(int fd, const struct drm_mode_card_res *res,
     return res->count_crtcs ? (int)crtcs[0] : -1;
 }
 
+static struct drm_mode_modeinfo fixed_1024x600_mode(void)
+{
+    struct drm_mode_modeinfo mode;
+
+    memset(&mode, 0, sizeof(mode));
+    mode.clock = 49000;
+    mode.hdisplay = 1024;
+    mode.hsync_start = 1029;
+    mode.hsync_end = 1042;
+    mode.htotal = 1312;
+    mode.vdisplay = 600;
+    mode.vsync_start = 602;
+    mode.vsync_end = 605;
+    mode.vtotal = 622;
+    mode.vrefresh = 60;
+    mode.flags = DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_PVSYNC;
+    mode.type = DRM_MODE_TYPE_USERDEF;
+    snprintf(mode.name, sizeof(mode.name), "1024x600");
+    return mode;
+}
+
 static int setup_kms(struct kms *k)
 {
     struct drm_mode_card_res res;
@@ -271,17 +292,20 @@ static int setup_kms(struct kms *k)
         if (get_connector(k->fd, connectors[i], &conn, &modes, &conn_encoders) < 0) {
             continue;
         }
-        if (conn.connector_type != DRM_MODE_CONNECTOR_HDMIA ||
-            conn.count_modes == 0) {
+        if (conn.connector_type != DRM_MODE_CONNECTOR_HDMIA) {
             continue;
         }
 
         k->connector_id = conn.connector_id;
-        k->mode = modes[0];
-        for (m = 0; m < conn.count_modes; m++) {
-            if (strcmp(modes[m].name, "1024x600") == 0) {
-                k->mode = modes[m];
-                break;
+        if (conn.count_modes == 0) {
+            k->mode = fixed_1024x600_mode();
+        } else {
+            k->mode = modes[0];
+            for (m = 0; m < conn.count_modes; m++) {
+                if (strcmp(modes[m].name, "1024x600") == 0) {
+                    k->mode = modes[m];
+                    break;
+                }
             }
         }
         k->crtc_id = (uint32_t)pick_crtc(k->fd, &res, crtcs, conn_encoders,
