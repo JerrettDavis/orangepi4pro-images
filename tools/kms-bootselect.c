@@ -125,11 +125,11 @@ static void draw_menu(struct kms *k, int selected, int remaining)
     char seconds[16];
     struct drm_mode_fb_dirty_cmd dirty;
     struct drm_clip_rect clip;
-    uint32_t white = 0x00ffffff;
-    uint32_t black = 0x00000000;
-    uint32_t blue = 0x00005fdb;
-    uint32_t yellow = 0x00ffd44a;
-    uint32_t gray = 0x00e8e8e8;
+    uint32_t white = 0xffffffff;
+    uint32_t black = 0xff000000;
+    uint32_t blue = 0xff005fdb;
+    uint32_t yellow = 0xffffd44a;
+    uint32_t gray = 0xffe8e8e8;
 
     fill_rect(k, 0, 0, k->width, k->height, white);
     fill_rect(k, 0, 0, k->width, 34, black);
