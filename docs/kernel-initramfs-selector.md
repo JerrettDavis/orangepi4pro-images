@@ -30,12 +30,15 @@ sudo scripts/stage-kernel-initramfs-selector.sh --timeout 10
 sudo scripts/settlement-validate-before-reboot.sh --expected-bootchooser boot-script-default-nvme
 ```
 
-The staging script writes only normal files on `/boot` and the mounted SD root:
+The staging script writes only normal files on `/boot`, `/boot/efi`, and the
+mounted SD root:
 
 - `uInitrd-orangepi4pro-bootselect`
 - `boot.cmd`
 - `boot.scr`
 - `orangepiEnv.txt`
+- versioned `uImage`, `uInitrd`, and DTB files needed when U-Boot sources the
+  EFI partition copy first
 - the clear-only `orangepi4pro-linux-boot-selector.service` cleanup unit
 
 It does not write boot sectors, U-Boot TOC1 packages, partition tables, or

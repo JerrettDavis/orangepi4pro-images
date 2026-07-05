@@ -62,6 +62,26 @@ done
 if [ "$expected_kernel_selector_first" = true ]; then
   require_file /boot/uInitrd-orangepi4pro-bootselect
   "$repo_root/scripts/validate-kernel-initramfs-selector.sh" /boot/uInitrd-orangepi4pro-bootselect
+  if [ -d /boot/efi ]; then
+    require_file /boot/efi/uInitrd-orangepi4pro-bootselect
+    cmp -s /boot/uInitrd-orangepi4pro-bootselect /boot/efi/uInitrd-orangepi4pro-bootselect \
+      || fail '/boot/efi selector initrd differs from /boot selector initrd'
+    cmp -s /boot/boot.cmd /boot/efi/boot.cmd \
+      || fail '/boot/efi/boot.cmd differs from /boot/boot.cmd'
+    cmp -s /boot/boot.scr /boot/efi/boot.scr \
+      || fail '/boot/efi/boot.scr differs from /boot/boot.scr'
+    cmp -s /boot/orangepiEnv.txt /boot/efi/orangepiEnv.txt \
+      || fail '/boot/efi/orangepiEnv.txt differs from /boot/orangepiEnv.txt'
+    for file in \
+      uImage-5.15.147-sun60iw2-cyberdeck \
+      uInitrd-5.15.147-sun60iw2-cyberdeck \
+      uImage-5.15.147-sun60iw2 \
+      uInitrd-5.15.147-sun60iw2 \
+      dtb-5.15.147-sun60iw2-cyberdeck/allwinner/sun60i-a733-orangepi-4-pro.dtb \
+      dtb-5.15.147-sun60iw2/allwinner/sun60i-a733-orangepi-4-pro.dtb; do
+      require_file "/boot/efi/$file"
+    done
+  fi
 fi
 
 if [ -e /boot/grub/grub.cfg ]; then
