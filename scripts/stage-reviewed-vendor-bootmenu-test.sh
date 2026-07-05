@@ -130,6 +130,7 @@ patch_env() {
     -e "s/^bootmenu_timeout=.*/bootmenu_timeout=${timeout}/" \
     -e "s/^bootmenu_default=.*/bootmenu_default=${default_target}/" \
     -e 's/^kernel_selector_first=.*/kernel_selector_first=false/' \
+    -e 's/^kernel_selector_timeout=.*/kernel_selector_timeout=30/' \
     -e 's/^selector_console=.*/selector_console=false/' \
     -e 's/^selector_prompt=.*/selector_prompt=true/' \
     -e 's/^selector_bitmap=.*/selector_bitmap=false/' \
@@ -152,6 +153,7 @@ EXPECTED_BOOTMENU_FIRST=true \
 EXPECTED_BOOTMENU_TIMEOUT="$timeout" \
 EXPECTED_BOOTMENU_DEFAULT="$default_target" \
 EXPECTED_KERNEL_SELECTOR_FIRST=false \
+EXPECTED_KERNEL_SELECTOR_TIMEOUT=30 \
 EXPECTED_SELECTOR_CONSOLE=false \
 EXPECTED_SELECTOR_VISUAL_TEST=none \
 EXPECTED_SELECTOR_VISUAL_HOLD=3 \
