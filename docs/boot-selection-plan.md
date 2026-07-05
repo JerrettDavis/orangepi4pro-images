@@ -25,6 +25,10 @@ Current status on 2026-07-05:
 - It is not ready to install as a visual fix because the factory fastlogo path
   requires `LogoRegData.bin` in the Allwinner bootloader resource area, and no
   valid copy was found locally.
+- Official Orange Pi Google Drive archives were identified, but direct
+  downloads returned quota-exceeded HTML on 2026-07-05. The official
+  `sun60iw2_packages` source repo was cloned and does not contain
+  `LogoRegData.bin` or a boot-resource image.
 - For future fastlogo tests, `settlement-validate-before-reboot.sh` supports
   `EXPECTED_FASTLOGO_RESOURCE=true` with `EXPECTED_FASTLOGO_REGBIN=/path/to/LogoRegData.bin`.
   Do not set that flag unless the register table has been recovered and staged
