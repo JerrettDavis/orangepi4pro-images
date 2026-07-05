@@ -219,6 +219,7 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^kernel_selector_first=.*/kernel_selector_first=${expected_kernel_selector_first}/" \
   | sed -E "s/^kernel_selector_timeout=.*/kernel_selector_timeout=${expected_kernel_selector_timeout}/" \
   | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
+  | sed '/^$/d' \
   > "$repo_env_cmp"
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   /boot/orangepiEnv.txt \
@@ -239,6 +240,7 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^kernel_selector_first=.*/kernel_selector_first=${expected_kernel_selector_first}/" \
   | sed -E "s/^kernel_selector_timeout=.*/kernel_selector_timeout=${expected_kernel_selector_timeout}/" \
   | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
+  | sed '/^$/d' \
   > "$boot_env_cmp"
 cmp -s "$repo_env_cmp" "$boot_env_cmp" \
   || fail '/boot/orangepiEnv.txt differs from configs/orangepiEnv.txt beyond allowed prompt-test overrides'
