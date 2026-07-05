@@ -121,6 +121,8 @@ static void draw_text(struct kms *k, unsigned int x, unsigned int y,
 static void draw_menu(struct kms *k, int selected, int remaining)
 {
     char seconds[16];
+    struct drm_mode_fb_dirty_cmd dirty;
+    struct drm_clip_rect clip;
     uint32_t white = 0x00ffffff;
     uint32_t black = 0x00000000;
     uint32_t blue = 0x00005fdb;
@@ -149,6 +151,15 @@ static void draw_menu(struct kms *k, int selected, int remaining)
     draw_text(k, 620, k->height > 86 ? k->height - 86 : 520, "TIME", 5, black);
     draw_text(k, 802, k->height > 86 ? k->height - 86 : 520, seconds, 5, yellow);
     msync(k->pixels, k->size, MS_SYNC);
+
+    memset(&clip, 0, sizeof(clip));
+    clip.x2 = k->width;
+    clip.y2 = k->height;
+    memset(&dirty, 0, sizeof(dirty));
+    dirty.fb_id = k->fb_id;
+    dirty.num_clips = 1;
+    dirty.clips_ptr = (uintptr_t)&clip;
+    ioctl(k->fd, DRM_IOCTL_MODE_DIRTYFB, &dirty);
 }
 
 static int get_resources(int fd, struct drm_mode_card_res *res,
