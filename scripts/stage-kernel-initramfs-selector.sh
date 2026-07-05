@@ -21,6 +21,32 @@ fail() {
   exit 1
 }
 
+set_env_key() {
+  env_file=$1
+  key=$2
+  value=$3
+  tmp=$(mktemp)
+
+  if grep -q "^${key}=" "$env_file"; then
+    sed "s/^${key}=.*/${key}=${value}/" "$env_file" > "$tmp"
+  else
+    awk -v key="$key" -v value="$value" '
+      { print }
+      $0 ~ /^bootmenu_default=/ && inserted == 0 {
+        printf "%s=%s\n", key, value
+        inserted = 1
+      }
+      END {
+        if (inserted == 0) {
+          printf "%s=%s\n", key, value
+        }
+      }
+    ' "$env_file" > "$tmp"
+  fi
+  install -m 0644 "$tmp" "$env_file"
+  rm -f "$tmp"
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --sd-root)
@@ -66,12 +92,8 @@ mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr >/dev/null
 install -m 0644 /boot/boot.scr "$sd_root/boot/boot.scr"
 
 for env in /boot/orangepiEnv.txt "$sd_root/boot/orangepiEnv.txt"; do
-  grep -q '^kernel_selector_first=' "$env" \
-    && sed -i 's/^kernel_selector_first=.*/kernel_selector_first=true/' "$env" \
-    || printf '\nkernel_selector_first=true\n' >> "$env"
-  grep -q '^kernel_selector_timeout=' "$env" \
-    && sed -i "s/^kernel_selector_timeout=.*/kernel_selector_timeout=$timeout/" "$env" \
-    || printf 'kernel_selector_timeout=%s\n' "$timeout" >> "$env"
+  set_env_key "$env" kernel_selector_first true
+  set_env_key "$env" kernel_selector_timeout "$timeout"
   grep -q '^extlinux_first=' "$env" \
     && sed -i 's/^extlinux_first=.*/extlinux_first=false/' "$env"
   grep -q '^bootmenu_first=' "$env" \
