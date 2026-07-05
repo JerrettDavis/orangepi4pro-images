@@ -49,10 +49,6 @@ elif grep -q 'bootchooser=uboot-visual-fbtest-ok' /proc/cmdline; then
   printf 'Current boot ran the U-Boot framebuffer visual test successfully.\n'
 elif grep -q 'bootchooser=uboot-visual-fbtest-fail' /proc/cmdline; then
   printf 'Current boot ran the U-Boot framebuffer visual test and the command failed.\n'
-elif grep -q 'bootchooser=uboot-visual-fbcycle-ok' /proc/cmdline; then
-  printf 'Current boot ran the U-Boot framebuffer cycle visual test successfully.\n'
-elif grep -q 'bootchooser=uboot-visual-fbcycle-fail' /proc/cmdline; then
-  printf 'Current boot ran the U-Boot framebuffer cycle visual test and the command failed.\n'
 elif grep -q 'bootchooser=uboot-visual-hdmi-recycle-ok' /proc/cmdline; then
   printf 'Current boot ran the U-Boot HDMI display recycle visual test successfully.\n'
 elif grep -q 'bootchooser=uboot-visual-hdmi-recycle-fail' /proc/cmdline; then
