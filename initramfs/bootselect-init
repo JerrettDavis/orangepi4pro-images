@@ -4,6 +4,7 @@ PATH=/bin:/sbin
 export PATH
 
 NVME_BOOT_DEV=/dev/nvme0n1p2
+EFI_BOOT_DEV=/dev/nvme0n1p1
 SD_ROOT_DEV=/dev/mmcblk1p1
 NVME_ROOT_DEV=/dev/nvme0n1p3
 DEFAULT_TARGET=nvme
@@ -29,6 +30,39 @@ wait_for_device() {
     count=$((count + 1))
   done
   [ -b "$dev" ]
+}
+
+set_extlinux_default_file() {
+  file=$1
+  target=$2
+  tmp="${file}.tmp"
+  [ -f "$file" ] || return 1
+  sed "s/^DEFAULT .*/DEFAULT ${target}/" "$file" > "$tmp" || return 1
+  mv "$tmp" "$file" || return 1
+  sync
+}
+
+set_extlinux_default() {
+  target=$1
+  ok=false
+
+  mkdir -p /mnt/nvmeboot /mnt/efiboot /mnt/sdroot
+  if wait_for_device "$NVME_BOOT_DEV" 8 && mount -t ext4 -o rw "$NVME_BOOT_DEV" /mnt/nvmeboot; then
+    set_extlinux_default_file /mnt/nvmeboot/extlinux/extlinux.conf "$target" && ok=true
+    umount /mnt/nvmeboot || true
+  fi
+
+  if wait_for_device "$EFI_BOOT_DEV" 8 && mount -t vfat -o rw "$EFI_BOOT_DEV" /mnt/efiboot; then
+    set_extlinux_default_file /mnt/efiboot/extlinux/extlinux.conf "$target" && ok=true
+    umount /mnt/efiboot || true
+  fi
+
+  if wait_for_device "$SD_ROOT_DEV" 8 && mount -t ext4 -o rw "$SD_ROOT_DEV" /mnt/sdroot; then
+    set_extlinux_default_file /mnt/sdroot/boot/extlinux/extlinux.conf "$target" && ok=true
+    umount /mnt/sdroot || true
+  fi
+
+  [ "$ok" = true ]
 }
 
 write_bootonce_to_mount() {
@@ -140,15 +174,21 @@ show_menu
 target=$SELECTED_TARGET
 
 case "$target" in
-  sd|nvme)
-    if write_bootonce "$target"; then
-      printf 'Boot request written. Rebooting into %s...\n' "$target"
+  sd)
+    if set_extlinux_default ubuntu-sd; then
+      printf 'Extlinux default set to SD. Rebooting once into SD Ubuntu...\n'
       sleep 2
       sync
       reboot -f
     fi
-    printf 'Could not write boot request; continuing NVMe root as fallback.\n'
+    printf 'Could not set SD extlinux default; continuing NVMe root as fallback.\n'
     sleep 2
+    fallback_nvme_root
+    ;;
+  nvme)
+    set_extlinux_default bootselect || true
+    printf 'Continuing into NVMe Ubuntu...\n'
+    sleep 1
     fallback_nvme_root
     ;;
   reboot)

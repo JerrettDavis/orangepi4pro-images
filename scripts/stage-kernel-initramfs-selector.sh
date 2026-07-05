@@ -47,6 +47,16 @@ set_env_key() {
   rm -f "$tmp"
 }
 
+set_extlinux_default_file() {
+  file=$1
+  target=$2
+  tmp=$(mktemp)
+
+  sed "s/^DEFAULT .*/DEFAULT ${target}/" "$file" > "$tmp"
+  install -m 0644 "$tmp" "$file"
+  rm -f "$tmp"
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --sd-root)
@@ -99,6 +109,8 @@ install -m 0644 "$artifact" /boot/uInitrd-orangepi4pro-bootselect
 install -m 0644 "$artifact" "$sd_root/boot/uInitrd-orangepi4pro-bootselect"
 install -m 0644 "$repo_root/configs/boot.cmd" /boot/boot.cmd
 install -m 0644 "$repo_root/configs/boot.cmd" "$sd_root/boot/boot.cmd"
+install -m 0644 "$repo_root/configs/extlinux.conf" /boot/extlinux/extlinux.conf
+install -m 0644 "$repo_root/configs/extlinux.conf" "$sd_root/boot/extlinux/extlinux.conf"
 mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr >/dev/null
 install -m 0644 /boot/boot.scr "$sd_root/boot/boot.scr"
 
@@ -110,7 +122,7 @@ if [ -d "$efi_dir" ]; then
   install -m 0644 "$repo_root/configs/boot.cmd" "$efi_dir/boot.cmd"
   install -m 0644 /boot/boot.scr "$efi_dir/boot.scr"
   [ -e "$efi_dir/orangepiEnv.txt" ] || install -m 0644 /boot/orangepiEnv.txt "$efi_dir/orangepiEnv.txt"
-  install -m 0644 /boot/extlinux/extlinux.conf "$efi_dir/extlinux/extlinux.conf"
+  install -m 0644 "$repo_root/configs/extlinux.conf" "$efi_dir/extlinux/extlinux.conf"
   for file in \
     uImage-5.15.147-sun60iw2-cyberdeck \
     uInitrd-5.15.147-sun60iw2-cyberdeck \
@@ -142,6 +154,12 @@ done
 
 if [ -d "$efi_dir" ]; then
   install -m 0644 /boot/orangepiEnv.txt "$efi_dir/orangepiEnv.txt"
+fi
+
+set_extlinux_default_file /boot/extlinux/extlinux.conf bootselect
+set_extlinux_default_file "$sd_root/boot/extlinux/extlinux.conf" bootselect
+if [ -d "$efi_dir" ]; then
+  set_extlinux_default_file "$efi_dir/extlinux/extlinux.conf" bootselect
 fi
 
 rm -f /boot/orangepiBootOnce.txt "$sd_root/boot/orangepiBootOnce.txt" "$efi_dir/orangepiBootOnce.txt"

@@ -33,7 +33,7 @@ install -m 0755 "$repo_root/initramfs/bootselect-init" "$root/init"
 
 while IFS= read -r applet; do
   case "$applet" in
-    awk|cat|cp|echo|grep|ln|ls|mkdir|mount|printf|readlink|reboot|rm|sed|sh|sleep|stty|sync|test|touch|umount|switch_root|'[')
+    awk|cat|cmp|cp|cut|echo|grep|ln|ls|mkdir|mount|mv|printf|readlink|reboot|rm|sed|sh|sleep|stty|sync|tail|test|touch|umount|switch_root|'[')
       ln -s busybox "$root/bin/$applet"
       ;;
   esac

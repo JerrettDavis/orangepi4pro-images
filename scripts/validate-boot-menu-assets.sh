@@ -190,6 +190,9 @@ grep -q 'sysboot -p' /boot/boot.cmd || fail 'boot.cmd does not contain prompted 
 
 grep -q 'Ubuntu NVMe - cyberdeck kernel' /boot/extlinux/extlinux.conf || fail 'extlinux NVMe menu entry missing'
 grep -q 'Ubuntu SD - stock kernel' /boot/extlinux/extlinux.conf || fail 'extlinux SD menu entry missing'
+grep -q '^LABEL bootselect$' /boot/extlinux/extlinux.conf || fail 'extlinux bootselect entry missing'
+grep -q 'bootchooser=kernel-initramfs-selector' /boot/extlinux/extlinux.conf \
+  || fail 'extlinux bootselect marker missing'
 grep -q "^PROMPT ${expected_extlinux_prompt}$" /boot/extlinux/extlinux.conf \
   || fail "extlinux prompt should be ${expected_extlinux_prompt}"
 grep -q "^TIMEOUT ${expected_extlinux_timeout}$" /boot/extlinux/extlinux.conf \
@@ -213,6 +216,8 @@ grep -q '^  LINUX ../uImage-5.15.147-sun60iw2-cyberdeck$' /boot/extlinux/extlinu
   || fail 'extlinux must use parent-relative legacy cyberdeck uImage path'
 grep -q '^  LINUX ../uImage-5.15.147-sun60iw2$' /boot/extlinux/extlinux.conf \
   || fail 'extlinux must use parent-relative legacy stock uImage path'
+grep -q '^  INITRD ../uInitrd-orangepi4pro-bootselect$' /boot/extlinux/extlinux.conf \
+  || fail 'extlinux bootselect must use selector initrd'
 
 cmp -s "$repo_root/configs/boot.cmd" /boot/boot.cmd || fail '/boot/boot.cmd differs from configs/boot.cmd'
 repo_env_cmp=$(mktemp)

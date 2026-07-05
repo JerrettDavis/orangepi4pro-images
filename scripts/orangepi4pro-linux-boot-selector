@@ -11,6 +11,7 @@ sd_boot_mount=/mnt/opisd-check
 bootonce_relative_path=boot/orangepiBootOnce.txt
 clear_only=false
 mirror_nvme_boot=true
+restore_extlinux_default=bootselect
 
 if [ -r "$config_file" ]; then
   # shellcheck source=/dev/null
@@ -25,6 +26,7 @@ sd_boot_mount=${SD_BOOT_MOUNT:-$sd_boot_mount}
 bootonce_relative_path=${BOOTONCE_RELATIVE_PATH:-$bootonce_relative_path}
 clear_only=${BOOT_SELECTOR_CLEAR_ONLY:-$clear_only}
 mirror_nvme_boot=${MIRROR_NVME_BOOT:-$mirror_nvme_boot}
+restore_extlinux_default=${RESTORE_EXTLINUX_DEFAULT:-$restore_extlinux_default}
 
 log() {
   printf 'orangepi4pro-linux-boot-selector: %s\n' "$*" >&2
@@ -76,6 +78,33 @@ clear_bootonce_files() {
       remove_bootonce_file "$sd_boot_mount"
     else
       log "could not mount $sd_boot_device to clear SD bootonce file"
+    fi
+  fi
+}
+
+set_extlinux_default_file() {
+  local file=$1
+  local target=$2
+  local tmp
+
+  [ -f "$file" ] || return 0
+  tmp=$(mktemp)
+  sed "s/^DEFAULT .*/DEFAULT ${target}/" "$file" > "$tmp"
+  install -m 0644 "$tmp" "$file"
+  rm -f "$tmp"
+}
+
+restore_extlinux_defaults() {
+  [ -n "$restore_extlinux_default" ] || return 0
+  set_extlinux_default_file /boot/extlinux/extlinux.conf "$restore_extlinux_default"
+  if [ -d /boot/efi/extlinux ]; then
+    set_extlinux_default_file /boot/efi/extlinux/extlinux.conf "$restore_extlinux_default"
+  fi
+  if [ -b "$sd_boot_device" ]; then
+    if ensure_sd_mounted; then
+      set_extlinux_default_file "$sd_boot_mount/boot/extlinux/extlinux.conf" "$restore_extlinux_default"
+    else
+      log "could not mount $sd_boot_device to restore SD extlinux default"
     fi
   fi
 }
@@ -154,6 +183,7 @@ show_menu() {
 case "${1:-}" in
   --clear)
     clear_bootonce_files
+    restore_extlinux_defaults
     exit 0
     ;;
   --boot-sd)
@@ -171,6 +201,7 @@ case "${1:-}" in
 esac
 
 clear_bootonce_files
+restore_extlinux_defaults
 
 if [ "$enabled" != true ]; then
   log "selector disabled"
