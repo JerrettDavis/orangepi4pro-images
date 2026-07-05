@@ -91,8 +91,8 @@ mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr >/dev/null
 install -m 0644 /boot/boot.scr "$sd_root/boot/boot.scr"
 
 for env in /boot/orangepiEnv.txt "$sd_root/boot/orangepiEnv.txt"; do
-  set_env_key "$env" kernel_selector_first true
   set_env_key "$env" kernel_selector_timeout "$timeout"
+  set_env_key "$env" kernel_selector_first true
   grep -q '^extlinux_first=' "$env" \
     && sed -i 's/^extlinux_first=.*/extlinux_first=false/' "$env"
   grep -q '^bootmenu_first=' "$env" \
