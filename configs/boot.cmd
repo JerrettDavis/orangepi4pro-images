@@ -253,12 +253,14 @@ if test "${selector_visual_test}" = "colorbar"; then
 	else
 		setenv pre_colorbar_hdmi "hdmi=diag-missing"
 	fi
+	setenv opi_hdmi_force_secondpass 1
 	sunxi_backlihgt on
 	if sunxi_drm colorbar 1; then
 		setenv extraargs bootchooser=uboot-visual-colorbar-ok
 	else
 		setenv extraargs bootchooser=uboot-visual-colorbar-fail
 	fi
+	setenv opi_hdmi_force_secondpass 0
 	if sunxi_drm_env; then
 		setenv post_colorbar_diag "${opi_drm_diag}"
 	else
@@ -292,12 +294,14 @@ if test "${selector_visual_test}" = "fbtest"; then
 	else
 		setenv pre_fbtest_hdmi "hdmi=diag-missing"
 	fi
+	setenv opi_hdmi_force_secondpass 1
 	sunxi_backlihgt on
 	if sunxi_drm fbtest; then
 		setenv extraargs bootchooser=uboot-visual-fbtest-ok
 	else
 		setenv extraargs bootchooser=uboot-visual-fbtest-fail
 	fi
+	setenv opi_hdmi_force_secondpass 0
 	if test -z "${opi_fbtest_diag}"; then
 		setenv opi_fbtest_diag "fbtest=unset"
 	fi
