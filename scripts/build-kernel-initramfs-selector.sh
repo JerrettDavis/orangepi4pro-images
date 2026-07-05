@@ -49,7 +49,7 @@ mkdir -p "$(dirname "$out")"
   cd "$root"
   find . -print0 | cpio --null -o --format=newc 2>/dev/null | gzip -9 > "$work/initramfs.cpio.gz"
 )
-mkimage -A arm64 -O linux -T ramdisk -C gzip -n 'Orange Pi 4 Pro boot selector initramfs' \
+mkimage -A arm -O linux -T ramdisk -C gzip -n 'Orange Pi 4 Pro boot selector initramfs' \
   -d "$work/initramfs.cpio.gz" "$out" >/dev/null
 
 printf 'Built %s\n' "$out"
