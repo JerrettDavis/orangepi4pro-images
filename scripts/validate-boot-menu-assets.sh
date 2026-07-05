@@ -36,6 +36,8 @@ expected_extlinux_first=${EXPECTED_EXTLINUX_FIRST:-true}
 expected_bootmenu_first=${EXPECTED_BOOTMENU_FIRST:-false}
 expected_bootmenu_timeout=${EXPECTED_BOOTMENU_TIMEOUT:-200}
 expected_bootmenu_default=${EXPECTED_BOOTMENU_DEFAULT:-nvme}
+expected_kernel_selector_first=${EXPECTED_KERNEL_SELECTOR_FIRST:-false}
+expected_kernel_selector_timeout=${EXPECTED_KERNEL_SELECTOR_TIMEOUT:-10}
 expected_bootgui_selector=${EXPECTED_BOOTGUI_SELECTOR:-false}
 expected_bootgui_selector_timeout=${EXPECTED_BOOTGUI_SELECTOR_TIMEOUT:-10}
 
@@ -57,6 +59,11 @@ for file in \
   require_file "$file"
 done
 
+if [ "$expected_kernel_selector_first" = true ]; then
+  require_file /boot/uInitrd-orangepi4pro-bootselect
+  "$repo_root/scripts/validate-kernel-initramfs-selector.sh" /boot/uInitrd-orangepi4pro-bootselect
+fi
+
 if [ -e /boot/grub/grub.cfg ]; then
   grub-script-check /boot/grub/grub.cfg
 fi
@@ -71,6 +78,10 @@ grep -q "^bootmenu_timeout=${expected_bootmenu_timeout}$" /boot/orangepiEnv.txt 
   || fail "bootmenu_timeout should be ${expected_bootmenu_timeout}"
 grep -q "^bootmenu_default=${expected_bootmenu_default}$" /boot/orangepiEnv.txt \
   || fail "bootmenu_default should be ${expected_bootmenu_default}"
+grep -q "^kernel_selector_first=${expected_kernel_selector_first}$" /boot/orangepiEnv.txt \
+  || fail "kernel_selector_first should be ${expected_kernel_selector_first}"
+grep -q "^kernel_selector_timeout=${expected_kernel_selector_timeout}$" /boot/orangepiEnv.txt \
+  || fail "kernel_selector_timeout should be ${expected_kernel_selector_timeout}"
 grep -q "^bootgui_selector=${expected_bootgui_selector}$" /boot/orangepiEnv.txt \
   || fail "bootgui_selector should be ${expected_bootgui_selector}"
 grep -q "^bootgui_selector_timeout=${expected_bootgui_selector_timeout}$" /boot/orangepiEnv.txt \
@@ -137,6 +148,8 @@ grep -q 'orangepiBootOnce.txt' /boot/boot.cmd || fail 'boot.cmd does not import 
 grep -q 'bootchooser=linux-selector-sd' /boot/boot.cmd || fail 'boot.cmd lacks Linux selector SD marker'
 grep -q 'bootchooser=linux-selector-nvme' /boot/boot.cmd || fail 'boot.cmd lacks Linux selector NVMe marker'
 grep -q 'bootchooser=boot-script-default-nvme' /boot/boot.cmd || fail 'boot.cmd lacks boot-script default NVMe marker'
+grep -q 'bootchooser=kernel-initramfs-selector' /boot/boot.cmd || fail 'boot.cmd lacks kernel initramfs selector marker'
+grep -q 'uInitrd-orangepi4pro-bootselect' /boot/boot.cmd || fail 'boot.cmd lacks kernel initramfs selector initrd'
 grep -q 'opi_bootselect' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI selector command'
 grep -q 'bootgui-selector-sd' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI SD marker'
 grep -q 'bootgui-selector-nvme' /boot/boot.cmd || fail 'boot.cmd lacks boot GUI NVMe marker'
@@ -203,6 +216,8 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
   | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
   | sed -E "s/^bootmenu_default=.*/bootmenu_default=${expected_bootmenu_default}/" \
+  | sed -E "s/^kernel_selector_first=.*/kernel_selector_first=${expected_kernel_selector_first}/" \
+  | sed -E "s/^kernel_selector_timeout=.*/kernel_selector_timeout=${expected_kernel_selector_timeout}/" \
   | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
   > "$repo_env_cmp"
 sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
@@ -221,6 +236,8 @@ sed -E "s/^selector_console=.*/selector_console=${expected_selector_console}/" \
   | sed -E "s/^bootmenu_first=.*/bootmenu_first=${expected_bootmenu_first}/" \
   | sed -E "s/^bootmenu_timeout=.*/bootmenu_timeout=${expected_bootmenu_timeout}/" \
   | sed -E "s/^bootmenu_default=.*/bootmenu_default=${expected_bootmenu_default}/" \
+  | sed -E "s/^kernel_selector_first=.*/kernel_selector_first=${expected_kernel_selector_first}/" \
+  | sed -E "s/^kernel_selector_timeout=.*/kernel_selector_timeout=${expected_kernel_selector_timeout}/" \
   | sed -E "s/^bootgui_selector=.*/bootgui_selector=${expected_bootgui_selector}/" \
   > "$boot_env_cmp"
 cmp -s "$repo_env_cmp" "$boot_env_cmp" \
@@ -255,6 +272,7 @@ for optional_file in \
   /boot/efi/boot1.bmp \
   /boot/efi/fastbootlogo.bmp \
   /boot/grub/grub.cfg \
+  /boot/uInitrd-orangepi4pro-bootselect \
   /boot/EFI/BOOT/BOOTAA64.EFI \
   /boot/EFI/BOOT/grub.cfg \
   /boot/efi/EFI/BOOT/BOOTAA64.EFI \
