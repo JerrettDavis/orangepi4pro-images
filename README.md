@@ -41,6 +41,13 @@ source:
 sudo scripts/install-extlinux-selector.sh /boot /boot/efi /mnt/opisd-ro/boot
 ```
 
+To rebuild a missing or replaced NVMe from the SD recovery system, use the
+guarded runbook in `docs/sd-reimage-nvme.md`. The script is dry-run by default:
+
+```bash
+scripts/reimage-nvme-from-sd.sh
+```
+
 Install the bootloader request-file helper into the current root, and into the
 mounted SD root if the SD card is present:
 

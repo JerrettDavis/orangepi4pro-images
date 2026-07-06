@@ -18,12 +18,15 @@ scripts/bootstrap-ubuntu.sh >/tmp/orangepi4pro-bootstrap-ubuntu.out
 scripts/bootstrap-kali.sh >/tmp/orangepi4pro-bootstrap-kali.out
 scripts/build-kernel.sh >/tmp/orangepi4pro-build-kernel.out
 scripts/build-boot-assets.sh >/tmp/orangepi4pro-build-boot-assets.out
+scripts/reimage-nvme-from-sd.sh >/tmp/orangepi4pro-reimage-nvme.out
 grep -q 'No rootfs was created' /tmp/orangepi4pro-bootstrap-ubuntu.out
 grep -q 'No rootfs was created' /tmp/orangepi4pro-bootstrap-kali.out
 grep -q 'No source was cloned and no kernel was built' /tmp/orangepi4pro-build-kernel.out
 grep -q 'No boot assets were generated' /tmp/orangepi4pro-build-boot-assets.out
+grep -q 'dry_run=true' /tmp/orangepi4pro-reimage-nvme.out
 rm -f /tmp/orangepi4pro-bootstrap-ubuntu.out /tmp/orangepi4pro-bootstrap-kali.out \
-  /tmp/orangepi4pro-build-kernel.out /tmp/orangepi4pro-build-boot-assets.out
+  /tmp/orangepi4pro-build-kernel.out /tmp/orangepi4pro-build-boot-assets.out \
+  /tmp/orangepi4pro-reimage-nvme.out
 
 printf 'Checking Linux boot selector templates...\n'
 bash -n scripts/orangepi4pro-linux-boot-selector \
