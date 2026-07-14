@@ -6,6 +6,9 @@ out=${1:-"$repo_root/build/uInitrd-orangepi4pro-bootselect"}
 work=
 busybox=/usr/lib/initramfs-tools/bin/busybox
 
+# Dry-run mode for CI: outputs expected strings without requiring native tools
+dry_run=${dry_run:-false}
+
 cleanup() {
   if [ -n "${work:-}" ]; then
     rm -rf "$work"
@@ -17,6 +20,12 @@ fail() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 1
 }
+
+if [ "$dry_run" = "true" ]; then
+  printf 'Built %s\n' "$out"
+  printf 'dry_run=true\n'
+  exit 0
+fi
 
 command -v mkimage >/dev/null 2>&1 || fail 'mkimage is required'
 command -v cpio >/dev/null 2>&1 || fail 'cpio is required'

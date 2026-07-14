@@ -208,12 +208,12 @@ done
 [ -n "$base" ] || fail '--mount-base cannot be empty'
 [ -n "$sd_boot_dir" ] || fail '--sd-boot-dir cannot be empty'
 
-require_cmds
 if [ "$write" != true ]; then
   print_plan
   exit 0
 fi
 
+require_cmds
 validate_write_context
 validate_target
 
