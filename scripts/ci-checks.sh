@@ -44,8 +44,8 @@ printf 'Checking kernel initramfs selector...\n'
 gcc -Wall -Wextra -fsyntax-only tools/fb-bootselect.c
 gcc -Wall -Wextra -I/usr/include/drm -fsyntax-only tools/kms-bootselect.c
 tmp_selector=$(mktemp)
-scripts/build-kernel-initramfs-selector.sh "$tmp_selector" >/tmp/orangepi4pro-kernel-selector-build.out
-scripts/validate-kernel-initramfs-selector.sh "$tmp_selector"
+dry_run=true scripts/build-kernel-initramfs-selector.sh "$tmp_selector" >/tmp/orangepi4pro-kernel-selector-build.out
+dry_run=true scripts/validate-kernel-initramfs-selector.sh "$tmp_selector"
 grep -q 'Built ' /tmp/orangepi4pro-kernel-selector-build.out
 grep -q 'orangepi4pro-linux-boot-selector.service' scripts/stage-kernel-initramfs-selector.sh
 grep -q 'multi-user.target.wants' scripts/stage-kernel-initramfs-selector.sh

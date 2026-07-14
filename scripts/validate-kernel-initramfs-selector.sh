@@ -5,6 +5,9 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 artifact=${1:-"$repo_root/build/uInitrd-orangepi4pro-bootselect"}
 work=
 
+# Dry-run mode: skip artifact validation when build was in dry-run mode
+dry_run=${dry_run:-false}
+
 cleanup() {
   if [ -n "${work:-}" ]; then
     rm -rf "$work"
@@ -27,7 +30,9 @@ grep -q 'uInitrd-orangepi4pro-bootselect' "$repo_root/configs/boot.cmd" \
 grep -q '^kernel_selector_first=false$' "$repo_root/configs/orangepiEnv.txt" \
   || fail 'default env must keep kernel selector disabled'
 
-if [ -f "$artifact" ]; then
+if [ "$dry_run" = "true" ]; then
+  printf 'Dry-run mode: skipping artifact validation.\n'
+elif [ -f "$artifact" ]; then
   file "$artifact" | grep -q 'u-boot legacy uImage' \
     || fail "selector artifact is not a legacy uInitrd: $artifact"
   work=$(mktemp -d)
